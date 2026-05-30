@@ -67,37 +67,101 @@ export function findUnit(unitId) {
   return getAllUnits().find((u) => u.id === unitId) || null
 }
 
-// חלונות (לוח) בכל יחידה. כרגע פעיל חלון תוכניות הניקיון; השאר שמורים להמשך.
+// ===== קטגוריות המסך הראשי (4 קוביות) =====
+// קיבוץ תצוגה: כל קובייה נפתחת לרשימת היחידות שלה.
+export const categories = [
+  {
+    id: 'inpatient',
+    name: 'מחלקות אשפוז',
+    subtitle: 'אשפוז א–ה · טיפול נמרץ',
+    unitIds: ['inpatient-a', 'inpatient-b', 'inpatient-c', 'inpatient-d', 'inpatient-e', 'icu'],
+  },
+  {
+    id: 'surgery',
+    name: 'מערך חדרי ניתוח והתאוששות',
+    subtitle: 'חדרי ניתוח · התאוששות',
+    unitIds: ['or', 'recovery'],
+  },
+  {
+    id: 'institutes',
+    name: 'מכונים ויחידות',
+    subtitle: 'גסטרו ופעולות · צינתורים · IVF',
+    unitIds: ['gastro', 'cath', 'ivf'],
+  },
+  {
+    id: 'imaging',
+    name: 'מכון דימות',
+    subtitle: 'CT · MRI · רנטגן',
+    unitIds: ['ct', 'mri', 'xray'],
+  },
+]
+
+export function getCategory(id) {
+  return categories.find((c) => c.id === id) || null
+}
+
+export function getCategoryUnits(id) {
+  const c = getCategory(id)
+  if (!c) return []
+  return c.unitIds.map(findUnit).filter(Boolean)
+}
+
+export function findCategoryOfUnit(unitId) {
+  return categories.find((c) => c.unitIds.includes(unitId)) || null
+}
+
+// החלונות הבסיסיים בכניסה לכל יחידה.
 export const unitWindows = [
   {
     id: 'cleaning',
     title: 'תוכניות ניקיון מחלקתי',
-    icon: 'cleaning',
     description: 'תוכנית יומית / שבועית / חודשית, צ׳קליסט וחתימת מבצע',
     enabled: true,
   },
   {
-    id: 'equipment',
-    title: 'ציוד ומלאי',
-    icon: 'equipment',
-    description: 'בקרת מלאי חומרי ניקיון וציוד מתכלה',
-    enabled: false,
-  },
-  {
-    id: 'tasks',
-    title: 'משימות יומיות',
-    icon: 'tasks',
-    description: 'משימות ושיבוץ כוחות עזר למשמרת',
-    enabled: false,
-  },
-  {
     id: 'reports',
-    title: 'דוחות ובקרה',
-    icon: 'reports',
-    description: 'סיכומי ביצוע ומעקב חתימות',
+    title: 'דוחות ביצוע',
+    description: 'ארכיון הדוחות השמורים של היחידה — צפייה, סינון והדפסה',
+    enabled: true,
+  },
+  {
+    id: 'handover',
+    title: 'העברת משמרת',
+    description: 'דיווח והעברת מידע בין משמרות',
+    enabled: true,
+  },
+  {
+    id: 'shortages',
+    title: 'דיווח על חסרים',
+    description: 'רישום ודיווח על חוסרים בציוד ובחומרים',
     enabled: false,
+    soonLabel: 'לא פעיל',
   },
 ]
+
+// פעולות מיוחדות – ייחודי ליחידת גסטרו ופעולות.
+export const specialProcedures = [
+  'ברונכו',
+  'ניקור פלאורלי',
+  'ציסטוסקופיה',
+  'קוניזציה',
+  'POEM',
+  'TIF',
+]
+
+// החלונות של יחידה ספציפית (כולל תוספות ייחודיות).
+export function getUnitWindows(unitId) {
+  const windows = [...unitWindows]
+  if (unitId === 'gastro') {
+    windows.push({
+      id: 'special',
+      title: 'פעולות מיוחדות',
+      description: 'ברונכו · ניקור פלאורלי · ציסטוסקופיה · קוניזציה · POEM · TIF',
+      enabled: true,
+    })
+  }
+  return windows
+}
 
 // קביעת משמרת אוטומטית לפי שעה: 07-15 בוקר, 15-23 ערב, 23-07 לילה
 export function getCurrentShift(date = new Date()) {

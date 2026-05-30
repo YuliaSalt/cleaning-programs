@@ -1,0 +1,31 @@
+// כותרת מסך אחידה: כפתור "חזרה" ברור, פירורי לחם (breadcrumb), כותרת ואלמנט ימני אופציונלי.
+
+export default function ScreenHeader({ title, trail = [], onBack, right }) {
+  return (
+    <div className="screen-head">
+      <div className="crumb-bar">
+        {onBack && (
+          <button className="back-link" onClick={onBack}>
+            <span className="bl-arrow">→</span> חזרה
+          </button>
+        )}
+        <nav className="crumbs" aria-label="מיקום">
+          {trail.map((c, i) => (
+            <span className="crumb" key={i}>
+              {i > 0 && <span className="crumb-sep">‹</span>}
+              {c.onClick ? (
+                <button className="crumb-link" onClick={c.onClick}>{c.label}</button>
+              ) : (
+                <span className="crumb-cur">{c.label}</span>
+              )}
+            </span>
+          ))}
+        </nav>
+      </div>
+      <div className="screen-head-main">
+        <h1 className="page-title">{title}</h1>
+        {right}
+      </div>
+    </div>
+  )
+}

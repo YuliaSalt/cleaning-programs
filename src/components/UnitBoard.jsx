@@ -1,29 +1,27 @@
-import { unitWindows, getCurrentShift } from '../data/departments.js'
-import Icon from './Icons.jsx'
+import { getUnitWindows, getCurrentShift } from '../data/departments.js'
+import ScreenHeader from './ScreenHeader.jsx'
 
-export default function UnitBoard({ unit, onOpenWindow, onGoHome }) {
+export default function UnitBoard({ unit, onOpenWindow, onGoHome, onBack, categoryName }) {
   const shift = getCurrentShift()
+  const windows = getUnitWindows(unit.id)
+
+  const trail = [{ label: 'ראשי', onClick: onGoHome }]
+  if (categoryName) trail.push({ label: categoryName, onClick: onBack })
+  trail.push({ label: unit.name })
 
   return (
     <div>
-      <div className="topbar">
-        <div>
-          <div className="breadcrumb">
-            <button
-              onClick={onGoHome}
-              style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', font: 'inherit', padding: 0 }}
-            >
-              מסך ראשי
-            </button>
-            {unit.groupName && <> · {unit.groupName}</>} · <b>{unit.name}</b>
+      <ScreenHeader
+        title={unit.name}
+        onBack={onBack}
+        trail={trail}
+        right={
+          <div className="shift-chip">
+            <span className="dot" />
+            משמרת נוכחית: {shift}
           </div>
-          <h1 className="page-title">{unit.name}</h1>
-        </div>
-        <div className="shift-chip">
-          <Icon name="clock" size={16} />
-          משמרת נוכחית: {shift}
-        </div>
-      </div>
+        }
+      />
 
       <div className="section-head">
         <h2>לוח חלונות</h2>
@@ -31,7 +29,7 @@ export default function UnitBoard({ unit, onOpenWindow, onGoHome }) {
       </div>
 
       <div className="card-grid">
-        {unitWindows.map((w) => (
+        {windows.map((w) => (
           <div
             key={w.id}
             className={
@@ -48,11 +46,10 @@ export default function UnitBoard({ unit, onOpenWindow, onGoHome }) {
             }}
           >
             <div className="wc-top">
-              <span className="wc-icon"><Icon name={w.icon} size={24} /></span>
               <h3>{w.title}</h3>
             </div>
             <p>{w.description}</p>
-            {!w.enabled && <span className="wc-soon">בקרוב</span>}
+            {!w.enabled && <span className="wc-soon">{w.soonLabel || 'בקרוב'}</span>}
           </div>
         ))}
       </div>

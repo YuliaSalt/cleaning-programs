@@ -1,29 +1,9 @@
 import { useMemo, useState } from 'react'
 import { getCurrentShift } from '../data/departments.js'
 import { getCleaningPlan, signoffKind } from '../data/cleaningTemplates.js'
-import Icon from './Icons.jsx'
-
-/* ===== מפתחות ועזרי תאריך ===== */
-function dateStr() {
-  return new Date().toLocaleDateString('en-CA') // YYYY-MM-DD
-}
-function isoWeek(d = new Date()) {
-  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
-  const day = t.getUTCDay() || 7
-  t.setUTCDate(t.getUTCDate() + 4 - day)
-  const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1))
-  const week = Math.ceil(((t - yearStart) / 86400000 + 1) / 7)
-  return t.getUTCFullYear() + '-W' + String(week).padStart(2, '0')
-}
-function monthStr(d = new Date()) {
-  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
-}
-function periodKey(tabId, shift) {
-  if (tabId === 'daily') return dateStr() + (shift ? ':' + shift : '')
-  if (tabId === 'weekly') return isoWeek()
-  if (tabId === 'monthly') return monthStr()
-  return dateStr() // isolation – אירוע ליום
-}
+import { dateStr, periodKey, planKey } from '../data/progress.js'
+import { storage } from '../data/storage.js'
+import ScreenHeader from './ScreenHeader.jsx'
 
 // שיטוח משימות הסקשן (תומך בקבוצות עם כותרות משנה) לאינדקס רץ אחיד
 function flattenTasks(section) {
@@ -39,16 +19,10 @@ function flattenTasks(section) {
 
 /* ===== סקשן "בין מטופלים" – מונה לחיצות, ללא חתימה ===== */
 function QuickSection({ skey, section }) {
-  const [counts, setCounts] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(skey)) || {}
-    } catch {
-      return {}
-    }
-  })
+  const [counts, setCounts] = useState(() => storage.getJSON(skey) || {})
   const save = (next) => {
     setCounts(next)
-    localStorage.setItem(skey, JSON.stringify(next))
+    storage.setJSON(skey, next)
   }
   const bump = (i, d) => {
     const n = Math.max(0, (counts[i] || 0) + d)
@@ -59,7 +33,7 @@ function QuickSection({ skey, section }) {
   return (
     <div className="glass plan-card section-card">
       <div className="sec-head">
-        <span className="sec-tag quick"><Icon name="flash" size={16} /> בין מטופלים</span>
+        <span className="sec-tag quick">בין מטופלים</span>
         <h3>{section.title}</h3>
         <span className="pill">{total} לחיצות</span>
       </div>
@@ -88,13 +62,7 @@ function SignedSection({ skey, section }) {
     [section]
   )
 
-  const [rec, setRec] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(skey))
-    } catch {
-      return null
-    }
-  })
+  const [rec, setRec] = useState(() => storage.getJSON(skey))
   const locked = !!rec
   const [checked, setChecked] = useState(() => (rec && rec.checked) || {})
   const [names, setNames] = useState(() => (rec && rec.names) || {})
@@ -122,12 +90,12 @@ function SignedSection({ skey, section }) {
       savedAt: new Date().toISOString(),
       by: nameIdx.map((i) => names[i]).filter(Boolean).join(' · '),
     }
-    localStorage.setItem(skey, JSON.stringify(r))
+    storage.setJSON(skey, r)
     setRec(r)
     setShowErr(false)
   }
   function handleUnlock() {
-    localStorage.removeItem(skey)
+    storage.removeItem(skey)
     setRec(null)
     setShowErr(false)
   }
@@ -144,7 +112,6 @@ function SignedSection({ skey, section }) {
 
       {locked && (
         <div className="lock-banner">
-          <span className="lk-icon"><Icon name="lock" size={18} /></span>
           <span>
             נשמר ונעול לקריאה בלבד.
             {rec.by && <> בוצע ע״י <b>{rec.by}</b>.</>}
@@ -219,13 +186,9 @@ function SignedSection({ skey, section }) {
 
       <div className="plan-foot">
         {!locked ? (
-          <button className="btn" onClick={handleSave}>
-            <Icon name="save" size={18} /> שמירה ונעילה
-          </button>
+          <button className="btn" onClick={handleSave}>שמירה ונעילה</button>
         ) : (
-          <button className="btn ghost" onClick={handleUnlock}>
-            <Icon name="edit" size={18} /> פתיחה לעריכה
-          </button>
+          <button className="btn ghost" onClick={handleUnlock}>פתיחה לעריכה</button>
         )}
       </div>
     </div>
@@ -233,7 +196,7 @@ function SignedSection({ skey, section }) {
 }
 
 /* ===== המסך הראשי ===== */
-export default function CleaningPlan({ unit, onBack }) {
+export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory, categoryName }) {
   const plan = getCleaningPlan(unit.id)
 
   const shifts = (plan && plan.shifts) || []
@@ -267,23 +230,25 @@ export default function CleaningPlan({ unit, onBack }) {
     return true
   })
 
-  const baseKey = (s) =>
-    `hmc:plan:${unit.id}:${s.roomScoped && room ? room : '-'}:${tab.id}:${s.id}:${period}`
+  const baseKey = (s) => planKey(unit.id, s.roomScoped && room ? room : '-', tab.id, s.id, period)
+
+  const trail = [{ label: 'ראשי', onClick: onGoHome }]
+  if (categoryName) trail.push({ label: categoryName, onClick: onBackToCategory })
+  trail.push({ label: unit.name, onClick: onBack })
+  trail.push({ label: 'תוכניות ניקיון' })
 
   return (
     <div className="plan-wrap wide">
-      <div className="topbar">
-        <div>
-          <div className="breadcrumb">
-            <button className="link-btn" onClick={onBack}>← חזרה ללוח החלונות</button>
-            {unit.groupName ? ' · ' + unit.groupName : ''} · <b>{unit.name}</b>
+      <ScreenHeader
+        title="תוכניות ניקיון מחלקתי"
+        onBack={onBack}
+        trail={trail}
+        right={
+          <div className="shift-chip">
+            <span className="dot" /> {dateStr()}
           </div>
-          <h1 className="page-title">תוכניות ניקיון מחלקתי</h1>
-        </div>
-        <div className="shift-chip">
-          <Icon name="clock" size={16} /> {dateStr()}
-        </div>
-      </div>
+        }
+      />
 
       {/* טאבים */}
       <div className="glass plan-card controls-card">
@@ -294,7 +259,6 @@ export default function CleaningPlan({ unit, onBack }) {
               className={'tab' + (tabId === t.id ? ' active' : '')}
               onClick={() => setTabId(t.id)}
             >
-              {t.id === 'isolation' && <Icon name="shield" size={15} style={{ marginInlineEnd: 4 }} />}
               {t.label}
             </button>
           ))}
@@ -343,7 +307,7 @@ export default function CleaningPlan({ unit, onBack }) {
         {plan.guidance && (
           <div className="guide">
             <button className="guide-toggle" onClick={() => setGuideOpen((o) => !o)}>
-              <Icon name="shield" size={16} /> {plan.guidance.title}
+              {plan.guidance.title}
               <span className="chev">{guideOpen ? '▲' : '▼'}</span>
             </button>
             {guideOpen && (

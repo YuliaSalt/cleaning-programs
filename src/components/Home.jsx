@@ -1,7 +1,6 @@
-import { groups, standaloneUnits } from '../data/departments.js'
-import Icon from './Icons.jsx'
+import { categories, getCategoryUnits } from '../data/departments.js'
 
-export default function Home({ onSelectUnit }) {
+export default function Home({ onOpenCategory, onOpenDashboard }) {
   return (
     <div>
       <div className="topbar">
@@ -11,50 +10,25 @@ export default function Home({ onSelectUnit }) {
         </div>
       </div>
 
-      {groups.map((g) => (
-        <section key={g.id}>
-          <div className="section-head">
-            <span className="sh-icon"><Icon name={g.icon} size={22} /></span>
-            <h2>{g.name}</h2>
-            <span className="pill">{g.units.length} מחלקות</span>
-          </div>
-          <div className="card-grid">
-            {g.units.map((u) => (
-              <button
-                key={u.id}
-                className="unit-card"
-                onClick={() => onSelectUnit(u.id)}
-              >
-                <span className="uc-group">{g.name}</span>
-                <span className="uc-icon"><Icon name={g.icon} size={26} /></span>
-                <span className="uc-name">{u.name}</span>
-                <span className="uc-meta">{(u.shifts || g.shifts).join(' · ')}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-      ))}
+      {/* כפתור רחב – דשבורד ביצועים */}
+      <button className="dash-btn" onClick={onOpenDashboard}>
+        <span className="db-title">דשבורד ביצועים</span>
+        <span className="db-sub">מעקב אחוזי ביצוע יומי · שבועי · חודשי לכל מחלקה</span>
+      </button>
 
-      <section>
-        <div className="section-head">
-          <span className="sh-icon"><Icon name="department" size={22} /></span>
-          <h2>יחידות עצמאיות</h2>
-          <span className="pill">{standaloneUnits.length} יחידות · 2 משמרות</span>
-        </div>
-        <div className="card-grid">
-          {standaloneUnits.map((u) => (
-            <button
-              key={u.id}
-              className="unit-card"
-              onClick={() => onSelectUnit(u.id)}
-            >
-              <span className="uc-icon"><Icon name={u.icon} size={26} /></span>
-              <span className="uc-name">{u.name}</span>
-              <span className="uc-meta">{u.shifts.join(' · ')}</span>
+      {/* רשת 2x2 של קטגוריות */}
+      <div className="cat-grid">
+        {categories.map((c) => {
+          const count = getCategoryUnits(c.id).length
+          return (
+            <button key={c.id} className="cat-card" onClick={() => onOpenCategory(c.id)}>
+              <span className="cc-name">{c.name}</span>
+              <span className="cc-sub">{c.subtitle}</span>
+              <span className="cc-count">{count} יחידות</span>
             </button>
-          ))}
-        </div>
-      </section>
+          )
+        })}
+      </div>
     </div>
   )
 }
