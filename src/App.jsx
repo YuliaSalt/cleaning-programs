@@ -6,6 +6,7 @@ import UnitBoard from './components/UnitBoard.jsx'
 import CleaningPlan from './components/CleaningPlan.jsx'
 import ReportsArchive from './components/ReportsArchive.jsx'
 import Handover from './components/Handover.jsx'
+import GastroHandover from './components/GastroHandover.jsx'
 import SpecialProcedures from './components/SpecialProcedures.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import { findUnit, getCategory, findCategoryOfUnit } from './data/departments.js'
@@ -118,13 +119,23 @@ export default function App() {
           )}
 
           {!showDashboard && unit && windowId === 'handover' && (
-            <Handover
-              unit={unit}
-              onBack={backToBoard}
-              onBackToCategory={backToCategory}
-              onGoHome={goHome}
-              categoryName={category ? category.name : null}
-            />
+            unit.id === 'gastro' ? (
+              <GastroHandover
+                unit={unit}
+                onBack={backToBoard}
+                onBackToCategory={backToCategory}
+                onGoHome={goHome}
+                categoryName={category ? category.name : null}
+              />
+            ) : (
+              <Handover
+                unit={unit}
+                onBack={backToBoard}
+                onBackToCategory={backToCategory}
+                onGoHome={goHome}
+                categoryName={category ? category.name : null}
+              />
+            )
           )}
 
           {!showDashboard && unit && windowId === 'special' && (

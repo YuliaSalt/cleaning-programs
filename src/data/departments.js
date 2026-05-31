@@ -170,3 +170,12 @@ export function getCurrentShift(date = new Date()) {
   if (h >= 15 && h < 23) return 'ערב'
   return 'לילה'
 }
+
+// משמרת גסטרו (2 משמרות): 06:30–15:00 בוקר, 15:00–23:00 ערב.
+// השלמה לשעות הלילה: עד 06:30 בוקר, מ-23:00 ערב.
+export function getGastroShift(date = new Date()) {
+  const m = date.getHours() * 60 + date.getMinutes()
+  if (m >= 390 && m < 900) return 'בוקר'
+  if (m >= 900 && m < 1380) return 'ערב'
+  return m >= 1380 ? 'ערב' : 'בוקר'
+}

@@ -1628,6 +1628,329 @@ h1, h2, h3, h4 {
   }
 }
 
+/* ===== העברת משמרת גסטרו ===== */
+.ho-form {
+  padding: 24px 26px 22px;
+}
+
+.ho-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--brand);
+  text-align: center;
+  padding-bottom: 14px;
+  border-bottom: 2px solid rgba(168, 220, 232, 0.6);
+}
+
+.ho-subrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0 8px;
+}
+
+.ho-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brand-soft);
+}
+
+.chips-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.ho-auto-hint {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.ho-nurse {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.ho-block {
+  margin-top: 22px;
+}
+
+.ho-block-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--brand);
+  background: rgba(214, 238, 245, 0.55);
+  border: 1px solid rgba(168, 220, 232, 0.6);
+  padding: 10px 16px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+}
+
+/* בלוק יש/אין */
+.yn-row {
+  margin-bottom: 12px;
+}
+
+.yn-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.yn-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+
+.yn-btns {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.yn-btn {
+  min-width: 64px;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(168, 220, 232, 0.8);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.16s ease;
+}
+
+.yn-btn.yes.active {
+  background: linear-gradient(135deg, #cfeede, #a7e0c2);
+  border-color: #7fcfa3;
+  color: #15795a;
+  box-shadow: 0 6px 16px rgba(120, 205, 160, 0.45);
+}
+
+.yn-btn.no.active {
+  background: #eef1f4;
+  border-color: #cdd6dd;
+  color: #5b6b77;
+}
+
+.yn-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.28s ease, margin-top 0.28s ease;
+}
+
+.yn-detail.open {
+  max-height: 260px;
+  margin-top: 10px;
+}
+
+.yn-detail textarea {
+  resize: vertical;
+}
+
+/* כרטיסי צ׳קליסט ירוקים */
+.ho-check {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: right;
+  padding: 14px 16px;
+  margin-bottom: 9px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(168, 220, 232, 0.5);
+  box-shadow: var(--halo-soft);
+  transition: all 0.16s ease;
+}
+
+.ho-check:hover {
+  border-color: rgba(168, 220, 232, 0.9);
+}
+
+.ho-circle {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--ice-2);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  background: #fff;
+  transition: all 0.16s ease;
+}
+
+.ho-check.on {
+  border-color: #45c08a;
+  background: rgba(168, 224, 194, 0.18);
+}
+
+.ho-check.on .ho-circle {
+  background: #1faf6e;
+  border-color: #1faf6e;
+}
+
+.ho-check-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.ho-check.on .ho-check-label {
+  color: #15795a;
+}
+
+/* פעולות */
+.ho-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.wa-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 200px;
+  padding: 15px 24px;
+  border-radius: var(--radius-pill);
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #25d366 0%, #11a44f 100%);
+  box-shadow: 0 0 26px rgba(37, 211, 102, 0.45), 0 10px 24px rgba(17, 164, 79, 0.4);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+
+.wa-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(37, 211, 102, 0.6), 0 14px 30px rgba(17, 164, 79, 0.45);
+}
+
+.wa-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.reset-btn {
+  padding: 15px 24px;
+  border-radius: var(--radius-pill);
+  border: 1px solid #cdd6dd;
+  background: #fff;
+  color: #5b6b77;
+  font-size: 15px;
+  font-weight: 700;
+  transition: all 0.16s ease;
+}
+
+.reset-btn:hover {
+  border-color: #aab6bf;
+  box-shadow: 0 4px 12px rgba(120, 140, 155, 0.18);
+}
+
+.ho-footer {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(168, 220, 232, 0.5);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* תצוגת רישום שמור */
+.ho-view-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 4px;
+  border-bottom: 1px solid rgba(168, 220, 232, 0.3);
+}
+
+.vr-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.vr-status {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.vr-status.yes {
+  color: #1faf6e;
+}
+
+.vr-text {
+  flex-basis: 100%;
+  width: 100%;
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--ink);
+  background: rgba(214, 238, 245, 0.4);
+  padding: 8px 12px;
+  border-radius: 10px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ===== מניעת גלישת טקסט חופשי – שבירה לשורה לפי רוחב המסך ===== */
+.input,
+textarea.input {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.yn-label,
+.ho-check-label,
+.vr-label,
+.qi-label,
+.rc-title,
+.rc-sub,
+.check-item label,
+.guide-list li,
+.rp-task-label {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
+}
+
+/* ילדי flex חייבים min-width:0 כדי שיוכלו להתכווץ ולשבור שורה */
+.yn-head,
+.ho-view-row,
+.report-card,
+.rc-main,
+.quick-item,
+.check-item,
+.sec-head {
+  min-width: 0;
+}
+
+.rc-main {
+  flex: 1;
+}
+
 /* ===== רספונסיב ===== */
 @media (max-width: 900px) {
   .app-shell {
