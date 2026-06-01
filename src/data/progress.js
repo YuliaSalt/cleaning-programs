@@ -47,9 +47,17 @@ export function computeUnitProgress(unitId) {
     }
     let sum = 0
     for (const s of signed) {
-      const period = periodKey(tab.id, s.shift)
+      // ביומי: סקשן עם משמרת נשמר תחת אותה משמרת; סקשן ללא משמרת עשוי להישמר תחת כל משמרת
+      let periods
+      if (tab.id === 'daily') {
+        periods = s.shift ? [periodKey('daily', s.shift)] : (plan.shifts || []).map((sh) => periodKey('daily', sh))
+      } else {
+        periods = [periodKey(tab.id, s.shift)]
+      }
       const rooms = s.roomScoped && plan.rooms ? plan.rooms : ['-']
-      const done = rooms.filter((r) => storage.has(planKey(unitId, r, tab.id, s.id, period))).length
+      const done = rooms.filter((r) =>
+        periods.some((per) => storage.has(planKey(unitId, r, tab.id, s.id, per)))
+      ).length
       sum += done / rooms.length
     }
     res[tab.id] = Math.round((sum / signed.length) * 100)

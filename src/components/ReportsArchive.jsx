@@ -81,12 +81,6 @@ function ReportDetail({ unit, report, onBack }) {
 /* ===== ארכיון הדוחות של היחידה ===== */
 export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategory, categoryName, onBackToPlan }) {
   const reports = useMemo(() => listReports(unit.id), [unit.id])
-  const types = useMemo(() => {
-    const present = new Set(reports.map((r) => r.tabId))
-    return ['daily', 'weekly', 'monthly', 'isolation'].filter((t) => present.has(t))
-  }, [reports])
-
-  const [type, setType] = useState(() => types[0] || 'daily')
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [performer, setPerformer] = useState('')
@@ -115,8 +109,9 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
     )
   }
 
+  const TYPE_ORDER = { daily: 0, weekly: 1, monthly: 2, isolation: 3 }
+
   const filtered = reports.filter((r) => {
-    if (r.tabId !== type) return false
     if (from && r.dateISO < from) return false
     if (to && r.dateISO > to) return false
     if (performer.trim()) {
@@ -127,24 +122,22 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
     return true
   })
 
-  // קיבוץ היררכי: שנה -> חודש -> תאריך (החדש למעלה)
+  // קיבוץ היררכי: שנה -> חודש -> סוג -> תאריך (החדש למעלה)
+  const sorted = [...filtered].sort(
+    (a, b) =>
+      b.year - a.year ||
+      b.month - a.month ||
+      (TYPE_ORDER[a.tabId] ?? 9) - (TYPE_ORDER[b.tabId] ?? 9) ||
+      b.day - a.day ||
+      b.sortTs - a.sortTs
+  )
   const groups = []
-  let curY, curM, curD
-  for (const r of filtered) {
-    if (r.year !== curY) {
-      curY = r.year
-      curM = curD = null
-      groups.push({ kind: 'year', label: String(r.year) })
-    }
-    if (r.month !== curM) {
-      curM = r.month
-      curD = null
-      groups.push({ kind: 'month', label: HE_MONTHS[r.month] + ' ' + r.year })
-    }
-    if (r.day !== curD) {
-      curD = r.day
-      groups.push({ kind: 'day', label: r.dateLabel })
-    }
+  let curY, curM, curT, curD
+  for (const r of sorted) {
+    if (r.year !== curY) { curY = r.year; curM = curT = curD = null; groups.push({ kind: 'year', label: String(r.year) }) }
+    if (r.month !== curM) { curM = r.month; curT = curD = null; groups.push({ kind: 'month', label: HE_MONTHS[r.month] + ' ' + r.year }) }
+    if (r.tabId !== curT) { curT = r.tabId; curD = null; groups.push({ kind: 'type', label: TYPE_LABELS[r.tabId] || r.tabId }) }
+    if (r.day !== curD) { curD = r.day; groups.push({ kind: 'day', label: r.dateLabel }) }
     groups.push({ kind: 'report', report: r })
   }
 
@@ -159,18 +152,6 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
       ) : (
         <>
           <div className="glass plan-card controls-card">
-            <div className="tabs">
-              {types.map((t) => (
-                <button
-                  key={t}
-                  className={'tab' + (type === t ? ' active' : '')}
-                  onClick={() => setType(t)}
-                >
-                  {TYPE_LABELS[t]}
-                </button>
-              ))}
-            </div>
-
             <div className="filters-row">
               <div className="field">
                 <label>מתאריך</label>
@@ -208,6 +189,7 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
               {groups.map((g, i) => {
                 if (g.kind === 'year') return <div key={i} className="grp-year">{g.label}</div>
                 if (g.kind === 'month') return <div key={i} className="grp-month">{g.label}</div>
+                if (g.kind === 'type') return <div key={i} className="grp-type">{g.label}</div>
                 if (g.kind === 'day') return <div key={i} className="grp-day">{g.label}</div>
                 const r = g.report
                 return (

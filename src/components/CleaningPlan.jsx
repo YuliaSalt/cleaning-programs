@@ -128,7 +128,7 @@ function SignedSection({ skey, section }) {
       {locked && (
         <div className="lock-banner">
           <span>
-            נשמר ונעול לקריאה בלבד.
+            ✓ נשמר ונעול — מופיע בארכיון "דוחות ביצוע".
             {rec.by && <> בוצע ע״י <b>{rec.by}</b>.</>}
             {rec.savedAt && <> ({new Date(rec.savedAt).toLocaleString('he-IL')})</>}
           </span>

@@ -1470,6 +1470,17 @@ h1, h2, h3, h4 {
   margin: 8px 2px 2px;
 }
 
+.grp-type {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--brand);
+  background: rgba(168, 220, 232, 0.28);
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  margin: 10px 2px 2px;
+}
+
 .grp-day {
   font-size: 13px;
   font-weight: 700;
