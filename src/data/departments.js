@@ -119,12 +119,6 @@ export const unitWindows = [
     enabled: true,
   },
   {
-    id: 'reports',
-    title: 'דוחות ביצוע',
-    description: 'ארכיון הדוחות השמורים של היחידה — צפייה, סינון והדפסה',
-    enabled: true,
-  },
-  {
     id: 'handover',
     title: 'העברת משמרת',
     description: 'דיווח והעברת מידע בין משמרות',

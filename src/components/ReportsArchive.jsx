@@ -79,7 +79,7 @@ function ReportDetail({ unit, report, onBack }) {
 }
 
 /* ===== ארכיון הדוחות של היחידה ===== */
-export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategory, categoryName }) {
+export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategory, categoryName, onBackToPlan }) {
   const reports = useMemo(() => listReports(unit.id), [unit.id])
   const types = useMemo(() => {
     const present = new Set(reports.map((r) => r.tabId))
@@ -95,12 +95,13 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBackToCategory })
   trail.push({ label: unit.name, onClick: onBack })
+  if (onBackToPlan) trail.push({ label: 'תוכניות ניקיון', onClick: onBackToPlan })
   trail.push({ label: 'דוחות ביצוע' })
 
   const header = (
     <ScreenHeader
       title="דוחות ביצוע"
-      onBack={onBack}
+      onBack={onBackToPlan || onBack}
       trail={trail}
     />
   )

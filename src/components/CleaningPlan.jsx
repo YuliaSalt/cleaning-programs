@@ -1,9 +1,24 @@
 import { useMemo, useState } from 'react'
 import { getCurrentShift } from '../data/departments.js'
-import { getCleaningPlan, signoffKind } from '../data/cleaningTemplates.js'
+import { getCleaningPlan, signoffKind, DISINFECTANT_GUIDE } from '../data/cleaningTemplates.js'
 import { dateStr, periodKey, planKey } from '../data/progress.js'
 import { storage } from '../data/storage.js'
 import ScreenHeader from './ScreenHeader.jsx'
+import ReportsArchive from './ReportsArchive.jsx'
+
+/* כפתורי דריל-דאון (זכוכית, בלי אייקונים) */
+function DrillGrid({ items }) {
+  return (
+    <div className="card-grid drill-grid">
+      {items.map((it) => (
+        <button key={it.key} className={'unit-card drill-card' + (it.cls ? ' ' + it.cls : '')} onClick={it.onClick}>
+          <span className="uc-name">{it.label}</span>
+          {it.meta && <span className="uc-meta">{it.meta}</span>}
+        </button>
+      ))}
+    </div>
+  )
+}
 
 // שיטוח משימות הסקשן (תומך בקבוצות עם כותרות משנה) לאינדקס רץ אחיד
 function flattenTasks(section) {
@@ -195,148 +210,210 @@ function SignedSection({ skey, section }) {
   )
 }
 
-/* ===== המסך הראשי ===== */
+/* ===== המסך הראשי – דריל-דאון + דוחות ביצוע ===== */
 export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory, categoryName }) {
   const plan = getCleaningPlan(unit.id)
 
-  const shifts = (plan && plan.shifts) || []
-  const initShift = () => {
-    const s = getCurrentShift()
-    return shifts.includes(s) ? s : shifts[shifts.length - 1]
-  }
-
-  const [tabId, setTabId] = useState(() => (plan ? plan.tabs[0].id : 'daily'))
-  const [shift, setShift] = useState(initShift)
+  const [showReports, setShowReports] = useState(false)
+  const [freq, setFreq] = useState(null) // tabId נבחר
+  const [shift, setShift] = useState(null) // משמרת (ביומי)
+  const [stationId, setStationId] = useState(null) // תחנה (שבועי/חודשי)
   const [room, setRoom] = useState(() => (plan && plan.rooms ? plan.rooms[0] : null))
   const [guideOpen, setGuideOpen] = useState(false)
 
   if (!plan) {
     return (
       <div className="plan-wrap">
-        <button className="btn ghost" onClick={onBack}>חזרה</button>
-        <p className="empty-hint" style={{ marginTop: 16 }}>
-          לא נמצאה תוכנית ניקיון מוגדרת ליחידה זו.
-        </p>
+        <ScreenHeader title="תוכניות ניקיון מחלקתי" onBack={onBack} trail={[{ label: 'ראשי', onClick: onGoHome }, { label: unit.name, onClick: onBack }]} />
+        <p className="empty-hint">לא נמצאה תוכנית ניקיון מוגדרת ליחידה זו.</p>
       </div>
     )
   }
 
-  const tab = plan.tabs.find((t) => t.id === tabId) || plan.tabs[0]
-  const period = periodKey(tab.id, shift)
+  // ===== תצוגת דוחות ביצוע (בתוך תוכניות ניקיון) =====
+  if (showReports) {
+    return (
+      <ReportsArchive
+        unit={unit}
+        onBack={onBack}
+        onGoHome={onGoHome}
+        onBackToCategory={onBackToCategory}
+        categoryName={categoryName}
+        onBackToPlan={() => setShowReports(false)}
+      />
+    )
+  }
 
-  // סינון סקשנים: ביומי לפי משמרת; roomScoped משויך לחדר שנבחר
-  const sections = tab.sections.filter((s) => {
-    if (tab.id === 'daily' && s.shift && s.shift !== shift) return false
-    return true
-  })
+  const tab = freq ? plan.tabs.find((t) => t.id === freq) : null
+  const shifts = plan.shifts || []
 
+  // סקשנים מועמדים: ביומי לפי המשמרת שנבחרה, אחרת כל הסקשנים
+  const candidates = !tab ? [] : tab.id === 'daily' ? tab.sections.filter((s) => !s.shift || s.shift === shift) : tab.sections
+  // האם קיים שלב בחירת תחנה (ביומי – רק כשמוגדר stationDaily ויש יותר מסקשן אחד)
+  const stationStep = !!tab && (tab.id === 'daily' ? plan.stationDaily && candidates.length > 1 : tab.sections.length > 1)
+
+  let view = 'freq'
+  if (tab) {
+    if (tab.id === 'daily' && !shift) view = 'shift'
+    else if (stationStep && !stationId) view = 'station'
+    else view = 'leaf'
+  }
+
+  const leafSections = view === 'leaf' ? (stationStep ? candidates.filter((s) => s.id === stationId) : candidates) : []
+  const stationSections = stationStep ? candidates : []
+
+  const period = tab ? periodKey(tab.id, shift) : ''
   const baseKey = (s) => planKey(unit.id, s.roomScoped && room ? room : '-', tab.id, s.id, period)
 
+  function back() {
+    if (view === 'leaf') {
+      if (stationStep) setStationId(null)
+      else if (tab.id === 'daily') setShift(null)
+      else setFreq(null)
+    } else if (view === 'station') {
+      if (tab.id === 'daily') setShift(null)
+      else setFreq(null)
+    } else if (view === 'shift') {
+      setFreq(null)
+    } else {
+      onBack()
+    }
+  }
+
+  const goRoot = () => { setFreq(null); setShift(null); setStationId(null) }
+  const goTabStart = () => { setShift(null); setStationId(null) }
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBackToCategory })
   trail.push({ label: unit.name, onClick: onBack })
-  trail.push({ label: 'תוכניות ניקיון' })
+  trail.push({ label: 'תוכניות ניקיון', onClick: freq ? goRoot : undefined })
+  if (tab) {
+    const atTabStart =
+      (tab.id === 'daily' && view === 'shift') ||
+      (tab.id !== 'daily' && stationStep && view === 'station') ||
+      (tab.id !== 'daily' && !stationStep && view === 'leaf')
+    trail.push({ label: tab.label, onClick: atTabStart ? undefined : goTabStart })
+    if (tab.id === 'daily' && shift) {
+      const linkShift = view === 'leaf' && stationStep
+      trail.push({ label: shift, onClick: linkShift ? () => setStationId(null) : undefined })
+    }
+    if (view === 'leaf' && stationStep && stationId) {
+      const st = tab.sections.find((s) => s.id === stationId)
+      trail.push({ label: st ? st.title : '' })
+    }
+  }
+
+  const title =
+    view === 'freq' ? 'תוכניות ניקיון מחלקתי' : tab.label + (tab.id === 'daily' && shift ? ' · ' + shift : '')
 
   return (
     <div className="plan-wrap wide">
       <ScreenHeader
-        title="תוכניות ניקיון מחלקתי"
-        onBack={onBack}
+        title={title}
+        onBack={back}
         trail={trail}
-        right={
-          <div className="shift-chip">
-            <span className="dot" /> {dateStr()}
-          </div>
-        }
+        right={<div className="shift-chip"><span className="dot" /> {dateStr()}</div>}
       />
 
-      {/* טאבים */}
-      <div className="glass plan-card controls-card">
-        <div className="tabs">
-          {plan.tabs.map((t) => (
-            <button
-              key={t.id}
-              className={'tab' + (tabId === t.id ? ' active' : '')}
-              onClick={() => setTabId(t.id)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {/* בורר חדרים */}
-        {plan.rooms && (
-          <div className="selector-row">
+      {/* בורר חדרים – לאורך כל הדריל */}
+      {plan.rooms && (
+        <div className="glass plan-card controls-card" style={{ paddingBlock: 14 }}>
+          <div className="selector-row" style={{ marginTop: 0 }}>
             <span className="sel-label">חדר:</span>
             <div className="chips">
               {plan.rooms.map((r) => (
-                <button
-                  key={r}
-                  className={'chip' + (room === r ? ' active' : '')}
-                  onClick={() => setRoom(r)}
-                >
-                  {r}
-                </button>
+                <button key={r} className={'chip' + (room === r ? ' active' : '')} onClick={() => setRoom(r)}>{r}</button>
               ))}
             </div>
           </div>
-        )}
-
-        {/* בורר משמרת – רק ביומי */}
-        {tab.id === 'daily' && shifts.length > 0 && (
-          <div className="selector-row">
-            <span className="sel-label">משמרת:</span>
-            <div className="chips">
-              {shifts.map((s) => (
-                <button
-                  key={s}
-                  className={'chip' + (shift === s ? ' active' : '')}
-                  onClick={() => setShift(s)}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-            <span className="sel-hint">נבחרה אוטומטית לפי השעה ({getCurrentShift()})</span>
-          </div>
-        )}
-
-        {tab.note && <div className="tab-note">{tab.note}</div>}
-
-        {/* הנחיות יחידה (נפתח) */}
-        {plan.guidance && (
-          <div className="guide">
-            <button className="guide-toggle" onClick={() => setGuideOpen((o) => !o)}>
-              {plan.guidance.title}
-              <span className="chev">{guideOpen ? '▲' : '▼'}</span>
-            </button>
-            {guideOpen && (
-              <ul className="guide-list">
-                {plan.guidance.items.map((g, i) => (
-                  <li key={i}>{g}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* סקשנים */}
-      {sections.length === 0 ? (
-        <p className="empty-hint">אין משימות להצגה למשמרת זו.</p>
-      ) : (
-        sections.map((s) =>
-          s.kind === 'quick' ? (
-            <QuickSection key={baseKey(s)} skey={baseKey(s)} section={s} />
-          ) : (
-            <SignedSection key={baseKey(s)} skey={baseKey(s)} section={s} />
-          )
-        )
+        </div>
       )}
 
-      <div style={{ marginTop: 8 }}>
-        <button className="btn ghost" onClick={onBack}>חזרה ללוח החלונות</button>
-      </div>
+      {/* שלב 1: בחירת תדירות + דוחות ביצוע */}
+      {view === 'freq' && (
+        <>
+          {/* שימוש בחומרי חיטוי – בולט ופתוח, לפני כפתורי התדירות */}
+          <div className="glass plan-card disinfect-card">
+            <div className="disinfect-title">{DISINFECTANT_GUIDE.title}</div>
+            <ul className="disinfect-list">
+              {DISINFECTANT_GUIDE.items.map((g, i) => (<li key={i}>{g}</li>))}
+            </ul>
+          </div>
+
+          {plan.guidance && (
+            <div className="glass plan-card controls-card">
+              <div className="guide" style={{ marginTop: 0 }}>
+                <button className="guide-toggle" onClick={() => setGuideOpen((o) => !o)}>
+                  {plan.guidance.title}
+                  <span className="chev">{guideOpen ? '▲' : '▼'}</span>
+                </button>
+                {guideOpen && (
+                  <ul className="guide-list">
+                    {plan.guidance.items.map((g, i) => (<li key={i}>{g}</li>))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          )}
+          <DrillGrid
+            items={[
+              ...plan.tabs.map((t) => ({
+                key: t.id,
+                label: t.label,
+                meta: t.id === 'daily' ? plan.shifts.join(' · ') : t.sections.length + ' תחנות',
+                onClick: () => { setFreq(t.id); setShift(null); setStationId(null) },
+              })),
+              {
+                key: 'reports',
+                label: 'דוחות ביצוע',
+                meta: 'ארכיון · חיפוש · הדפסה',
+                cls: 'reports-tile',
+                onClick: () => setShowReports(true),
+              },
+            ]}
+          />
+        </>
+      )}
+
+      {/* שלב 2 (יומי): בחירת משמרת */}
+      {view === 'shift' && (
+        <DrillGrid
+          items={shifts.map((s) => ({
+            key: s,
+            label: s,
+            meta: s === getCurrentShift() ? 'משמרת נוכחית' : '',
+            onClick: () => setShift(s),
+          }))}
+        />
+      )}
+
+      {/* שלב תחנות: שבועי/חודשי – ישירות; יומי – אחרי בחירת משמרת */}
+      {view === 'station' && (
+        <>
+          {tab.note && <div className="tab-note" style={{ marginBottom: 16 }}>{tab.note}</div>}
+          <DrillGrid items={stationSections.map((s) => ({ key: s.id, label: s.title, onClick: () => setStationId(s.id) }))} />
+        </>
+      )}
+
+      {/* עלה: צ׳קליסט + חתימות */}
+      {view === 'leaf' && (
+        <>
+          {tab.note && tab.id !== 'daily' && <div className="tab-note" style={{ marginBottom: 4 }}>{tab.note}</div>}
+          {leafSections.length === 0 ? (
+            <p className="empty-hint">אין משימות להצגה.</p>
+          ) : (
+            leafSections.map((s) =>
+              s.kind === 'quick' ? (
+                <QuickSection key={baseKey(s)} skey={baseKey(s)} section={s} />
+              ) : (
+                <SignedSection key={baseKey(s)} skey={baseKey(s)} section={s} />
+              )
+            )
+          )}
+          <div style={{ marginTop: 8 }}>
+            <button className="btn ghost" onClick={back}>← חזרה</button>
+          </div>
+        </>
+      )}
     </div>
   )
 }

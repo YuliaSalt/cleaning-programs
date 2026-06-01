@@ -4,7 +4,6 @@ import Home from './components/Home.jsx'
 import CategoryView from './components/CategoryView.jsx'
 import UnitBoard from './components/UnitBoard.jsx'
 import CleaningPlan from './components/CleaningPlan.jsx'
-import ReportsArchive from './components/ReportsArchive.jsx'
 import GeneralHandover from './components/GeneralHandover.jsx'
 import GastroHandover from './components/GastroHandover.jsx'
 import SpecialProcedures from './components/SpecialProcedures.jsx'
@@ -100,16 +99,6 @@ export default function App() {
 
           {!showDashboard && unit && windowId === 'cleaning' && (
             <CleaningPlan
-              unit={unit}
-              onBack={backToBoard}
-              onBackToCategory={backToCategory}
-              onGoHome={goHome}
-              categoryName={category ? category.name : null}
-            />
-          )}
-
-          {!showDashboard && unit && windowId === 'reports' && (
-            <ReportsArchive
               unit={unit}
               onBack={backToBoard}
               onBackToCategory={backToCategory}
