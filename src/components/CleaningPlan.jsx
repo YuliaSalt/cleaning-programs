@@ -32,19 +32,41 @@ function flattenTasks(section) {
   return out
 }
 
-/* ===== סקשן "בין מטופלים" – מונה לחיצות, ללא חתימה ===== */
+/* ===== סקשן "בין מטופלים" – ללא חתימה ===== */
 function QuickSection({ skey, section }) {
-  const [counts, setCounts] = useState(() => storage.getJSON(skey) || {})
+  const [state, setState] = useState(() => storage.getJSON(skey) || {})
   const save = (next) => {
-    setCounts(next)
+    setState(next)
     storage.setJSON(skey, next)
   }
-  const bump = (i, d) => {
-    const n = Math.max(0, (counts[i] || 0) + d)
-    save({ ...counts, [i]: n })
-  }
-  const total = section.items.reduce((s, _, i) => s + (counts[i] || 0), 0)
 
+  // מצב "סימון V פעם אחת" (ללא מונה +/-)
+  if (section.checkOnce) {
+    const toggle = (i) => save({ ...state, [i]: !state[i] })
+    const done = section.items.filter((_, i) => state[i]).length
+    return (
+      <div className="glass plan-card section-card">
+        <div className="sec-head">
+          <span className="sec-tag quick">בין מטופלים</span>
+          <h3>{section.title}</h3>
+          <span className="pill">{done}/{section.items.length}</span>
+        </div>
+        <p className="sec-note">צ׳ק ליסט מהיר ללא חתימה — סימון V פעם אחת. נשמר אוטומטית.</p>
+        <div className="checklist">
+          {section.items.map((label, i) => (
+            <div key={i} className={'check-item' + (state[i] ? ' done' : '')}>
+              <input type="checkbox" id={skey + '-q' + i} checked={!!state[i]} onChange={() => toggle(i)} />
+              <label htmlFor={skey + '-q' + i}>{label}</label>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // מצב מונה לחיצות (+/-)
+  const bump = (i, d) => save({ ...state, [i]: Math.max(0, (state[i] || 0) + d) })
+  const total = section.items.reduce((s, _, i) => s + (state[i] || 0), 0)
   return (
     <div className="glass plan-card section-card">
       <div className="sec-head">
@@ -59,7 +81,7 @@ function QuickSection({ skey, section }) {
             <span className="qi-label">{label}</span>
             <span className="qi-counter">
               <button className="qi-btn" onClick={() => bump(i, -1)} aria-label="הפחת">−</button>
-              <span className="qi-num">{counts[i] || 0}</span>
+              <span className="qi-num">{state[i] || 0}</span>
               <button className="qi-btn add" onClick={() => bump(i, 1)} aria-label="הוסף">+</button>
             </span>
           </div>
@@ -249,8 +271,26 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
 
   // סקשנים מועמדים: ביומי לפי המשמרת שנבחרה, אחרת כל הסקשנים
   const candidates = !tab ? [] : tab.id === 'daily' ? tab.sections.filter((s) => !s.shift || s.shift === shift) : tab.sections
-  // האם קיים שלב בחירת תחנה (ביומי – רק כשמוגדר stationDaily ויש יותר מסקשן אחד)
-  const stationStep = !!tab && (tab.id === 'daily' ? plan.stationDaily && candidates.length > 1 : tab.sections.length > 1)
+
+  // שלב ביניים (תחנות / אזורים): כפתורים שכל אחד פותח קבוצת סקשנים
+  let subGroups = null
+  let groupMatch = null
+  if (tab) {
+    if (tab.id === 'daily') {
+      if (tab.dailyAreas) {
+        const present = new Set(candidates.map((s) => s.area))
+        subGroups = tab.dailyAreas.filter((a) => present.has(a.id))
+        groupMatch = (s, gid) => s.area === gid
+      } else if (plan.stationDaily && candidates.length > 1) {
+        subGroups = candidates.map((s) => ({ id: s.id, label: s.title }))
+        groupMatch = (s, gid) => s.id === gid
+      }
+    } else if (tab.sections.length > 1) {
+      subGroups = tab.sections.map((s) => ({ id: s.id, label: s.title }))
+      groupMatch = (s, gid) => s.id === gid
+    }
+  }
+  const stationStep = !!subGroups
 
   let view = 'freq'
   if (tab) {
@@ -259,8 +299,7 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
     else view = 'leaf'
   }
 
-  const leafSections = view === 'leaf' ? (stationStep ? candidates.filter((s) => s.id === stationId) : candidates) : []
-  const stationSections = stationStep ? candidates : []
+  const leafSections = view === 'leaf' ? (stationStep ? candidates.filter((s) => groupMatch(s, stationId)) : candidates) : []
 
   const period = tab ? periodKey(tab.id, shift) : ''
   const baseKey = (s) => planKey(unit.id, s.roomScoped && room ? room : '-', tab.id, s.id, period)
@@ -297,8 +336,8 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
       trail.push({ label: shift, onClick: linkShift ? () => setStationId(null) : undefined })
     }
     if (view === 'leaf' && stationStep && stationId) {
-      const st = tab.sections.find((s) => s.id === stationId)
-      trail.push({ label: st ? st.title : '' })
+      const g = subGroups.find((x) => x.id === stationId)
+      trail.push({ label: g ? g.label : '' })
     }
   }
 
@@ -386,11 +425,11 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
         />
       )}
 
-      {/* שלב תחנות: שבועי/חודשי – ישירות; יומי – אחרי בחירת משמרת */}
+      {/* שלב תחנות/אזורים: שבועי/חודשי – ישירות; יומי – אחרי בחירת משמרת */}
       {view === 'station' && (
         <>
           {tab.note && <div className="tab-note" style={{ marginBottom: 16 }}>{tab.note}</div>}
-          <DrillGrid items={stationSections.map((s) => ({ key: s.id, label: s.title, onClick: () => setStationId(s.id) }))} />
+          <DrillGrid items={subGroups.map((g) => ({ key: g.id, label: g.label, onClick: () => setStationId(g.id) }))} />
         </>
       )}
 
