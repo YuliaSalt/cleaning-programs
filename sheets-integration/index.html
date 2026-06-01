@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>הרצליה מדיקל סנטר · דוחות תוכניות ניקיון</title>
+  <style>
+    /* ===== צבעי מותג HMC (ניתן לעריכה) ===== */
+    :root {
+      --brand: #0a4d8c;
+      --brand-2: #17a2b8;
+      --ink: #1f2d36;
+      --muted: #6b7c89;
+      --bg: #f3f8fb;
+      --card: #ffffff;
+      --line: #e2ebf1;
+      --line-strong: #cfdde7;
+      --ok: #1faf6e;
+      --err: #d35454;
+      --chip: #eef6fa;
+      --radius: 12px;
+      --shadow: 0 6px 20px rgba(20, 80, 130, 0.07);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: 'Heebo', 'Segoe UI', Arial, "Noto Sans Hebrew", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      direction: rtl;
+      -webkit-font-smoothing: antialiased;
+      font-size: 15px;
+    }
+
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 16px 18px 60px; }
+
+    /* ===== כותרת ===== */
+    header.app {
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 130%);
+      color: #fff;
+    }
+    .head-inner {
+      max-width: 1280px; margin: 0 auto; padding: 16px 18px;
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .logo-mark {
+      width: 42px; height: 42px; flex: none; border-radius: 11px;
+      background: rgba(255,255,255,0.16); display: grid; place-items: center;
+      font-weight: 800; font-size: 20px; border: 1px solid rgba(255,255,255,0.35);
+    }
+    .head-title { font-size: 19px; font-weight: 800; }
+    .head-sub { font-size: 12.5px; opacity: 0.9; font-weight: 500; }
+    .head-right { margin-inline-start: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .updated { font-size: 12.5px; opacity: 0.92; }
+    .btn {
+      border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.14);
+      color: #fff; border-radius: 999px; padding: 8px 16px; font: inherit;
+      font-weight: 700; font-size: 13.5px; cursor: pointer; transition: .15s;
+    }
+    .btn:hover { background: rgba(255,255,255,0.26); }
+    .btn[disabled] { opacity: .55; cursor: not-allowed; }
+
+    /* ===== מסננים ===== */
+    .filters {
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 14px 16px; margin-top: 16px;
+    }
+    .filters-grid {
+      display: grid; gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    .field label { display: block; font-size: 12.5px; font-weight: 700; color: var(--brand); margin-bottom: 5px; }
+    .field input, .field select {
+      width: 100%; padding: 9px 11px; border: 1px solid var(--line-strong);
+      border-radius: 10px; font: inherit; font-size: 14px; color: var(--ink); background: #fff;
+    }
+    .field input:focus, .field select:focus { outline: none; border-color: var(--brand-2); box-shadow: 0 0 0 3px rgba(23,162,184,.15); }
+    .search-row { margin-bottom: 12px; }
+    .search-row input { font-size: 15px; padding: 11px 13px; }
+    .filters-foot { display: flex; align-items: center; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+    .btn-ghost {
+      border: 1px solid var(--line-strong); background: #fff; color: var(--brand);
+      border-radius: 999px; padding: 9px 18px; font: inherit; font-weight: 700; font-size: 13.5px; cursor: pointer;
+    }
+    .btn-ghost:hover { background: var(--chip); }
+    .count {
+      margin-inline-start: auto; font-size: 13.5px; font-weight: 700; color: var(--muted);
+    }
+    .count b { color: var(--brand); }
+
+    /* ===== מצבים ===== */
+    .status { padding: 26px 16px; text-align: center; color: var(--muted); font-size: 15px; }
+    .status.err { color: var(--err); font-weight: 600; }
+    .spinner {
+      width: 26px; height: 26px; border: 3px solid var(--line); border-top-color: var(--brand-2);
+      border-radius: 50%; margin: 0 auto 12px; animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== טבלה ===== */
+    .table-wrap { margin-top: 14px; overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--line); background: var(--card); box-shadow: var(--shadow); }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 640px; }
+    thead th {
+      position: sticky; top: 0; background: var(--brand); color: #fff; text-align: right;
+      padding: 11px 12px; font-weight: 700; white-space: nowrap; font-size: 13px;
+    }
+    tbody td { padding: 10px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+    tbody tr:nth-child(even) { background: #fafcfe; }
+    tbody tr:hover { background: #eef6fb; }
+    td.wd { color: var(--brand-2); font-weight: 700; white-space: nowrap; }
+
+    /* כרטיסים בנייד */
+    @media (max-width: 720px) {
+      table, thead, tbody, th, td, tr { display: block; }
+      thead { display: none; }
+      table { min-width: 0; }
+      tbody tr {
+        border: 1px solid var(--line); border-radius: 10px; margin: 10px; padding: 6px 4px; background: #fff;
+      }
+      tbody td { border: none; padding: 7px 12px; display: flex; gap: 10px; }
+      tbody td::before {
+        content: attr(data-label); flex: none; width: 42%; font-weight: 700; color: var(--brand); font-size: 12.5px;
+      }
+    }
+
+    .load-more { text-align: center; margin: 16px 0; }
+    .load-more button {
+      border: 1px solid var(--line-strong); background: #fff; color: var(--brand);
+      border-radius: 999px; padding: 11px 26px; font: inherit; font-weight: 700; cursor: pointer;
+    }
+    .load-more button:hover { background: var(--chip); }
+  </style>
+</head>
+<body>
+  <header class="app">
+    <div class="head-inner">
+      <div class="logo-mark">+</div>
+      <div>
+        <div class="head-title">הרצליה מדיקל סנטר</div>
+        <div class="head-sub">דוחות תוכניות ניקיון · נתונים חיים מ-Google Sheets</div>
+      </div>
+      <div class="head-right">
+        <span class="updated" id="updated"></span>
+        <button class="btn" id="refreshBtn" type="button">רענון</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <!-- מסננים -->
+    <div class="filters">
+      <div class="field search-row">
+        <label for="q">חיפוש חופשי</label>
+        <input id="q" type="search" placeholder="חיפוש בכל השדות..." autocomplete="off" />
+      </div>
+
+      <div class="filters-grid">
+        <div class="field">
+          <label for="f-shift">משמרת</label>
+          <select id="f-shift"><option value="">הכל</option></select>
+        </div>
+        <div class="field">
+          <label for="f-dep">מחלקה</label>
+          <select id="f-dep"><option value="">הכל</option></select>
+        </div>
+        <div class="field">
+          <label for="f-weekday">יום בשבוע</label>
+          <select id="f-weekday"><option value="">הכל</option></select>
+        </div>
+        <div class="field">
+          <label for="f-month">חודש</label>
+          <select id="f-month"><option value="">הכל</option></select>
+        </div>
+        <div class="field">
+          <label for="f-year">שנה</label>
+          <select id="f-year"><option value="">הכל</option></select>
+        </div>
+        <div class="field">
+          <label for="f-from">מתאריך</label>
+          <input id="f-from" type="date" />
+        </div>
+        <div class="field">
+          <label for="f-to">עד תאריך</label>
+          <input id="f-to" type="date" />
+        </div>
+      </div>
+
+      <div class="filters-foot">
+        <button class="btn-ghost" id="clearBtn" type="button">נקה סינון</button>
+        <span class="count" id="count"></span>
+      </div>
+    </div>
+
+    <!-- מצב / תוצאות -->
+    <div class="status" id="status"><div class="spinner"></div>טוען נתונים...</div>
+    <div class="table-wrap" id="tableWrap" hidden>
+      <table>
+        <thead><tr id="theadRow"></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="load-more" id="loadMoreWrap" hidden>
+      <button id="loadMoreBtn" type="button">טען עוד</button>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       קבועים נוחים לעריכה
+       ============================================================ */
+    // כתובת ה-/exec של ה-Web App (Apps Script). הדבק כאן את הכתובת שקיבלת בפריסה.
+    var API_URL = 'PASTE_YOUR_WEB_APP_EXEC_URL_HERE';
+
+    // רענון אוטומטי במילישניות (5 דקות). הגדר 0 לכיבוי.
+    var AUTO_REFRESH_MS = 5 * 60 * 1000;
+
+    // כמה שורות לרנדר בכל פעם (טעינה חלקה בנייד / מכשירים חלשים).
+    var RENDER_CHUNK = 200;
+
+    // שמות עמודות לסינון (התאם אם שונה בגיליון).
+    var COL_SHIFT = 'משמרת';
+    var COL_DEPARTMENT = 'מחלקה';
+
+    var HE_WEEKDAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+    var HE_MONTHS = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+
+    /* ============================================================
+       מצב (בזיכרון בלבד – ללא localStorage/sessionStorage)
+       ============================================================ */
+    var ALL = [];        // כל הנתונים החיים מהשרת
+    var COLUMNS = [];     // עמודות התצוגה (ללא שדות נגזרים)
+    var filtered = [];    // לאחר סינון
+    var shown = 0;        // כמה מרונדרים כרגע
+    var autoTimer = null;
+
+    var $ = function (id) { return document.getElementById(id); };
+
+    /* ============================================================
+       שליפת נתונים: fetch GET (ללא הדרים/Content-Type) + fallback ל-JSONP
+       ============================================================ */
+    function fetchViaFetch() {
+      return fetch(API_URL, { method: 'GET' }).then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      });
+    }
+
+    function fetchViaJsonp() {
+      return new Promise(function (resolve, reject) {
+        var cb = '__hmc_cb_' + Date.now();
+        var sep = API_URL.indexOf('?') === -1 ? '?' : '&';
+        var s = document.createElement('script');
+        var timer = setTimeout(function () { cleanup(); reject(new Error('JSONP timeout')); }, 20000);
+        function cleanup() { clearTimeout(timer); delete window[cb]; if (s.parentNode) s.parentNode.removeChild(s); }
+        window[cb] = function (data) { cleanup(); resolve(data); };
+        s.onerror = function () { cleanup(); reject(new Error('JSONP error')); };
+        s.src = API_URL + sep + 'callback=' + cb;
+        document.body.appendChild(s);
+      });
+    }
+
+    function fetchData() {
+      return fetchViaFetch().catch(function () { return fetchViaJsonp(); });
+    }
+
+    /* ============================================================
+       טעינה
+       ============================================================ */
+    function loadData(isRefresh) {
+      if (API_URL.indexOf('PASTE_YOUR') === 0) {
+        showStatus('יש להגדיר את כתובת ה-API (API_URL) בראש הקובץ.', true);
+        return;
+      }
+      if (!isRefresh) showStatus('<div class="spinner"></div>טוען נתונים...', false);
+      setBusy(true);
+
+      fetchData().then(function (payload) {
+        if (!payload || payload.ok === false) {
+          throw new Error((payload && payload.error) || 'תשובה לא תקינה מהשרת');
+        }
+        ALL = Array.isArray(payload.data) ? payload.data : [];
+        COLUMNS = computeColumns(ALL, payload.columns);
+        $('updated').textContent = payload.updatedAt ? ('עודכן: ' + formatUpdated(payload.updatedAt)) : '';
+        buildHead();
+        populateFilters();
+        applyAndRender();
+        setBusy(false);
+      }).catch(function (err) {
+        setBusy(false);
+        showStatus('שגיאה בטעינת הנתונים: ' + (err && err.message ? err.message : err), true);
+      });
+    }
+
+    function computeColumns(rows, serverCols) {
+      var cols = [];
+      if (serverCols && serverCols.length) cols = serverCols.slice();
+      else if (rows.length) {
+        for (var k in rows[0]) { if (k.charAt(0) !== '_') cols.push(k); }
+      }
+      return cols.filter(function (c) { return c && c.charAt(0) !== '_'; });
+    }
+
+    /* ============================================================
+       מסננים – מילוי דינמי מהנתונים (distinct)
+       ============================================================ */
+    function distinct(rows, fn) {
+      var seen = {}, out = [];
+      rows.forEach(function (r) {
+        var v = fn(r);
+        if (v === '' || v === null || v === undefined) return;
+        var key = String(v);
+        if (!seen[key]) { seen[key] = 1; out.push(v); }
+      });
+      return out;
+    }
+
+    function fillSelect(sel, values, formatter) {
+      var prev = sel.value;
+      sel.innerHTML = '<option value="">הכל</option>';
+      values.forEach(function (v) {
+        var o = document.createElement('option');
+        o.value = String(v);
+        o.textContent = formatter ? formatter(v) : String(v);
+        sel.appendChild(o);
+      });
+      if (prev && Array.prototype.some.call(sel.options, function (o) { return o.value === prev; })) sel.value = prev;
+    }
+
+    function populateFilters() {
+      fillSelect($('f-shift'), distinct(ALL, function (r) { return r[COL_SHIFT]; }).sort());
+      fillSelect($('f-dep'), distinct(ALL, function (r) { return r[COL_DEPARTMENT]; }).sort());
+
+      var wds = distinct(ALL, function (r) { return r._weekday; })
+        .sort(function (a, b) { return HE_WEEKDAYS.indexOf(a) - HE_WEEKDAYS.indexOf(b); });
+      fillSelect($('f-weekday'), wds);
+
+      var months = distinct(ALL, function (r) { return r._month; })
+        .map(Number).sort(function (a, b) { return a - b; });
+      fillSelect($('f-month'), months, function (m) { return HE_MONTHS[m - 1] || m; });
+
+      var years = distinct(ALL, function (r) { return r._year; })
+        .map(Number).sort(function (a, b) { return b - a; }); // כל השנים, החדשה למעלה
+      fillSelect($('f-year'), years);
+    }
+
+    /* ============================================================
+       סינון בצד הלקוח (כל הסינונים יחד)
+       ============================================================ */
+    function applyAndRender() {
+      var q = $('q').value.trim().toLowerCase();
+      var fShift = $('f-shift').value;
+      var fDep = $('f-dep').value;
+      var fWd = $('f-weekday').value;
+      var fMonth = $('f-month').value;
+      var fYear = $('f-year').value;
+      var fFrom = $('f-from').value;
+      var fTo = $('f-to').value;
+
+      filtered = ALL.filter(function (r) {
+        if (fShift && String(r[COL_SHIFT] || '').trim() !== fShift) return false;
+        if (fDep && String(r[COL_DEPARTMENT] || '').trim() !== fDep) return false;
+        if (fWd && String(r._weekday || '') !== fWd) return false;
+        if (fMonth && Number(r._month) !== Number(fMonth)) return false;
+        if (fYear && Number(r._year) !== Number(fYear)) return false;
+        if (fFrom && (!r._iso || r._iso < fFrom)) return false;
+        if (fTo && (!r._iso || r._iso > fTo)) return false;
+        if (q) {
+          var hay = '';
+          for (var k in r) { if (k.charAt(0) !== '_') hay += ' ' + r[k]; }
+          if (hay.toLowerCase().indexOf(q) === -1) return false;
+        }
+        return true;
+      });
+
+      shown = 0;
+      $('tbody').innerHTML = '';
+      renderMore();
+      updateCount();
+
+      if (!ALL.length) {
+        showStatus('אין נתונים בגיליון.', false);
+      } else if (!filtered.length) {
+        showStatus('לא נמצאו תוצאות התואמות לסינון.', false);
+        $('tableWrap').hidden = true;
+        $('loadMoreWrap').hidden = true;
+      } else {
+        $('status').hidden = true;
+        $('tableWrap').hidden = false;
+      }
+    }
+
+    function buildHead() {
+      var tr = $('theadRow');
+      tr.innerHTML = '';
+      var thDay = document.createElement('th'); thDay.textContent = 'יום'; tr.appendChild(thDay);
+      COLUMNS.forEach(function (c) {
+        var th = document.createElement('th'); th.textContent = c; tr.appendChild(th);
+      });
+    }
+
+    function renderMore() {
+      var frag = document.createDocumentFragment();
+      var end = Math.min(shown + RENDER_CHUNK, filtered.length);
+      for (var i = shown; i < end; i++) {
+        var r = filtered[i];
+        var tr = document.createElement('tr');
+
+        var tdDay = document.createElement('td');
+        tdDay.className = 'wd';
+        tdDay.setAttribute('data-label', 'יום');
+        tdDay.textContent = r._weekday || '';
+        tr.appendChild(tdDay);
+
+        COLUMNS.forEach(function (c) {
+          var td = document.createElement('td');
+          td.setAttribute('data-label', c);
+          var v = r[c];
+          td.textContent = (v === null || v === undefined) ? '' : String(v);
+          tr.appendChild(td);
+        });
+        frag.appendChild(tr);
+      }
+      $('tbody').appendChild(frag);
+      shown = end;
+      $('loadMoreWrap').hidden = shown >= filtered.length;
+    }
+
+    function updateCount() {
+      $('count').innerHTML = 'מציג <b>' + Math.min(shown, filtered.length) + '</b> מתוך <b>' +
+        filtered.length + '</b> תוצאות · סה״כ <b>' + ALL.length + '</b> רשומות';
+    }
+
+    /* ============================================================
+       עזרים לתצוגה
+       ============================================================ */
+    function showStatus(html, isErr) {
+      var el = $('status');
+      el.hidden = false;
+      el.className = 'status' + (isErr ? ' err' : '');
+      el.innerHTML = html;
+      if (isErr || html.indexOf('spinner') === -1) { $('tableWrap').hidden = true; $('loadMoreWrap').hidden = true; }
+    }
+
+    function setBusy(b) { $('refreshBtn').disabled = b; }
+
+    function formatUpdated(iso) {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      return d.toLocaleString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function clearFilters() {
+      $('q').value = '';
+      ['f-shift', 'f-dep', 'f-weekday', 'f-month', 'f-year'].forEach(function (id) { $(id).value = ''; });
+      $('f-from').value = ''; $('f-to').value = '';
+      applyAndRender();
+    }
+
+    /* ============================================================
+       אירועים
+       ============================================================ */
+    ['q', 'f-shift', 'f-dep', 'f-weekday', 'f-month', 'f-year', 'f-from', 'f-to'].forEach(function (id) {
+      var el = $(id);
+      el.addEventListener('input', applyAndRender);
+      el.addEventListener('change', applyAndRender);
+    });
+    $('clearBtn').addEventListener('click', clearFilters);
+    $('refreshBtn').addEventListener('click', function () { loadData(true); });
+    $('loadMoreBtn').addEventListener('click', function () { renderMore(); updateCount(); });
+
+    // רענון אוטומטי
+    if (AUTO_REFRESH_MS > 0) {
+      autoTimer = setInterval(function () {
+        if (document.visibilityState === 'visible') loadData(true);
+      }, AUTO_REFRESH_MS);
+    }
+
+    // טעינה ראשונית
+    loadData(false);
+  </script>
+</body>
+</html>

@@ -49,9 +49,9 @@ export default function Dashboard({ onGoHome, onSelectUnit }) {
   return (
     <div>
       <ScreenHeader
-        title="דשבורד ביצועים"
+        title="דשבורד ביצועים · תוכניות ניקיון"
         onBack={onGoHome}
-        trail={[{ label: 'ראשי', onClick: onGoHome }, { label: 'דשבורד ביצועים' }]}
+        trail={[{ label: 'ראשי', onClick: onGoHome }, { label: 'דשבורד ביצועים · תוכניות ניקיון' }]}
       />
 
       <p className="empty-hint" style={{ margin: '4px 2px 24px' }}>

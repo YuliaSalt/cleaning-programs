@@ -32,58 +32,29 @@ function flattenTasks(section) {
   return out
 }
 
-/* ===== סקשן "בין מטופלים" – ללא חתימה ===== */
+/* ===== סקשן "בין מטופלים" – סימון V בלבד, ללא חתימה וללא מונה +/- ===== */
 function QuickSection({ skey, section }) {
   const [state, setState] = useState(() => storage.getJSON(skey) || {})
   const save = (next) => {
     setState(next)
     storage.setJSON(skey, next)
   }
+  const toggle = (i) => save({ ...state, [i]: !state[i] })
+  const done = section.items.filter((_, i) => state[i]).length
 
-  // מצב "סימון V פעם אחת" (ללא מונה +/-)
-  if (section.checkOnce) {
-    const toggle = (i) => save({ ...state, [i]: !state[i] })
-    const done = section.items.filter((_, i) => state[i]).length
-    return (
-      <div className="glass plan-card section-card">
-        <div className="sec-head">
-          <span className="sec-tag quick">בין מטופלים</span>
-          <h3>{section.title}</h3>
-          <span className="pill">{done}/{section.items.length}</span>
-        </div>
-        <p className="sec-note">צ׳ק ליסט מהיר ללא חתימה — סימון V פעם אחת. נשמר אוטומטית.</p>
-        <div className="checklist">
-          {section.items.map((label, i) => (
-            <div key={i} className={'check-item' + (state[i] ? ' done' : '')}>
-              <input type="checkbox" id={skey + '-q' + i} checked={!!state[i]} onChange={() => toggle(i)} />
-              <label htmlFor={skey + '-q' + i}>{label}</label>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  // מצב מונה לחיצות (+/-)
-  const bump = (i, d) => save({ ...state, [i]: Math.max(0, (state[i] || 0) + d) })
-  const total = section.items.reduce((s, _, i) => s + (state[i] || 0), 0)
   return (
     <div className="glass plan-card section-card">
       <div className="sec-head">
         <span className="sec-tag quick">בין מטופלים</span>
         <h3>{section.title}</h3>
-        <span className="pill">{total} לחיצות</span>
+        <span className="pill">{done}/{section.items.length}</span>
       </div>
-      <p className="sec-note">צ׳ק ליסט מהיר ללא חתימה — לחיצה בכל ביצוע. המונה נשמר אוטומטית.</p>
-      <div className="quick-list">
+      <p className="sec-note">צ׳ק ליסט מהיר ללא חתימה — סימון V. נשמר אוטומטית.</p>
+      <div className="checklist">
         {section.items.map((label, i) => (
-          <div key={i} className="quick-item">
-            <span className="qi-label">{label}</span>
-            <span className="qi-counter">
-              <button className="qi-btn" onClick={() => bump(i, -1)} aria-label="הפחת">−</button>
-              <span className="qi-num">{state[i] || 0}</span>
-              <button className="qi-btn add" onClick={() => bump(i, 1)} aria-label="הוסף">+</button>
-            </span>
+          <div key={i} className={'check-item' + (state[i] ? ' done' : '')}>
+            <input type="checkbox" id={skey + '-q' + i} checked={!!state[i]} onChange={() => toggle(i)} />
+            <label htmlFor={skey + '-q' + i}>{label}</label>
           </div>
         ))}
       </div>
