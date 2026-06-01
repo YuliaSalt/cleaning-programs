@@ -7,6 +7,8 @@ import {
   emptyHandover,
   saveHandover,
   listHandovers,
+  getDeviceNurse,
+  rememberDeviceNurse,
 } from '../data/handover.js'
 import { buildHandoverImage, shareHandoverImage } from './handoverImage.js'
 import HandoverArchive from './HandoverArchive.jsx'
@@ -26,11 +28,12 @@ const todayStr = () => new Date().toLocaleDateString('en-CA')
 /* ===== טופס מילוי ===== */
 function HandoverForm({ unit, onSent, onReset }) {
   const now = new Date()
-  // משמרת נקבעת אוטומטית לפי השעה (06:30–15:00 בוקר, 15:00–23:00 ערב)
-  const [shift, setShift] = useState(() => getGastroShift())
+  // בחירת משמרת היא שלב חובה; הזמן רק ממליץ (06:30–15:00 בוקר, 15:00–23:00 ערב)
+  const suggested = getGastroShift()
+  const [shift, setShift] = useState(suggested) // נבחרת אוטומטית לפי השעה; ניתן לשנות
   const [reports, setReports] = useState(() => emptyHandover(unit.id, unit.name, shift).reports)
   const [checks, setChecks] = useState(() => emptyHandover(unit.id, unit.name, shift).checks)
-  const [nurse, setNurse] = useState({ first: '', last: '' })
+  const [nurse, setNurse] = useState(() => getDeviceNurse()) // שם מלא בשדה אחד; נשמר במכשיר
   const [err, setErr] = useState(false)
   const [busy, setBusy] = useState(false)
 
@@ -46,27 +49,28 @@ function HandoverForm({ unit, onSent, onReset }) {
     const e = emptyHandover(unit.id, unit.name, shift)
     setReports(e.reports)
     setChecks(e.checks)
-    setNurse({ first: '', last: '' })
+    setNurse(getDeviceNurse()) // שומר על שם האחות המוסרת השמור במכשיר
     setErr(false)
     if (onReset) onReset()
   }
 
   function send() {
-    // חובה לרשום שם ושם משפחה של האחות המוסרת לפני שמירה ושליחה
-    if (!nurse.first.trim() || !nurse.last.trim()) {
+    // חובה לרשום את שם האחות המוסרת לפני שמירה ושליחה
+    if (!nurse.trim()) {
       setErr(true)
       return
     }
     setErr(false)
+    rememberDeviceNurse(nurse) // שמירת שם האחות המוסרת קבוע במכשיר
     // תאריך, שעה ומשמרת נרשמים אוטומטית בעת השליחה
     const at = new Date()
     const record = {
       unitId: unit.id,
       unitName: unit.name,
       date: todayStr(),
-      shift: getGastroShift(at),
+      shift, // המשמרת שנבחרה ידנית
       savedAt: at.toISOString(),
-      nurse: (nurse.first.trim() + ' ' + nurse.last.trim()).trim(),
+      nurse: nurse.trim(),
       reports,
       checks,
     }
@@ -89,18 +93,30 @@ function HandoverForm({ unit, onSent, onReset }) {
 
       <div className="ho-subrow">
         <span className="ho-date">תאריך: {dateHe} · שעה: {timeHe}</span>
-        <div className="chips-wrap">
-          <div className="chips">
-            {SHIFTS.map((s) => (
-              <button key={s} className={'chip' + (shift === s ? ' active' : '')} onClick={() => setShift(s)}>
-                {s}
-              </button>
-            ))}
-          </div>
-          <span className="ho-auto-hint">המשמרת נקבעה אוטומטית לפי השעה</span>
+      </div>
+
+      {/* בחירת משמרת – שלב חובה ובולט לפני מילוי הטופס */}
+      <div className="ho-shift-pick">
+        <div className="ho-shift-title">משמרת</div>
+        <div className="ho-shift-sub">נבחרה אוטומטית לפי השעה — ניתן לשנות</div>
+        <div className="ho-shift-btns">
+          {SHIFTS.map((s) => (
+            <button
+              key={s}
+              className={'ho-shift-btn' + (shift === s ? ' active' : '') + (s === suggested ? ' suggested' : '')}
+              onClick={() => setShift(s)}
+            >
+              <span className="ho-shift-name">{s}</span>
+              {s === suggested && <span className="ho-shift-tag">מומלץ לפי השעה</span>}
+            </button>
+          ))}
         </div>
       </div>
 
+      {!shift && <div className="ho-shift-locked">בחר/י משמרת למעלה כדי למלא את הטופס</div>}
+
+      {shift && (
+        <>
       {/* בלוק 1 – דיווח ובקרה */}
       <div className="ho-block">
         <div className="ho-block-title">דיווח ובקרה</div>
@@ -142,32 +158,21 @@ function HandoverForm({ unit, onSent, onReset }) {
         </div>
       ))}
 
-      {/* חתימת אחות מוסרת – חובה */}
+      {/* חתימת אחות מוסרת – חובה (שם מלא בשדה אחד, נשמר במכשיר) */}
       <div className="ho-block">
         <div className="ho-block-title">חתימת אחות מוסרת</div>
-        <div className="form-row">
-          <div className="field">
-            <label>שם פרטי <span className="req">*</span></label>
-            <input
-              className={'input' + (err && !nurse.first.trim() ? ' invalid' : '')}
-              type="text"
-              placeholder="שם פרטי"
-              value={nurse.first}
-              onChange={(e) => setNurse((n) => ({ ...n, first: e.target.value }))}
-            />
-          </div>
-          <div className="field">
-            <label>שם משפחה <span className="req">*</span></label>
-            <input
-              className={'input' + (err && !nurse.last.trim() ? ' invalid' : '')}
-              type="text"
-              placeholder="שם משפחה"
-              value={nurse.last}
-              onChange={(e) => setNurse((n) => ({ ...n, last: e.target.value }))}
-            />
-          </div>
+        <div className="field">
+          <label>שם האחות המוסרת <span className="req">*</span></label>
+          <input
+            className={'input' + (err && !nurse.trim() ? ' invalid' : '')}
+            type="text"
+            placeholder="שם מלא"
+            value={nurse}
+            onChange={(e) => setNurse(e.target.value)}
+          />
+          <span className="ho-auto-hint">נשמר במכשיר ויופיע מראש בפעם הבאה</span>
         </div>
-        {err && <div className="err">חובה למלא שם ושם משפחה של האחות המוסרת לפני שמירה ושליחה.</div>}
+        {err && <div className="err">חובה למלא את שם האחות המוסרת לפני שמירה ושליחה.</div>}
       </div>
 
       <div className="ho-actions">
@@ -176,6 +181,8 @@ function HandoverForm({ unit, onSent, onReset }) {
         </button>
         <button className="reset-btn" onClick={reset}>איפוס רשימה</button>
       </div>
+        </>
+      )}
 
       <div className="ho-footer">הרצליה מדיקל סנטר</div>
     </div>

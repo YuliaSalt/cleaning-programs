@@ -1,11 +1,44 @@
 import { useMemo, useState } from 'react'
-import { getCurrentShift } from '../data/departments.js'
+import { getCurrentShift, findUnit } from '../data/departments.js'
 import { getCleaningPlan, signoffKind, DISINFECTANT_GUIDE } from '../data/cleaningTemplates.js'
 import { dateStr, periodKey, planKey } from '../data/progress.js'
 import { storage } from '../data/storage.js'
 import { pushReport } from '../data/cloudSync.js'
+import { TYPE_LABELS } from '../data/reports.js'
 import ScreenHeader from './ScreenHeader.jsx'
 import ReportsArchive from './ReportsArchive.jsx'
+
+// פירוק מפתח: hmc:plan:{unitId}:{room}:{tabId}:{sectionId}:{period}
+function parseSkey(skey) {
+  const p = String(skey).replace(/^hmc:plan:/, '').split(':')
+  return { unitId: p[0], room: p[1], tabId: p[2], sectionId: p[3], period: p.slice(4).join(':') }
+}
+
+// בונה ייצוג קריא לגיליון: meta + עמודה לכל משימה (✓/✗) ולכל שדה חתימה.
+function buildReadable(skey, section, tasks, signoff, rec) {
+  const { unitId, room, tabId } = parseSkey(skey)
+  const unit = findUnit(unitId)
+  const columns = []
+  tasks.forEach((t, i) => {
+    const header = t.group ? `${t.group} – ${t.label}` : t.label
+    columns.push([header, rec.checked[i] ? '✓' : '✗'])
+  })
+  signoff.forEach((s, i) => {
+    if (s.type === 'name') columns.push([s.label, (rec.names[i] || '').trim()])
+    else columns.push([s.label, rec.signs[i] ? '✓' : '✗'])
+  })
+  return {
+    meta: {
+      savedAt: rec.savedAt,
+      unitName: unit ? unit.name : unitId,
+      freqLabel: TYPE_LABELS[tabId] || tabId,
+      room: room === '-' ? '' : room,
+      sectionTitle: section.title,
+      by: rec.by || '',
+    },
+    columns,
+  }
+}
 
 /* כפתורי דריל-דאון (זכוכית, בלי אייקונים) */
 function DrillGrid({ items }) {
@@ -63,7 +96,29 @@ function QuickSection({ skey, section }) {
   )
 }
 
-/* ===== סקשן "סגירה" – צ׳קליסט + חתימות חובה ונעילה ===== */
+// זכירת שם המבצע במכשיר: כל שדה-שם זוכר את הערך האחרון שהוזן בו (לפי התווית),
+// כדי שבמכשיר אישי לא יצטרכו להקליד את השם בכל פעם מחדש.
+const DEVICE_NAMES_KEY = 'hmc:device:names'
+function getRememberedNames() {
+  return storage.getJSON(DEVICE_NAMES_KEY) || {}
+}
+function rememberNames(signoff, names) {
+  const map = getRememberedNames()
+  signoff.forEach((s, i) => {
+    if (s.type === 'name' && (names[i] || '').trim()) map[s.label] = names[i].trim()
+  })
+  storage.setJSON(DEVICE_NAMES_KEY, map)
+}
+function initNames(signoff) {
+  const map = getRememberedNames()
+  const out = {}
+  signoff.forEach((s, i) => {
+    if (s.type === 'name' && map[s.label]) out[i] = map[s.label]
+  })
+  return out
+}
+
+/* ===== סקשן "סגירה" – צ׳קליסט + חתימות חובה ונעילה (סופית) ===== */
 function SignedSection({ skey, section }) {
   const tasks = useMemo(() => flattenTasks(section), [section])
   const signoff = useMemo(
@@ -74,7 +129,7 @@ function SignedSection({ skey, section }) {
   const [rec, setRec] = useState(() => storage.getJSON(skey))
   const locked = !!rec
   const [checked, setChecked] = useState(() => (rec && rec.checked) || {})
-  const [names, setNames] = useState(() => (rec && rec.names) || {})
+  const [names, setNames] = useState(() => (rec && rec.names) || initNames(signoff))
   const [signs, setSigns] = useState(() => (rec && rec.signs) || {})
   const [showErr, setShowErr] = useState(false)
 
@@ -100,14 +155,9 @@ function SignedSection({ skey, section }) {
       by: nameIdx.map((i) => names[i]).filter(Boolean).join(' · '),
     }
     storage.setJSON(skey, r)
-    pushReport(skey, r, 'save') // גיבוי לענן (best-effort, לא חוסם)
+    rememberNames(signoff, names) // שמירת שם המבצע במכשיר לפעם הבאה
+    pushReport(skey, r, 'save', buildReadable(skey, section, tasks, signoff, r)) // גיבוי לענן (best-effort, לא חוסם)
     setRec(r)
-    setShowErr(false)
-  }
-  function handleUnlock() {
-    storage.removeItem(skey)
-    pushReport(skey, null, 'delete') // מחיקה גם מהענן
-    setRec(null)
     setShowErr(false)
   }
 
@@ -196,11 +246,7 @@ function SignedSection({ skey, section }) {
       )}
 
       <div className="plan-foot">
-        {!locked ? (
-          <button className="btn" onClick={handleSave}>שמירה ונעילה</button>
-        ) : (
-          <button className="btn ghost" onClick={handleUnlock}>פתיחה לעריכה</button>
-        )}
+        {!locked && <button className="btn" onClick={handleSave}>שמירה ונעילה</button>}
       </div>
     </div>
   )

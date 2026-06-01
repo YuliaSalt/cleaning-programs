@@ -38,10 +38,15 @@ async function postToCloud(body) {
   })
 }
 
-// action: 'save' | 'delete'. נכשל בשקט ונכנס לתור אם אין רשת.
-export async function pushReport(key, rec, action = 'save') {
+// action: 'save' | 'delete'. readable = ייצוג קריא לטבלה (meta+columns). נכשל בשקט ונכנס לתור.
+export async function pushReport(key, rec, action = 'save', readable = null) {
   if (!cloudEnabled()) return
-  const item = { key, action, rec: action === 'save' ? rec : null }
+  const item = {
+    key,
+    action,
+    rec: action === 'save' ? rec : null,
+    readable: action === 'save' ? readable : null,
+  }
   try {
     await postToCloud({ ...item, ts: Date.now() })
   } catch {

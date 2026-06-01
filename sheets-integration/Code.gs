@@ -23,9 +23,14 @@ var COL_DEPARTMENT = 'מחלקה';
 // ימי השבוע בעברית, אינדקס 0 = ראשון
 var HE_WEEKDAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
-// שם הטאב שבו נשמרים דוחות הביצוע (גיבוי ענן מהאפליקציה). נוצר אוטומטית אם חסר.
+// טאבים לדוחות הביצוע (גיבוי ענן מהאפליקציה). נוצרים אוטומטית אם חסרים.
+//  Reports     – קריא לבני אדם: עמודה לכל שדה/צ'קבוקס.
+//  ReportsRaw  – מוסתר: JSON מלא לכל דוח, נחוץ לשחזור האוטומטי באפליקציה.
 var REPORTS_SHEET = 'Reports';
-var REPORTS_HEADERS = ['key', 'savedAt', 'unitId', 'tabId', 'by', 'payload'];
+var RAW_SHEET = 'ReportsRaw';
+var RAW_HEADERS = ['key', 'savedAt', 'payload'];
+// עמודות קבועות (אנושיות) בתחילת טאב Reports; אחריהן עמודות דינמיות לפי התוויות.
+var REPORTS_FIXED = ['key', 'תאריך', 'שעה', 'מחלקה', 'תדירות', 'חדר', 'סקשן', 'מבצעים'];
 
 function doGet(e) {
   e = e || {};
@@ -59,85 +64,120 @@ function doPost(e) {
       deleteReport(key);
       return respond({ ok: true, action: 'delete', key: key });
     }
-    saveReport(key, body.rec || {});
+    saveReport(key, body.rec || {}, body.readable || null);
     return respond({ ok: true, action: 'save', key: key });
   } catch (err) {
     return respond({ ok: false, error: String(err && err.message ? err.message : err) });
   }
 }
 
-/* ===================== אחסון דוחות בטאב Reports ===================== */
+/* ===================== אחסון דוחות (Reports + ReportsRaw) ===================== */
+function getRawSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(RAW_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(RAW_SHEET);
+    sh.getRange(1, 1, 1, RAW_HEADERS.length).setValues([RAW_HEADERS]);
+    sh.hideSheet(); // טכני בלבד – מוסתר מהמשתמש
+  }
+  return sh;
+}
+
 function getReportsSheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sh = ss.getSheetByName(REPORTS_SHEET);
   if (!sh) {
     sh = ss.insertSheet(REPORTS_SHEET);
-    sh.getRange(1, 1, 1, REPORTS_HEADERS.length).setValues([REPORTS_HEADERS]);
+    sh.getRange(1, 1, 1, REPORTS_FIXED.length).setValues([REPORTS_FIXED]);
   }
   return sh;
 }
 
-// מאתר את מספר השורה (1-based) של מפתח נתון, או -1 אם לא קיים.
-function findReportRow(sh, key) {
+// קורא את שורת הכותרות; מוסיף כותרות חסרות בסוף ומחזיר את המערך המלא.
+function ensureHeaders(sh, needed) {
+  var lastCol = sh.getLastColumn();
+  var headers = lastCol > 0 ? sh.getRange(1, 1, 1, lastCol).getValues()[0].map(String) : [];
+  var changed = false;
+  for (var i = 0; i < needed.length; i++) {
+    if (headers.indexOf(needed[i]) === -1) { headers.push(needed[i]); changed = true; }
+  }
+  if (changed) sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+  return headers;
+}
+
+// מאתר שורה (1-based) לפי מפתח בעמודה נתונה (1-based), או -1.
+function findRowByKey(sh, keyCol, key) {
   var last = sh.getLastRow();
   if (last < 2) return -1;
-  var keys = sh.getRange(2, 1, last - 1, 1).getValues();
+  var keys = sh.getRange(2, keyCol, last - 1, 1).getValues();
   for (var i = 0; i < keys.length; i++) {
     if (String(keys[i][0]) === key) return i + 2;
   }
   return -1;
 }
 
-function saveReport(key, rec) {
+function upsertRow(sh, keyCol, key, row) {
+  var at = findRowByKey(sh, keyCol, key);
+  if (at === -1) sh.appendRow(row);
+  else sh.getRange(at, 1, 1, row.length).setValues([row]);
+}
+
+function saveReport(key, rec, readable) {
+  // 1) raw – לשחזור האפליקציה
+  var raw = getRawSheet();
+  upsertRow(raw, 1, key, [key, rec.savedAt || '', JSON.stringify(rec)]);
+
+  // 2) Reports – קריא לבני אדם (עמודה לכל שדה/צ'קבוקס)
+  if (!readable) return;
   var sh = getReportsSheet();
-  var row = [
-    key,
-    rec.savedAt || '',
-    keyField(key, 0),
-    keyField(key, 2),
-    rec.by || '',
-    JSON.stringify(rec),
-  ];
-  var at = findReportRow(sh, key);
-  if (at === -1) {
-    sh.appendRow(row);
-  } else {
-    sh.getRange(at, 1, 1, row.length).setValues([row]);
+  var tz = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone() || 'Asia/Jerusalem';
+  var meta = readable.meta || {};
+  var d = parseDate(meta.savedAt, tz);
+
+  var vals = {};
+  vals['key'] = key;
+  vals['תאריך'] = d ? Utilities.formatDate(d, tz, 'yyyy-MM-dd') : '';
+  vals['שעה'] = d ? Utilities.formatDate(d, tz, 'HH:mm') : '';
+  vals['מחלקה'] = meta.unitName || '';
+  vals['תדירות'] = meta.freqLabel || '';
+  vals['חדר'] = meta.room || '';
+  vals['סקשן'] = meta.sectionTitle || '';
+  vals['מבצעים'] = meta.by || '';
+  var cols = readable.columns || [];
+  for (var i = 0; i < cols.length; i++) {
+    vals[String(cols[i][0])] = cols[i][1];
   }
+
+  var headers = ensureHeaders(sh, Object.keys(vals));
+  var row = headers.map(function (h) { return Object.prototype.hasOwnProperty.call(vals, h) ? vals[h] : ''; });
+  upsertRow(sh, headers.indexOf('key') + 1, key, row);
 }
 
 function deleteReport(key) {
+  var raw = getRawSheet();
+  var atRaw = findRowByKey(raw, 1, key);
+  if (atRaw !== -1) raw.deleteRow(atRaw);
+
   var sh = getReportsSheet();
-  var at = findReportRow(sh, key);
+  var headers = ensureHeaders(sh, ['key']);
+  var at = findRowByKey(sh, headers.indexOf('key') + 1, key);
   if (at !== -1) sh.deleteRow(at);
 }
 
+// קריאה לאפליקציה (פול/מיזוג) – מהטאב הטכני בלבד.
 function readReports() {
-  var sh = getReportsSheet();
+  var sh = getRawSheet();
   var last = sh.getLastRow();
   var tz = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone() || 'Asia/Jerusalem';
   if (last < 2) return { ok: true, count: 0, updatedAt: nowIso(tz), data: [] };
-  var values = sh.getRange(2, 1, last - 1, REPORTS_HEADERS.length).getValues();
+  var values = sh.getRange(2, 1, last - 1, RAW_HEADERS.length).getValues();
   var data = [];
   for (var i = 0; i < values.length; i++) {
     var key = String(values[i][0] || '').trim();
     if (!key) continue;
-    data.push({
-      key: key,
-      savedAt: values[i][1],
-      unitId: values[i][2],
-      tabId: values[i][3],
-      by: values[i][4],
-      payload: values[i][5], // JSON string – נפרק באפליקציה
-    });
+    data.push({ key: key, savedAt: values[i][1], payload: values[i][2] });
   }
   return { ok: true, count: data.length, updatedAt: nowIso(tz), data: data };
-}
-
-// חילוץ חלק ממפתח התוכנית: hmc:plan:{unitId}:{room}:{tabId}:{sectionId}:{period}
-function keyField(key, idx) {
-  var parts = String(key).replace(/^hmc:plan:/, '').split(':');
-  return parts[idx] != null ? parts[idx] : '';
 }
 
 /* בניית התשובה מהגיליון */

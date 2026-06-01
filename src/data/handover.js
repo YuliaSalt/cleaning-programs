@@ -99,6 +99,16 @@ export function fullName(n) {
   return ((n.first || '') + ' ' + (n.last || '')).trim()
 }
 
+// שם האחות המוסרת נשמר קבוע במכשיר, ומולא מראש בכל פתיחת טופס (כל אחד מהמכשיר שלו).
+const DEVICE_NURSE_KEY = 'hmc:device:nurse'
+export function getDeviceNurse() {
+  return storage.getItem(DEVICE_NURSE_KEY) || ''
+}
+export function rememberDeviceNurse(name) {
+  const v = (name || '').trim()
+  if (v) storage.setItem(DEVICE_NURSE_KEY, v)
+}
+
 const PREFIX = 'hmc:handover:'
 
 export function emptyHandover(unitId, unitName, shift) {

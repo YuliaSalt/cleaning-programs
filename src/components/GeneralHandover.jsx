@@ -10,6 +10,8 @@ import {
   saveHandover,
   listHandovers,
   fullName,
+  getDeviceNurse,
+  rememberDeviceNurse,
 } from '../data/handover.js'
 import { buildGeneralHandoverImage, shareHandoverImage } from './handoverImage.js'
 import HandoverArchive from './HandoverArchive.jsx'
@@ -28,11 +30,13 @@ const todayStr = () => new Date().toLocaleDateString('en-CA')
 /* ===== טופס מילוי כללי ===== */
 function GeneralForm({ unit, onSent, onReset }) {
   const shifts = unit.shifts || ['בוקר', 'ערב']
-  const initShift = shifts.includes(getCurrentShift()) ? getCurrentShift() : shifts[shifts.length - 1]
-  const blank = emptyGeneralHandover(unit.id, unit.name, initShift)
+  // בחירת משמרת היא שלב חובה; הזמן רק ממליץ
+  const suggested = shifts.includes(getCurrentShift()) ? getCurrentShift() : shifts[shifts.length - 1]
+  const blank = emptyGeneralHandover(unit.id, unit.name, suggested)
 
-  const [shift, setShift] = useState(initShift)
-  const [names, setNames] = useState({ nurseOut: { first: '', last: '' }, nurseIn: { first: '', last: '' } })
+  const [shift, setShift] = useState(suggested) // נבחרת אוטומטית לפי השעה; ניתן לשנות
+  // שם מלא בשדה אחד (ב-first); אחות מוסרת מולאת מראש מהמכשיר
+  const [names, setNames] = useState({ nurseOut: { first: getDeviceNurse(), last: '' }, nurseIn: { first: '', last: '' } })
   const [numbers, setNumbers] = useState(blank.numbers)
   const [occNote, setOccNote] = useState('')
   const [reports, setReports] = useState(blank.reports)
@@ -51,7 +55,7 @@ function GeneralForm({ unit, onSent, onReset }) {
 
   function reset() {
     const e = emptyGeneralHandover(unit.id, unit.name, shift)
-    setNames({ nurseOut: { first: '', last: '' }, nurseIn: { first: '', last: '' } })
+    setNames({ nurseOut: { first: getDeviceNurse(), last: '' }, nurseIn: { first: '', last: '' } })
     setNumbers(e.numbers)
     setOccNote('')
     setReports(e.reports)
@@ -61,11 +65,12 @@ function GeneralForm({ unit, onSent, onReset }) {
   }
 
   function send() {
-    if (!names.nurseOut.first.trim() || !names.nurseOut.last.trim()) {
+    if (!names.nurseOut.first.trim()) {
       setErr(true)
       return
     }
     setErr(false)
+    rememberDeviceNurse(names.nurseOut.first) // שמירת שם האחות המוסרת קבוע במכשיר
     const record = {
       kind: 'general',
       unitId: unit.id,
@@ -100,44 +105,45 @@ function GeneralForm({ unit, onSent, onReset }) {
 
       <div className="ho-subrow">
         <span className="ho-date">מחלקה: {unit.name} · תאריך: {dateHe}</span>
-        <div className="chips-wrap">
-          <div className="chips">
-            {shifts.map((s) => (
-              <button key={s} className={'chip' + (shift === s ? ' active' : '')} onClick={() => setShift(s)}>
-                {s}
-              </button>
-            ))}
-          </div>
-          <span className="ho-auto-hint">בחירת משמרת</span>
+      </div>
+
+      {/* בחירת משמרת – שלב חובה ובולט לפני מילוי הטופס */}
+      <div className="ho-shift-pick">
+        <div className="ho-shift-title">משמרת</div>
+        <div className="ho-shift-sub">נבחרה אוטומטית לפי השעה — ניתן לשנות</div>
+        <div className="ho-shift-btns">
+          {shifts.map((s) => (
+            <button
+              key={s}
+              className={'ho-shift-btn' + (shift === s ? ' active' : '') + (s === suggested ? ' suggested' : '')}
+              onClick={() => setShift(s)}
+            >
+              <span className="ho-shift-name">{s}</span>
+              {s === suggested && <span className="ho-shift-tag">מומלץ לפי השעה</span>}
+            </button>
+          ))}
         </div>
       </div>
 
+      {!shift && <div className="ho-shift-locked">בחר/י משמרת למעלה כדי למלא את הטופס</div>}
+
+      {shift && (
+        <>
       {/* בלוק 1 – נתוני תפוסה וצוות */}
       <div className="ho-block">
         <div className="ho-block-title">נתוני תפוסה וצוות</div>
 
         {GEN_OCC_NAMES.map((it) => (
-          <div className="ho-2col" key={it.id}>
-            <div className="field">
-              <label>{it.label} – שם פרטי {it.required && <span className="req">*</span>}</label>
-              <input
-                className={'input' + (err && it.required && !names[it.id].first.trim() ? ' invalid' : '')}
-                type="text"
-                placeholder="שם פרטי"
-                value={names[it.id].first}
-                onChange={(e) => setName(it.id, 'first', e.target.value)}
-              />
-            </div>
-            <div className="field">
-              <label>{it.label} – שם משפחה {it.required && <span className="req">*</span>}</label>
-              <input
-                className={'input' + (err && it.required && !names[it.id].last.trim() ? ' invalid' : '')}
-                type="text"
-                placeholder="שם משפחה"
-                value={names[it.id].last}
-                onChange={(e) => setName(it.id, 'last', e.target.value)}
-              />
-            </div>
+          <div className="field" key={it.id}>
+            <label>{it.label} {it.required && <span className="req">*</span>}</label>
+            <input
+              className={'input' + (err && it.required && !names[it.id].first.trim() ? ' invalid' : '')}
+              type="text"
+              placeholder="שם מלא"
+              value={names[it.id].first}
+              onChange={(e) => setName(it.id, 'first', e.target.value)}
+            />
+            {it.id === 'nurseOut' && <span className="ho-auto-hint">נשמר במכשיר ויופיע מראש בפעם הבאה</span>}
           </div>
         ))}
 
@@ -225,7 +231,7 @@ function GeneralForm({ unit, onSent, onReset }) {
           <span className="sc-label">חתימת אחות מוסרת:</span>
           <span className="sc-name">{outName || 'יש למלא שם אחות מוסרת בבלוק "נתוני תפוסה וצוות"'}</span>
         </div>
-        {err && <div className="err">חובה למלא שם ושם משפחה של האחות המוסרת לפני שמירה ושליחה.</div>}
+        {err && <div className="err">חובה למלא את שם האחות המוסרת לפני שמירה ושליחה.</div>}
       </div>
 
       <div className="ho-actions">
@@ -234,6 +240,8 @@ function GeneralForm({ unit, onSent, onReset }) {
         </button>
         <button className="reset-btn" onClick={reset}>איפוס רשימה</button>
       </div>
+        </>
+      )}
 
       <div className="ho-footer">הרצליה מדיקל סנטר</div>
     </div>

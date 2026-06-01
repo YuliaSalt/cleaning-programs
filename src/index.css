@@ -1726,6 +1726,83 @@ h1, h2, h3, h4 {
   color: var(--ink);
 }
 
+/* בחירת משמרת – נבחרת אוטומטית לפי השעה, קומפקטית, בראש טופס העברת משמרת */
+.ho-shift-pick {
+  margin: 10px 0 6px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(207, 234, 243, 0.6));
+  border: 1px solid rgba(168, 220, 232, 0.8);
+}
+.ho-shift-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--brand);
+}
+.ho-shift-sub {
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.ho-shift-btns {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.ho-shift-btn {
+  position: relative;
+  min-width: 92px;
+  padding: 9px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1.5px solid rgba(168, 220, 232, 0.7);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+.ho-shift-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--halo-md, var(--halo-lg));
+}
+.ho-shift-name {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ink-strong);
+}
+.ho-shift-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.ho-shift-btn.suggested {
+  border-color: rgba(34, 150, 178, 0.55);
+}
+.ho-shift-btn.active {
+  border-color: var(--brand);
+  background: linear-gradient(135deg, rgba(207, 234, 243, 0.9), rgba(255, 255, 255, 0.9));
+  box-shadow: 0 0 0 3px rgba(34, 150, 178, 0.28), var(--halo-lg);
+}
+.ho-shift-btn.active .ho-shift-name {
+  color: var(--brand);
+}
+.ho-shift-locked {
+  margin: 14px 0 4px;
+  padding: 14px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--muted);
+  border: 1px dashed rgba(168, 220, 232, 0.9);
+  border-radius: 14px;
+}
+
 /* ארכיון העברת משמרת – כפתור חדש למעלה, חיפוש, רשימה */
 .wide-btn {
   width: 100%;
