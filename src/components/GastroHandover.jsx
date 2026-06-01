@@ -7,9 +7,9 @@ import {
   emptyHandover,
   saveHandover,
   listHandovers,
-  HE_MONTHS,
 } from '../data/handover.js'
 import { buildHandoverImage, shareHandoverImage } from './handoverImage.js'
+import HandoverArchive from './HandoverArchive.jsx'
 
 function WhatsAppIcon() {
   return (
@@ -51,14 +51,13 @@ function HandoverForm({ unit, onSent, onReset }) {
     if (onReset) onReset()
   }
 
-  async function send() {
+  function send() {
     // חובה לרשום שם ושם משפחה של האחות המוסרת לפני שמירה ושליחה
     if (!nurse.first.trim() || !nurse.last.trim()) {
       setErr(true)
       return
     }
     setErr(false)
-    setBusy(true)
     // תאריך, שעה ומשמרת נרשמים אוטומטית בעת השליחה
     const at = new Date()
     const record = {
@@ -71,15 +70,16 @@ function HandoverForm({ unit, onSent, onReset }) {
       reports,
       checks,
     }
+    // 1) שמירה לארכיון (תמיד, ראשון)
     saveHandover(record)
+    // 2) תמונה ושיתוף לוואטסאפ – ברקע, לא חוסם
     try {
-      if (document.fonts && document.fonts.ready) await document.fonts.ready
       const canvas = buildHandoverImage(record)
-      await shareHandoverImage(canvas, 'העברת משמרת גסטרו · קבוצת אחריות משמרת')
+      shareHandoverImage(canvas).catch(() => {})
     } catch (e) {
-      /* גם אם השיתוף נכשל – הרישום כבר נשמר בארכיון */
+      /* הרישום כבר נשמר */
     }
-    setBusy(false)
+    // 3) חזרה לרשימה + אישור
     onSent()
   }
 
@@ -187,7 +187,7 @@ function HandoverView({ record }) {
   async function reshare() {
     if (document.fonts && document.fonts.ready) await document.fonts.ready
     const canvas = buildHandoverImage(record)
-    await shareHandoverImage(canvas, 'העברת משמרת גסטרו · קבוצת אחריות משמרת')
+    await shareHandoverImage(canvas)
   }
   return (
     <div className="glass plan-card ho-form">
@@ -243,6 +243,7 @@ export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategor
   const [mode, setMode] = useState('list') // list | form | view
   const [openRec, setOpenRec] = useState(null)
   const [refresh, setRefresh] = useState(0)
+  const [savedFlash, setSavedFlash] = useState(false)
   const records = useMemo(() => listHandovers(unit.id), [unit.id, refresh])
 
   const baseTrail = [{ label: 'ראשי', onClick: onGoHome }]
@@ -259,7 +260,7 @@ export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategor
           onBack={goList}
           trail={[...baseTrail, { label: 'העברת משמרת', onClick: goList }, { label: 'רישום חדש' }]}
         />
-        <HandoverForm unit={unit} onSent={() => { setRefresh((n) => n + 1); goList() }} />
+        <HandoverForm unit={unit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true); goList() }} />
       </div>
     )
   }
@@ -278,15 +279,6 @@ export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategor
   }
 
   // mode === 'list'
-  const groups = []
-  let y, mo, d
-  for (const r of records) {
-    if (r.year !== y) { y = r.year; mo = d = null; groups.push({ k: 'year', label: String(r.year) }) }
-    if (r.month !== mo) { mo = r.month; d = null; groups.push({ k: 'month', label: HE_MONTHS[r.month] + ' ' + r.year }) }
-    if (r.day !== d) { d = r.day; groups.push({ k: 'day', label: r.dateLabel }) }
-    groups.push({ k: 'rec', r })
-  }
-
   return (
     <div>
       <ScreenHeader
@@ -294,34 +286,12 @@ export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategor
         onBack={onBack}
         trail={[...baseTrail, { label: 'העברת משמרת' }]}
       />
-
-      {records.length === 0 ? (
-        <div className="glass plan-card" style={{ padding: 40, textAlign: 'center' }}>
-          <p className="empty-hint" style={{ fontSize: 16 }}>אין עדיין רישומי העברת משמרת ביחידה זו.</p>
-        </div>
-      ) : (
-        <div className="report-list">
-          {groups.map((g, i) => {
-            if (g.k === 'year') return <div key={i} className="grp-year">{g.label}</div>
-            if (g.k === 'month') return <div key={i} className="grp-month">{g.label}</div>
-            if (g.k === 'day') return <div key={i} className="grp-day">{g.label}</div>
-            const r = g.r
-            return (
-              <button key={i} className="report-card" onClick={() => { setOpenRec(r); setMode('view') }}>
-                <div className="rc-main">
-                  <span className="rc-title">העברת משמרת · {r.record.shift}</span>
-                  <span className="rc-sub">{r.timeLabel}</span>
-                </div>
-                <span className="rc-by">צפייה</span>
-              </button>
-            )
-          })}
-        </div>
-      )}
-
-      <div style={{ marginTop: 18 }}>
-        <button className="btn" onClick={() => setMode('form')}>+ העברת משמרת חדשה</button>
-      </div>
+      <HandoverArchive
+        records={records}
+        savedFlash={savedFlash}
+        onNew={() => { setSavedFlash(false); setMode('form') }}
+        onOpen={(r) => { setSavedFlash(false); setOpenRec(r); setMode('view') }}
+      />
     </div>
   )
 }

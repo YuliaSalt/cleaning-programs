@@ -45,6 +45,60 @@ export const GASTRO_CHECK_BLOCKS = [
   },
 ]
 
+// ===== טופס כללי (מחלקות אשפוז, טיפול נמרץ, חדרי ניתוח, התאוששות, צינתורים, IVF) =====
+// בלוק 1 – נתוני תפוסה וצוות:
+//   שמות (שם פרטי + שם משפחה) – אחות מוסרת (חובה/חתימה) ואחות מקבלת
+export const GEN_OCC_NAMES = [
+  { id: 'nurseOut', label: 'אחות מוסרת', required: true },
+  { id: 'nurseIn', label: 'אחות מקבלת', required: false },
+]
+//   מונים מספריים (בחירה או הקלדה)
+export const GEN_OCC_NUMBERS = [
+  { id: 'patients', label: 'מספר מטופלים במחלקה' },
+  { id: 'discharges', label: 'מספר משוחררים' },
+  { id: 'admissions', label: 'מספר קבלות' },
+]
+
+// בלוק 2 – דיווח ובקרה קליני וניהולי (יש/אין דינמי + מלל חופשי, ללא הערות בצד)
+export const GEN_REPORT_ITEMS = [
+  { id: 'staffing', label: 'הפקדת כח אדם - אחיות וכוחות עזר', placeholder: 'פירוט הפקדת כח האדם...' },
+  { id: 'specialTests', label: 'בדיקות וטיפולים מיוחדים', placeholder: 'פירוט בדיקות וטיפולים...' },
+  { id: 'complexClinical', label: 'מצבים קליניים מורכבים / התערבות נדרשת', placeholder: 'פירוט המצב הקליני וההתערבות...' },
+  { id: 'event', label: 'אירוע חריג', placeholder: 'לדוגמה: נפילת מטופל בחדר 3...' },
+  { id: 'faults', label: 'תקלות פתוחות', placeholder: 'לדוגמה: מסך מחשב בעמדה 2 מהבהב...' },
+  { id: 'generalNotes', label: 'הערות כלליות', placeholder: 'הודעות למשמרת הבאה...' },
+]
+
+// בלוק 3 – משימות ובטיחות המחלקה (צ׳קליסט + הערות)
+export const GEN_CHECK_ITEMS = [
+  'ביצוע העברת מידע על פי דוח ISBAR',
+  'ביצוע ספירת נרקוטיקה',
+  'ביצוע בדיקת עגלת החייאה',
+  'ליקויים בציוד ריהוט ותשתיות',
+]
+
+export function emptyGeneralHandover(unitId, unitName, shift) {
+  return {
+    kind: 'general',
+    unitId,
+    unitName,
+    date: new Date().toLocaleDateString('en-CA'),
+    shift,
+    nurseOut: { first: '', last: '' },
+    nurseIn: { first: '', last: '' },
+    numbers: Object.fromEntries(GEN_OCC_NUMBERS.map((it) => [it.id, ''])),
+    occNote: '',
+    reports: Object.fromEntries(GEN_REPORT_ITEMS.map((it) => [it.id, { has: false, text: '' }])),
+    checks: Object.fromEntries(GEN_CHECK_ITEMS.map((_, i) => [i, { on: false, note: '' }])),
+    nurse: '',
+  }
+}
+
+export function fullName(n) {
+  if (!n) return ''
+  return ((n.first || '') + ' ' + (n.last || '')).trim()
+}
+
 const PREFIX = 'hmc:handover:'
 
 export function emptyHandover(unitId, unitName, shift) {

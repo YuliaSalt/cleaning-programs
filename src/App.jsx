@@ -5,7 +5,7 @@ import CategoryView from './components/CategoryView.jsx'
 import UnitBoard from './components/UnitBoard.jsx'
 import CleaningPlan from './components/CleaningPlan.jsx'
 import ReportsArchive from './components/ReportsArchive.jsx'
-import Handover from './components/Handover.jsx'
+import GeneralHandover from './components/GeneralHandover.jsx'
 import GastroHandover from './components/GastroHandover.jsx'
 import SpecialProcedures from './components/SpecialProcedures.jsx'
 import Dashboard from './components/Dashboard.jsx'
@@ -128,7 +128,7 @@ export default function App() {
                 categoryName={category ? category.name : null}
               />
             ) : (
-              <Handover
+              <GeneralHandover
                 unit={unit}
                 onBack={backToBoard}
                 onBackToCategory={backToCategory}
