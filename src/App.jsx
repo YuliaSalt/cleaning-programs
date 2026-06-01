@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Sidebar from './components/Sidebar.jsx'
 import Home from './components/Home.jsx'
 import CategoryView from './components/CategoryView.jsx'
@@ -9,6 +9,7 @@ import GastroHandover from './components/GastroHandover.jsx'
 import SpecialProcedures from './components/SpecialProcedures.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import { findUnit, getCategory, findCategoryOfUnit } from './data/departments.js'
+import { syncReports } from './data/cloudSync.js'
 
 export default function App() {
   // ניווט מבוסס מצב: דשבורד | קטגוריה | יחידה | חלון | בית
@@ -16,6 +17,12 @@ export default function App() {
   const [unitId, setUnitId] = useState(null)
   const [windowId, setWindowId] = useState(null)
   const [showDashboard, setShowDashboard] = useState(false)
+
+  // גיבוי ענן: בעליית האפליקציה מושכים דוחות מהגיליון וממזגים, ודוחפים תור ממתין.
+  // משוחזר אוטומטית אם ה-localStorage התאפס. ללא הגדרת ענן – no-op שקט.
+  useEffect(() => {
+    syncReports().catch(() => {})
+  }, [])
 
   const unit = unitId ? findUnit(unitId) : null
   const category = categoryId ? getCategory(categoryId) : null

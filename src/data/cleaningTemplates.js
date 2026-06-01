@@ -1093,7 +1093,8 @@ PLANS.gastro = {
     {
       id: 'weekly',
       label: 'שבועי',
-      note: 'לביצוע בימי ראשון',
+      meta: 'לביצוע ימי ראשון · משמרת ערב',
+      note: 'לביצוע בימי ראשון · משמרת ערב',
       sections: [
         signed(
           'w1',
@@ -1134,7 +1135,8 @@ PLANS.gastro = {
     {
       id: 'monthly',
       label: 'חודשי',
-      note: MONTHLY_NOTE,
+      meta: 'לביצוע בשבוע ראשון של החודש',
+      note: 'לביצוע בשבוע ראשון של החודש',
       sections: [
         signed(
           'm1',

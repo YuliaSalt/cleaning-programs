@@ -23,10 +23,18 @@ var COL_DEPARTMENT = 'מחלקה';
 // ימי השבוע בעברית, אינדקס 0 = ראשון
 var HE_WEEKDAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
+// שם הטאב שבו נשמרים דוחות הביצוע (גיבוי ענן מהאפליקציה). נוצר אוטומטית אם חסר.
+var REPORTS_SHEET = 'Reports';
+var REPORTS_HEADERS = ['key', 'savedAt', 'unitId', 'tabId', 'by', 'payload'];
+
 function doGet(e) {
   e = e || {};
   var params = e.parameter || {};
   try {
+    // action=reports – קריאת כל דוחות הביצוע שגובו (לשחזור/מיזוג באפליקציה)
+    if (params.action === 'reports') {
+      return respond(readReports(), params.callback);
+    }
     return respond(buildPayload(params), params.callback);
   } catch (err) {
     return respond(
@@ -34,6 +42,102 @@ function doGet(e) {
       params.callback
     );
   }
+}
+
+// כתיבה: שמירה/מחיקה של דוח ביצוע בודד (נקרא מהאפליקציה ב-POST).
+function doPost(e) {
+  e = e || {};
+  try {
+    var body = {};
+    if (e.postData && e.postData.contents) {
+      body = JSON.parse(e.postData.contents);
+    }
+    var key = String(body.key || '').trim();
+    if (!key) return respond({ ok: false, error: 'missing key' });
+
+    if (body.action === 'delete') {
+      deleteReport(key);
+      return respond({ ok: true, action: 'delete', key: key });
+    }
+    saveReport(key, body.rec || {});
+    return respond({ ok: true, action: 'save', key: key });
+  } catch (err) {
+    return respond({ ok: false, error: String(err && err.message ? err.message : err) });
+  }
+}
+
+/* ===================== אחסון דוחות בטאב Reports ===================== */
+function getReportsSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(REPORTS_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(REPORTS_SHEET);
+    sh.getRange(1, 1, 1, REPORTS_HEADERS.length).setValues([REPORTS_HEADERS]);
+  }
+  return sh;
+}
+
+// מאתר את מספר השורה (1-based) של מפתח נתון, או -1 אם לא קיים.
+function findReportRow(sh, key) {
+  var last = sh.getLastRow();
+  if (last < 2) return -1;
+  var keys = sh.getRange(2, 1, last - 1, 1).getValues();
+  for (var i = 0; i < keys.length; i++) {
+    if (String(keys[i][0]) === key) return i + 2;
+  }
+  return -1;
+}
+
+function saveReport(key, rec) {
+  var sh = getReportsSheet();
+  var row = [
+    key,
+    rec.savedAt || '',
+    keyField(key, 0),
+    keyField(key, 2),
+    rec.by || '',
+    JSON.stringify(rec),
+  ];
+  var at = findReportRow(sh, key);
+  if (at === -1) {
+    sh.appendRow(row);
+  } else {
+    sh.getRange(at, 1, 1, row.length).setValues([row]);
+  }
+}
+
+function deleteReport(key) {
+  var sh = getReportsSheet();
+  var at = findReportRow(sh, key);
+  if (at !== -1) sh.deleteRow(at);
+}
+
+function readReports() {
+  var sh = getReportsSheet();
+  var last = sh.getLastRow();
+  var tz = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone() || 'Asia/Jerusalem';
+  if (last < 2) return { ok: true, count: 0, updatedAt: nowIso(tz), data: [] };
+  var values = sh.getRange(2, 1, last - 1, REPORTS_HEADERS.length).getValues();
+  var data = [];
+  for (var i = 0; i < values.length; i++) {
+    var key = String(values[i][0] || '').trim();
+    if (!key) continue;
+    data.push({
+      key: key,
+      savedAt: values[i][1],
+      unitId: values[i][2],
+      tabId: values[i][3],
+      by: values[i][4],
+      payload: values[i][5], // JSON string – נפרק באפליקציה
+    });
+  }
+  return { ok: true, count: data.length, updatedAt: nowIso(tz), data: data };
+}
+
+// חילוץ חלק ממפתח התוכנית: hmc:plan:{unitId}:{room}:{tabId}:{sectionId}:{period}
+function keyField(key, idx) {
+  var parts = String(key).replace(/^hmc:plan:/, '').split(':');
+  return parts[idx] != null ? parts[idx] : '';
 }
 
 /* בניית התשובה מהגיליון */

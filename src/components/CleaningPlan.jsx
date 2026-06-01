@@ -3,6 +3,7 @@ import { getCurrentShift } from '../data/departments.js'
 import { getCleaningPlan, signoffKind, DISINFECTANT_GUIDE } from '../data/cleaningTemplates.js'
 import { dateStr, periodKey, planKey } from '../data/progress.js'
 import { storage } from '../data/storage.js'
+import { pushReport } from '../data/cloudSync.js'
 import ScreenHeader from './ScreenHeader.jsx'
 import ReportsArchive from './ReportsArchive.jsx'
 
@@ -99,11 +100,13 @@ function SignedSection({ skey, section }) {
       by: nameIdx.map((i) => names[i]).filter(Boolean).join(' · '),
     }
     storage.setJSON(skey, r)
+    pushReport(skey, r, 'save') // גיבוי לענן (best-effort, לא חוסם)
     setRec(r)
     setShowErr(false)
   }
   function handleUnlock() {
     storage.removeItem(skey)
+    pushReport(skey, null, 'delete') // מחיקה גם מהענן
     setRec(null)
     setShowErr(false)
   }
@@ -369,7 +372,7 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
               ...plan.tabs.map((t) => ({
                 key: t.id,
                 label: t.label,
-                meta: t.id === 'daily' ? plan.shifts.join(' · ') : t.sections.length + ' תחנות',
+                meta: t.meta ?? (t.id === 'daily' ? plan.shifts.join(' · ') : t.sections.length + ' תחנות'),
                 onClick: () => { setFreq(t.id); setShift(null); setStationId(null) },
               })),
               {
