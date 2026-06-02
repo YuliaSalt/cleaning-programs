@@ -1,0 +1,12 @@
+{
+  "name": "מערכת גסטרו",
+  "short_name": "גסטרו",
+  "display": "standalone",
+  "start_url": ".",
+  "scope": ".",
+  "background_color": "#e0f2f1",
+  "theme_color": "#e0f2f1",
+  "icons": [
+    { "src": "logo.png", "sizes": "any", "type": "image/png", "purpose": "any" }
+  ]
+}

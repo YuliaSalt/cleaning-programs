@@ -1,8 +1,0 @@
-{
-  "name": "מערכת גסטרו",
-  "short_name": "גסטרו",
-  "display": "standalone",
-  "start_url": "./index.html",
-  "background_color": "#e0f2f1",
-  "theme_color": "#e0f2f1"
-}
