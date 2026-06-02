@@ -40,9 +40,8 @@ function HandoverForm({ unit, onSent, onReset }) {
   const dateHe = now.toLocaleDateString('he-IL')
   const timeHe = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })
 
-  // הערה נשמרת רק במצב "אין" (has=false); בחירת "יש" מנקה את הטקסט
   const setHas = (id, has) =>
-    setReports((r) => ({ ...r, [id]: { has, text: has ? '' : r[id].text } }))
+    setReports((r) => ({ ...r, [id]: { has, text: has ? r[id].text : '' } }))
   const setText = (id, text) => setReports((r) => ({ ...r, [id]: { ...r[id], text } }))
   const toggle = (blk, i) => setChecks((c) => ({ ...c, [blk]: { ...c[blk], [i]: !c[blk][i] } }))
 
@@ -124,11 +123,11 @@ function HandoverForm({ unit, onSent, onReset }) {
             <div className="yn-head">
               <span className="yn-label">{it.label}</span>
               <div className="yn-btns">
-                <button className={'yn-btn yes' + (reports[it.id].has === true ? ' active' : '')} onClick={() => setHas(it.id, true)}>יש</button>
-                <button className={'yn-btn no' + (reports[it.id].has === false ? ' active' : '')} onClick={() => setHas(it.id, false)}>אין</button>
+                <button className={'yn-btn yes' + (reports[it.id].has ? ' active' : '')} onClick={() => setHas(it.id, true)}>יש</button>
+                <button className={'yn-btn no' + (!reports[it.id].has ? ' active' : '')} onClick={() => setHas(it.id, false)}>אין</button>
               </div>
             </div>
-            <div className={'yn-detail' + (reports[it.id].has === false ? ' open' : '')}>
+            <div className={'yn-detail' + (reports[it.id].has ? ' open' : '')}>
               <textarea
                 className="input"
                 rows={3}
@@ -214,7 +213,7 @@ function HandoverView({ record }) {
             <div className="ho-view-row" key={it.id}>
               <span className="vr-label">{it.label}</span>
               <span className={'vr-status' + (r.has ? ' yes' : '')}>{r.has ? 'יש' : 'אין'}</span>
-              {r.text && <p className="vr-text">{r.text}</p>}
+              {r.has && r.text && <p className="vr-text">{r.text}</p>}
             </div>
           )
         })}

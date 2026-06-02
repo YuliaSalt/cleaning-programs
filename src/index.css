@@ -512,12 +512,14 @@ h1, h2, h3, h4 {
 
 .screen-head-main {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 10px 16px;
 }
 
+/* שם המחלקה תופס שורה מלאה – אופקי, מיושר לימין (לא נדחס לעמודה) */
 .screen-head-main .page-title {
-  flex: 1;
+  flex: 1 1 100%;
 }
 
 .shift-chip {

@@ -24,11 +24,6 @@ export default function ScreenHeader({ title, trail = [], onBack, right }) {
         </nav>
       </div>
       <div className="screen-head-main">
-        <img
-          className="sh-logo"
-          src={import.meta.env.BASE_URL + 'logo.png'}
-          alt="הרצליה מדיקל סנטר"
-        />
         <h1 className="page-title">{title}</h1>
         {right}
       </div>

@@ -167,7 +167,7 @@ export function buildHandoverImage(record) {
   for (const it of GASTRO_REPORT_ITEMS) {
     const r = (record.reports && record.reports[it.id]) || {}
     b.statusRow(it.label, r.has ? 'יש' : 'אין', r.has ? '#15a34a' : '#8194a0', true)
-    if (r.text && r.text.trim()) b.para(r.text.trim(), { s: 32, color: '#33424d', indent: 30, gap: 0.32 })
+    if (r.has && r.text && r.text.trim()) b.para(r.text.trim(), { s: 32, color: '#33424d', indent: 30, gap: 0.32 })
     b.gap(6)
   }
   for (const blk of GASTRO_CHECK_BLOCKS) {
@@ -201,7 +201,7 @@ export function buildGeneralHandoverImage(record) {
   for (const it of GEN_REPORT_ITEMS) {
     const r = (record.reports && record.reports[it.id]) || {}
     b.statusRow(it.label, r.has ? 'יש' : 'אין', r.has ? '#15a34a' : '#8194a0', true)
-    if (r.text && r.text.trim()) b.para(r.text.trim(), { s: 32, color: '#33424d', indent: 30, gap: 0.32 })
+    if (r.has && r.text && r.text.trim()) b.para(r.text.trim(), { s: 32, color: '#33424d', indent: 30, gap: 0.32 })
     b.gap(6)
   }
 
