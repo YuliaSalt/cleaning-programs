@@ -7,6 +7,7 @@ import {
   deleteProcedureReport,
 } from '../data/procedureChecklists.js'
 import { getDeviceNurse, rememberDeviceNurse } from '../data/handover.js'
+import PinModal from './PinModal.jsx'
 
 // פריט יכול להיות מחרוזת פשוטה, או אובייקט { name, sku }.
 // השם בלבד מוצג במסך; המק"ט נשלח רק בהודעת החוסרים בוואטסאפ, מרוחק מהשם וללא סוגריים.
@@ -31,6 +32,7 @@ export default function ProcedureChecklist({ procId, title, waTitle, blocks }) {
   const [savedFlash, setSavedFlash] = useState(false)
   const [reports, setReports] = useState(() => listProcedureReports(procId))
   const [openKey, setOpenKey] = useState(null)
+  const [pendingDelKey, setPendingDelKey] = useState(null) // מפתח דוח הממתין לאישור PIN למחיקה
 
   // לחיצה מחליפה X (חסר) <-> V (קיים)
   const toggle = (blk, i) => setChecks((c) => ({ ...c, [blk]: { ...c[blk], [i]: !c[blk][i] } }))
@@ -90,10 +92,13 @@ export default function ProcedureChecklist({ procId, title, waTitle, blocks }) {
     setSignErr(false)
   }
 
-  function removeReport(key) {
+  // מחיקה מוגנת: עדכון מצב המחיקה מתבצע רק לאחר אישור קוד ה-PIN במודאל.
+  function confirmRemove() {
+    const key = pendingDelKey
     deleteProcedureReport(key)
     setReports(listProcedureReports(procId))
     if (openKey === key) setOpenKey(null)
+    setPendingDelKey(null)
   }
 
   function sendWhatsApp() {
@@ -122,6 +127,7 @@ export default function ProcedureChecklist({ procId, title, waTitle, blocks }) {
   }
 
   return (
+    <>
     <div className="glass plan-card ho-form">
       <div className="ho-title">{title}</div>
 
@@ -217,7 +223,7 @@ export default function ProcedureChecklist({ procId, title, waTitle, blocks }) {
                         </div>
                       ))
                     )}
-                    <button className="proc-report-del" onClick={() => removeReport(r.key)}>
+                    <button className="proc-report-del" onClick={() => setPendingDelKey(r.key)}>
                       מחיקת דוח
                     </button>
                   </div>
@@ -230,5 +236,15 @@ export default function ProcedureChecklist({ procId, title, waTitle, blocks }) {
 
       <div className="ho-footer">הרצליה מדיקל סנטר</div>
     </div>
+
+    {pendingDelKey && (
+      <PinModal
+        title="מחיקת דוח"
+        message="מחיקת דוח דורשת קוד אבטחה. הזן/י את הקוד כדי לאשר."
+        onConfirm={confirmRemove}
+        onCancel={() => setPendingDelKey(null)}
+      />
+    )}
+    </>
   )
 }

@@ -8,8 +8,10 @@ import GeneralHandover from './components/GeneralHandover.jsx'
 import GastroHandover from './components/GastroHandover.jsx'
 import SpecialProcedures from './components/SpecialProcedures.jsx'
 import Dashboard from './components/Dashboard.jsx'
+import BottomNav from './components/BottomNav.jsx'
 import { findUnit, getCategory, findCategoryOfUnit } from './data/departments.js'
 import { syncReports } from './data/cloudSync.js'
+import { recordVisit, getAutoRedirectUnit } from './data/routing.js'
 
 // זיהוי מובייל לפי רוחב המסך – מאפשר פריסת מובייל ייעודית (ללא סרגל צד).
 function useIsMobile(breakpoint = 900) {
@@ -36,6 +38,14 @@ export default function App() {
   // משוחזר אוטומטית אם ה-localStorage התאפס. ללא הגדרת ענן – no-op שקט.
   useEffect(() => {
     syncReports().catch(() => {})
+  }, [])
+
+  // ניתוב חכם: בעליית האפליקציה, אם נכנסו לאותה מחלקה ברצף – מדלגים על מסך
+  // הבחירה ועוברים ישר אליה. רץ פעם אחת בלבד; ניתן לחזור עם "חזרה"/"ראשי".
+  useEffect(() => {
+    const auto = getAutoRedirectUnit()
+    if (auto && findUnit(auto)) selectUnit(auto)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const unit = unitId ? findUnit(unitId) : null
@@ -65,6 +75,7 @@ export default function App() {
     const lookupId = u && u.parentId ? u.parentId : id
     const cat = findCategoryOfUnit(lookupId)
     if (cat) setCategoryId(cat.id)
+    recordVisit(id) // ניתוב חכם: ספירת רצף כניסות למחלקה
   }
   function goHome() {
     setCategoryId(null)
@@ -84,6 +95,16 @@ export default function App() {
   function backToBoard() {
     setWindowId(null)
   }
+  // חזרה אחידה לרמה אחת מעלה – משמש את סרגל הניווט התחתון.
+  function goBack() {
+    if (showDashboard) return goHome()
+    if (windowId) return setWindowId(null)
+    if (unitId) return backToCategory()
+    if (categoryId) return setCategoryId(null)
+  }
+  // האם יש לאן לחזור (משמש לכיבוי כפתור "חזרה" במסך הבית)
+  const canBack = showDashboard || !!windowId || !!unitId || !!categoryId
+  const atHome = !showDashboard && !categoryId && !unitId
 
   return (
     <div className="app-root">
@@ -170,6 +191,17 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {isMobile && (
+        <BottomNav
+          onHome={goHome}
+          onDashboard={openDashboard}
+          onBack={goBack}
+          homeActive={atHome}
+          dashActive={showDashboard}
+          canBack={canBack}
+        />
+      )}
     </div>
   )
 }

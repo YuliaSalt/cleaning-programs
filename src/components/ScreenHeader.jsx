@@ -5,8 +5,9 @@ export default function ScreenHeader({ title, trail = [], onBack, right }) {
     <div className="screen-head">
       <div className="crumb-bar">
         {onBack && (
-          <button className="back-link" onClick={onBack}>
-            <span className="bl-arrow">→</span> חזרה
+          <button className="back-link" onClick={onBack} aria-label="חזרה">
+            <span className="bl-arrow">→</span>
+            <span className="bl-text"> חזרה</span>
           </button>
         )}
         <nav className="crumbs" aria-label="מיקום">
