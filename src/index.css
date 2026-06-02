@@ -1482,6 +1482,28 @@ h1, h2, h3, h4 {
   border-radius: var(--radius-pill);
 }
 
+/* דשבורד כקובייה חמישית – לרוחב מלא, אופקית */
+.cat-dash {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 14px;
+  min-height: 0;
+  padding: 22px 24px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.62) 0%, rgba(197, 232, 242, 0.62) 100%);
+  border-color: rgba(168, 220, 232, 0.9);
+}
+
+.cat-dash .cc-name {
+  color: var(--brand);
+}
+
+.cat-dash .cc-sub {
+  flex-basis: 100%;
+  opacity: 0.9;
+}
+
 .back-btn {
   margin-top: 2px;
 }
@@ -1599,6 +1621,22 @@ h1, h2, h3, h4 {
 
 .filters-label {
   align-self: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--brand-soft);
+  white-space: nowrap;
+}
+
+/* שורת תיקיות (צ׳יפים) בארכיון הדוחות / העברות המשמרת */
+.folder-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.folder-label {
   font-size: 14px;
   font-weight: 800;
   color: var(--brand-soft);
@@ -2005,7 +2043,15 @@ h1, h2, h3, h4 {
 }
 
 .ho-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 14px 0 6px;
+}
+
+.ho-search .input {
+  flex: 1;
+  min-width: 0;
 }
 
 /* קישור משני לצפייה בהעברות שמורות (מתחת לטופס) */

@@ -40,6 +40,13 @@ export function computeUnitProgress(unitId) {
   if (!plan) return res
   for (const tab of plan.tabs) {
     if (!(tab.id in res)) continue
+    // מחלקות אשפוז: היומי נשמר כרשומה ממוזגת אחת ('day') לכל משמרת
+    if (plan.stationDaily && tab.id === 'daily') {
+      const shifts = plan.shifts || []
+      const done = shifts.filter((sh) => storage.has(planKey(unitId, '-', 'daily', 'day', periodKey('daily', sh)))).length
+      res.daily = shifts.length ? Math.round((done / shifts.length) * 100) : null
+      continue
+    }
     const signed = tab.sections.filter((s) => s.kind === 'signed')
     if (signed.length === 0) {
       res[tab.id] = null

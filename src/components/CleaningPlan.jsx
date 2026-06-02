@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { getCurrentShift, findUnit } from '../data/departments.js'
-import { getCleaningPlan, signoffKind, DISINFECTANT_GUIDE } from '../data/cleaningTemplates.js'
+import { getCleaningPlan, signoffKind, DISINFECTANT_GUIDE, getMergedDailySection } from '../data/cleaningTemplates.js'
 import { dateStr, periodKey, planKey } from '../data/progress.js'
 import { storage } from '../data/storage.js'
 import { pushReport } from '../data/cloudSync.js'
@@ -320,6 +320,10 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
 
   const leafSections = view === 'leaf' ? (stationStep ? candidates.filter((s) => groupMatch(s, stationId)) : candidates) : []
 
+  // מחלקות אשפוז (stationDaily): כל משימות היומי של המשמרת בעמוד אחד עם חתימה יחידה
+  const flatDaily = !!plan.stationDaily && tab && tab.id === 'daily'
+  const dailyMerged = flatDaily && view === 'leaf' ? getMergedDailySection(plan, shift) : null
+
   const period = tab ? periodKey(tab.id, shift) : ''
   const baseKey = (s) => planKey(unit.id, s.roomScoped && room ? room : '-', tab.id, s.id, period)
 
@@ -463,17 +467,23 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
       {view === 'leaf' && (
         <>
           {tab.note && tab.id !== 'daily' && <div className="tab-note" style={{ marginBottom: 4 }}>{tab.note}</div>}
-          {leafSections.length === 0 ? (
+          {flatDaily ? (
+            // עמוד יומי אחד למשמרת – כל המשימות עם חתימה אחת
+            dailyMerged ? (
+              <SignedSection key={baseKey(dailyMerged)} skey={baseKey(dailyMerged)} section={dailyMerged} flat />
+            ) : (
+              <p className="empty-hint">אין משימות להצגה.</p>
+            )
+          ) : leafSections.length === 0 ? (
             <p className="empty-hint">אין משימות להצגה.</p>
           ) : (
-            leafSections.map((s) => {
-              const flat = !!plan.stationDaily && tab.id === 'daily'
-              return s.kind === 'quick' ? (
-                <QuickSection key={baseKey(s)} skey={baseKey(s)} section={s} flat={flat} />
+            leafSections.map((s) =>
+              s.kind === 'quick' ? (
+                <QuickSection key={baseKey(s)} skey={baseKey(s)} section={s} />
               ) : (
-                <SignedSection key={baseKey(s)} skey={baseKey(s)} section={s} flat={flat} />
+                <SignedSection key={baseKey(s)} skey={baseKey(s)} section={s} />
               )
-            })
+            )
           )}
           <div style={{ marginTop: 8 }}>
             <button className="btn ghost" onClick={back}>← חזרה</button>

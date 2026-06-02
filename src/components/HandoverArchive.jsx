@@ -4,14 +4,20 @@ import { HE_MONTHS } from '../data/handover.js'
 // רשימת רישומי העברת משמרת: כפתור "חדש" למעלה, חיפוש, ואז ארכיון לפי שנה>חודש>תאריך.
 export default function HandoverArchive({ records, onNew, onOpen, savedFlash }) {
   const [q, setQ] = useState('')
+  const [folder, setFolder] = useState('all') // תיקייה לפי משמרת
   const query = q.trim()
 
-  const filtered = query
-    ? records.filter((r) => {
-        const hay = [r.dateLabel, r.timeLabel, r.record.shift, r.record.nurse || '', HE_MONTHS[r.month], String(r.year)].join(' ')
-        return hay.includes(query)
-      })
-    : records
+  // תיקיות לפי משמרת (בוקר/ערב/לילה) – רק אלו שקיימות בפועל
+  const folders = [...new Set(records.map((r) => r.record.shift).filter(Boolean))]
+
+  const filtered = records.filter((r) => {
+    if (folder !== 'all' && r.record.shift !== folder) return false
+    if (query) {
+      const hay = [r.dateLabel, r.timeLabel, r.record.shift, r.record.nurse || '', HE_MONTHS[r.month], String(r.year)].join(' ')
+      if (!hay.includes(query)) return false
+    }
+    return true
+  })
 
   const groups = []
   let y, mo, d
@@ -31,15 +37,29 @@ export default function HandoverArchive({ records, onNew, onOpen, savedFlash }) 
       <button className="btn wide-btn" onClick={onNew}>+ העברת משמרת חדשה</button>
 
       {records.length > 0 && (
-        <div className="ho-search">
-          <input
-            className="input"
-            type="text"
-            placeholder="חיפוש לפי תאריך, חודש, שנה, שם או משמרת"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </div>
+        <>
+          {folders.length > 1 && (
+            <div className="folder-row">
+              <span className="folder-label">תיקיות:</span>
+              <div className="chips">
+                <button className={'chip' + (folder === 'all' ? ' active' : '')} onClick={() => setFolder('all')}>הכל</button>
+                {folders.map((f) => (
+                  <button key={f} className={'chip' + (folder === f ? ' active' : '')} onClick={() => setFolder(f)}>{f}</button>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="ho-search">
+            <span className="filters-label">חיפוש לפי:</span>
+            <input
+              className="input"
+              type="text"
+              placeholder="תאריך, חודש, שנה, שם או משמרת"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+        </>
       )}
 
       {records.length === 0 ? (

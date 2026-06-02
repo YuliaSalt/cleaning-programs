@@ -1929,3 +1929,22 @@ export function getCleaningPlan(unitId) {
   const key = UNIT_TO_PLAN[unitId]
   return (key && PLANS[key]) || null
 }
+
+// מיזוג כל משימות היומי של משמרת לסקשן אחד עם חתימה אחת (מחלקות אשפוז – stationDaily).
+// כך כל המשימות (כולל חלוקה לקבוצות) מופיעות ברצף בעמוד אחד עם חתימה יחידה.
+// id קבוע 'day' כדי שהשמירה/הדוח/הדשבורד יזהו את הרשומה הממוזגת.
+export function getMergedDailySection(plan, shift) {
+  const tab = plan && plan.tabs.find((t) => t.id === 'daily')
+  if (!tab) return null
+  const candidates = tab.sections.filter((s) => !s.shift || s.shift === shift)
+  const items = []
+  candidates.forEach((s) => {
+    if (s.items) s.items.forEach((l) => items.push(l))
+    else (s.groups || []).forEach((g) => g.items.forEach((l) => items.push(l)))
+  })
+  // חתימה אחת – של סקשן המשמרת הראשי (לפי המשמרת), אחרת הסקשן החתום הראשון
+  const primary =
+    candidates.find((s) => s.kind === 'signed' && s.shift === shift) ||
+    candidates.find((s) => s.kind === 'signed')
+  return { id: 'day', kind: 'signed', title: '', items, signoff: primary ? primary.signoff : [] }
+}

@@ -1,6 +1,6 @@
 // קריאת דוחות הביצוע השמורים (סקשני חתימה נעולים) של יחידה, מתוך ה-StorageAdapter.
 
-import { getCleaningPlan } from './cleaningTemplates.js'
+import { getCleaningPlan, getMergedDailySection } from './cleaningTemplates.js'
 import { findUnit } from './departments.js'
 import { storage } from './storage.js'
 
@@ -48,9 +48,12 @@ export function listReports(unitId) {
     const rec = storage.getJSON(key)
     if (!rec || !rec.savedAt) continue // רק דוחות חתומים (לא מוני "בין מטופלים")
     const p = parseKey(key)
-    const section = findSection(plan, p.tabId, p.sectionId)
     const saved = new Date(rec.savedAt)
     const shift = p.tabId === 'daily' ? p.period.split(':')[1] || '' : ''
+    // 'day' = רשומת יומי ממוזגת (מחלקות אשפוז) – משחזרים את הסקשן הממוזג לתצוגה
+    const section = p.sectionId === 'day'
+      ? getMergedDailySection(plan, shift)
+      : findSection(plan, p.tabId, p.sectionId)
     // שם הדוח: "[שם מחלקה] - יומי בוקר / יומי ערב" (תדירות + משמרת)
     const unit = findUnit(p.unitId)
     const unitName = unit ? unit.name : p.unitId

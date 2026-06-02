@@ -85,7 +85,15 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [performer, setPerformer] = useState('')
+  const [folder, setFolder] = useState('all') // תיקייה: יומי בוקר/ערב · שבועי · חודשי
   const [open, setOpen] = useState(null)
+
+  // שם התיקייה של דוח: יומי מפוצל לפי משמרת, שאר התדירויות לפי שמן
+  const folderOf = (r) => (r.tabId === 'daily' ? 'יומי ' + (r.shift || '') : TYPE_LABELS[r.tabId] || r.tabId)
+  const FOLDER_ORDER = ['יומי בוקר', 'יומי ערב', 'יומי לילה', 'שבועי', 'חודשי']
+  const folders = [...new Set(reports.map(folderOf))].sort(
+    (a, b) => (FOLDER_ORDER.indexOf(a) + 1 || 99) - (FOLDER_ORDER.indexOf(b) + 1 || 99)
+  )
 
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBackToCategory })
@@ -113,6 +121,7 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
   const TYPE_ORDER = { daily: 0, weekly: 1, monthly: 2, isolation: 3 }
 
   const filtered = reports.filter((r) => {
+    if (folder !== 'all' && folderOf(r) !== folder) return false
     if (from && r.dateISO < from) return false
     if (to && r.dateISO > to) return false
     if (performer.trim()) {
@@ -153,6 +162,17 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
       ) : (
         <>
           <div className="glass plan-card controls-card">
+            {folders.length > 1 && (
+              <div className="folder-row">
+                <span className="folder-label">תיקיות:</span>
+                <div className="chips">
+                  <button className={'chip' + (folder === 'all' ? ' active' : '')} onClick={() => setFolder('all')}>הכל</button>
+                  {folders.map((f) => (
+                    <button key={f} className={'chip' + (folder === f ? ' active' : '')} onClick={() => setFolder(f)}>{f}</button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="filters-row">
               <span className="filters-label">חיפוש לפי:</span>
               <div className="field">
@@ -191,7 +211,8 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
               {groups.map((g, i) => {
                 if (g.kind === 'year') return <div key={i} className="grp-year">{g.label}</div>
                 if (g.kind === 'month') return <div key={i} className="grp-month">{g.label}</div>
-                if (g.kind === 'type') return <div key={i} className="grp-type">{g.label}</div>
+                // בתיקייה ספציפית הסוג כבר ידוע – לא מציגים שוב כותרת סוג
+                if (g.kind === 'type') return folder === 'all' ? <div key={i} className="grp-type">{g.label}</div> : null
                 if (g.kind === 'day') return <div key={i} className="grp-day">{g.label}</div>
                 const r = g.report
                 return (

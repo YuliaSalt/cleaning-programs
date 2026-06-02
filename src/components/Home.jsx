@@ -10,17 +10,11 @@ export default function Home({ onOpenCategory, onOpenDashboard }) {
           src={import.meta.env.BASE_URL + 'logo.png'}
           alt="הרצליה מדיקל סנטר"
         />
-        <p className="home-sub">הרצליה מדיקל סנטר · כוחות עזר</p>
+        <p className="home-sub">הרצליה מדיקל סנטר</p>
       </div>
 
-      {/* כפתור רחב – דשבורד ביצועים */}
-      <button className="dash-btn" onClick={onOpenDashboard}>
-        <span className="db-title">דשבורד ביצועים</span>
-        <span className="db-sub">מעקב אחוזי ביצוע יומי · שבועי · חודשי לכל מחלקה</span>
-      </button>
-
-      {/* רשת קטגוריות – עמודה אחת אם המספר אי-זוגי */}
-      <div className={'cat-grid' + (categories.length % 2 ? ' single-col' : '')}>
+      {/* רשת קטגוריות + דשבורד כקובייה חמישית רחבה */}
+      <div className="cat-grid">
         {categories.map((c) => {
           const count = getCategoryUnits(c.id).length
           return (
@@ -31,6 +25,11 @@ export default function Home({ onOpenCategory, onOpenDashboard }) {
             </button>
           )
         })}
+        {/* דשבורד ביצועים – קובייה חמישית, לרוחב מלא */}
+        <button className="cat-card cat-dash" onClick={onOpenDashboard}>
+          <span className="cc-name">דשבורד ביצועים</span>
+          <span className="cc-sub">מעקב אחוזי ביצוע יומי · שבועי · חודשי לכל מחלקה</span>
+        </button>
       </div>
     </div>
   )
