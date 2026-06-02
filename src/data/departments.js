@@ -139,6 +139,7 @@ export const specialProcedures = [
   { id: 'broncho', en: 'Bronchoscopy', he: 'ברונכוסקופיה' },
   'ניקור פלאורלי',
   { id: 'cystoscopy', en: 'Cystoscopy', he: 'ציסטוסקופיה' },
+  { id: 'pain', he: 'מרפאת כאב' },
   'קוניזציה',
   'POEM',
   'TIF',

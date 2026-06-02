@@ -8,6 +8,11 @@ import {
 } from '../data/procedureChecklists.js'
 import { getDeviceNurse, rememberDeviceNurse } from '../data/handover.js'
 
+// פריט יכול להיות מחרוזת פשוטה, או אובייקט { name, sku }.
+// השם בלבד מוצג במסך; המק"ט נשלח רק בהודעת החוסרים בוואטסאפ, מרוחק מהשם וללא סוגריים.
+const itemName = (it) => (typeof it === 'string' ? it : it.name)
+const itemWa = (it) => (typeof it === 'string' ? it : `${it.name}    מק"ט: ${it.sku}`)
+
 function WhatsAppIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
@@ -57,12 +62,17 @@ export default function ProcedureChecklist({ procId, title, waTitle, blocks }) {
       return
     }
     rememberDeviceNurse(nurse)
+    // בדוח השמור נשמרים שמות הפריטים בלבד (ללא מק"ט), בהתאם לתצוגה במסך.
+    const missingForReport = missing.map((g) => ({
+      title: g.title,
+      items: g.items.map(itemName),
+    }))
     saveProcedureReport({
       procId,
       procName: title,
       nurse: nurse.trim(),
       checks,
-      missing,
+      missing: missingForReport,
       missingCount,
       allReady,
     })
@@ -102,7 +112,7 @@ export default function ProcedureChecklist({ procId, title, waTitle, blocks }) {
     lines.push('')
     for (const g of missing) {
       lines.push(g.title + ':')
-      for (const it of g.items) lines.push(it)
+      for (const it of g.items) lines.push(itemWa(it))
       lines.push('')
     }
     lines.push('הרצליה מדיקל סנטר')
@@ -119,7 +129,7 @@ export default function ProcedureChecklist({ procId, title, waTitle, blocks }) {
         <div className="ho-block" key={blk.id}>
           <div className="ho-block-title">{blk.title}</div>
           {blk.note && <div className="cysto-note">{blk.note}</div>}
-          {blk.items.map((label, i) => {
+          {blk.items.map((item, i) => {
             const on = !!checks[blk.id][i]
             return (
               <button
@@ -128,7 +138,7 @@ export default function ProcedureChecklist({ procId, title, waTitle, blocks }) {
                 onClick={() => toggle(blk.id, i)}
               >
                 <span className="cysto-mark">{on ? '✓' : '✕'}</span>
-                <span className="cysto-label">{label}</span>
+                <span className="cysto-label">{itemName(item)}</span>
               </button>
             )
           })}
