@@ -209,6 +209,20 @@ function deleteReport(key) {
   if (at !== -1) sh.deleteRow(at);
 }
 
+// ניקוי כל הדוחות בענן: מוחק את כל שורות הנתונים (משאיר כותרות) בטאבים
+// ReportsRaw, Reports ו-Handovers. להרצה חד-פעמית מעורך ה-Apps Script:
+// בחר/י את הפונקציה clearAllReports ולחץ/י Run. פעולה בלתי הפיכה.
+function clearAllReports() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  [RAW_SHEET, REPORTS_SHEET, HANDOVERS_SHEET].forEach(function (name) {
+    var sh = ss.getSheetByName(name);
+    if (!sh) return;
+    var last = sh.getLastRow();
+    if (last > 1) sh.deleteRows(2, last - 1); // משאיר את שורת הכותרות
+  });
+  return 'cleared';
+}
+
 // קריאה לאפליקציה (פול/מיזוג) – מהטאב הטכני בלבד.
 function readReports() {
   var sh = getRawSheet();

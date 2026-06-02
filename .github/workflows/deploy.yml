@@ -27,9 +27,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-        env:
-          # קוד ה-PIN למחיקת דוחות – נטען מ-Secret של המאגר (לא מאוחסן בקוד).
-          VITE_DELETE_PIN: ${{ secrets.VITE_DELETE_PIN }}
       - uses: actions/configure-pages@v5
         with:
           # מפעיל את GitHub Pages (מקור: GitHub Actions) אוטומטית אם עדיין לא הופעל.
