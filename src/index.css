@@ -611,6 +611,14 @@ h1, h2, h3, h4 {
   font-weight: 600;
 }
 
+/* כותרת משנה – משמעות בעברית מתחת לרישום באנגלית */
+.unit-card .uc-sub {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
 .unit-card .uc-group {
   position: absolute;
   top: 18px;
@@ -2029,6 +2037,113 @@ h1, h2, h3, h4 {
 
 .ho-check.on .ho-check-label {
   color: #15795a;
+}
+
+/* צ'ק-ליסט ציסטוסקופיה – ברירת מחדל X אדום, בלחיצה V ירוק */
+.cysto-note {
+  margin-bottom: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: rgba(255, 238, 196, 0.85);
+  border: 2px solid rgba(236, 184, 84, 0.9);
+  color: #7a5b16;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.cysto-check {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: right;
+  padding: 14px 16px;
+  margin-bottom: 9px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(244, 170, 175, 0.7);
+  box-shadow: var(--halo-soft);
+  transition: all 0.16s ease;
+}
+
+.cysto-check:hover {
+  border-color: rgba(244, 140, 145, 0.9);
+}
+
+.cysto-mark {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 900;
+  background: #ff5a6a;
+  border: 2px solid #ff5a6a;
+  transition: all 0.16s ease;
+}
+
+.cysto-check.on {
+  border-color: #7fcfa3;
+  background: rgba(168, 224, 194, 0.18);
+}
+
+.cysto-check.on .cysto-mark {
+  background: #1faf6e;
+  border-color: #1faf6e;
+}
+
+.cysto-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.cysto-check.on .cysto-label {
+  color: #15795a;
+}
+
+/* הערה משפטית מעל החתימה */
+.cysto-sign-note {
+  margin-bottom: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: rgba(214, 238, 245, 0.55);
+  border: 2px solid rgba(168, 220, 232, 0.9);
+  color: #233039;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+/* כפתור חתימה – בולט, מתחת לשם האחות */
+.cysto-sign-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 15px 24px;
+  border-radius: var(--radius-pill);
+  border: none;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #2aa9c9 0%, #1782a6 100%);
+  box-shadow: 0 0 24px rgba(42, 169, 201, 0.4), 0 10px 24px rgba(23, 130, 166, 0.35);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+.cysto-sign-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 36px rgba(42, 169, 201, 0.55), 0 14px 30px rgba(23, 130, 166, 0.4);
+}
+.cysto-sign-btn.signed {
+  background: linear-gradient(135deg, #45c08a 0%, #1faf6e 100%);
+  box-shadow: none;
+  cursor: default;
+}
+.cysto-sign-btn:disabled {
+  transform: none;
 }
 
 /* פעולות */

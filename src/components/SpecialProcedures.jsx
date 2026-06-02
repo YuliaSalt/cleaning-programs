@@ -1,23 +1,36 @@
 import { useState } from 'react'
 import ScreenHeader from './ScreenHeader.jsx'
 import { specialProcedures } from '../data/departments.js'
+import CystoscopyChecklist from './CystoscopyChecklist.jsx'
+
+// נרמול פריט (מחרוזת פשוטה או אובייקט עם רישום באנגלית + משמעות בעברית).
+function normalize(p) {
+  if (typeof p === 'string') return { id: p, title: p, sub: null }
+  return { id: p.id, title: p.en, sub: p.he }
+}
 
 export default function SpecialProcedures({ unit, onBack, onGoHome, onBackToCategory, categoryName }) {
   const [proc, setProc] = useState(null)
+
+  const procLabel = proc ? (proc.sub ? `${proc.title} · ${proc.sub}` : proc.title) : ''
 
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBackToCategory })
   trail.push({ label: unit.name, onClick: onBack })
   trail.push({ label: 'פעולות מיוחדות', onClick: proc ? () => setProc(null) : undefined })
-  if (proc) trail.push({ label: proc })
+  if (proc) trail.push({ label: procLabel })
 
   if (proc) {
     return (
       <div>
-        <ScreenHeader title={proc} onBack={() => setProc(null)} trail={trail} />
-        <div className="glass plan-card" style={{ padding: 40, textAlign: 'center' }}>
-          <p className="empty-hint" style={{ fontSize: 16 }}>התוכן יתווסף בהמשך.</p>
-        </div>
+        <ScreenHeader title={procLabel} onBack={() => setProc(null)} trail={trail} />
+        {proc.id === 'cystoscopy' ? (
+          <CystoscopyChecklist />
+        ) : (
+          <div className="glass plan-card" style={{ padding: 40, textAlign: 'center' }}>
+            <p className="empty-hint" style={{ fontSize: 16 }}>התוכן יתווסף בהמשך.</p>
+          </div>
+        )}
       </div>
     )
   }
@@ -26,11 +39,15 @@ export default function SpecialProcedures({ unit, onBack, onGoHome, onBackToCate
     <div>
       <ScreenHeader title="פעולות מיוחדות" onBack={onBack} trail={trail} />
       <div className="card-grid">
-        {specialProcedures.map((p) => (
-          <button key={p} className="unit-card" onClick={() => setProc(p)}>
-            <span className="uc-name">{p}</span>
-          </button>
-        ))}
+        {specialProcedures.map((p) => {
+          const n = normalize(p)
+          return (
+            <button key={n.id} className="unit-card" onClick={() => setProc(n)}>
+              <span className="uc-name">{n.title}</span>
+              {n.sub && <span className="uc-sub">{n.sub}</span>}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
