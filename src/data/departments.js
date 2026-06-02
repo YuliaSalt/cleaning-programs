@@ -140,7 +140,7 @@ export const specialProcedures = [
   'ניקור פלאורלי',
   { id: 'cystoscopy', en: 'Cystoscopy', he: 'ציסטוסקופיה' },
   { id: 'pain', he: 'מרפאת כאב' },
-  'קוניזציה',
+  { id: 'conization', en: 'Conization', he: 'קוניזציה' },
   'POEM',
   'TIF',
 ]
@@ -152,7 +152,7 @@ export function getUnitWindows(unitId) {
     windows.push({
       id: 'special',
       title: 'פעולות מיוחדות',
-      description: 'ברונכו · ניקור פלאורלי · ציסטוסקופיה · קוניזציה · POEM · TIF',
+      description: 'Bronchoscopy · Pleural Puncture · Cystoscopy · Pain Clinic · Conization · POEM · TIF',
       enabled: true,
     })
   }
