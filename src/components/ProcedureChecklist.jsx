@@ -1,5 +1,11 @@
 import { useState } from 'react'
-import { SIGN_NOTE, emptyChecks } from '../data/procedureChecklists.js'
+import {
+  SIGN_NOTE,
+  emptyChecks,
+  saveProcedureReport,
+  listProcedureReports,
+  deleteProcedureReport,
+} from '../data/procedureChecklists.js'
 import { getDeviceNurse, rememberDeviceNurse } from '../data/handover.js'
 
 function WhatsAppIcon() {
@@ -11,11 +17,15 @@ function WhatsAppIcon() {
   )
 }
 
-export default function ProcedureChecklist({ title, waTitle, blocks }) {
+export default function ProcedureChecklist({ procId, title, waTitle, blocks }) {
+  // מילוי חדש בכל פתיחה: ה-state מאותחל ריק בכל עליית הרכיב.
   const [checks, setChecks] = useState(() => emptyChecks(blocks))
   const [nurse, setNurse] = useState(() => getDeviceNurse())
-  const [signed, setSigned] = useState(false) // חתימה = שמירת השם; חובה לפני שליחה
+  const [signed, setSigned] = useState(false) // חתימה = שמירת דוח; חובה לפני שליחה
   const [signErr, setSignErr] = useState(false)
+  const [savedFlash, setSavedFlash] = useState(false)
+  const [reports, setReports] = useState(() => listProcedureReports(procId))
+  const [openKey, setOpenKey] = useState(null)
 
   // לחיצה מחליפה X (חסר) <-> V (קיים)
   const toggle = (blk, i) => setChecks((c) => ({ ...c, [blk]: { ...c[blk], [i]: !c[blk][i] } }))
@@ -23,22 +33,6 @@ export default function ProcedureChecklist({ title, waTitle, blocks }) {
   function onNurseChange(v) {
     setNurse(v)
     setSigned(false) // שינוי השם מבטל חתימה קיימת
-  }
-
-  // חתימה = שמירת שם האחות במכשיר ואישור הטופס
-  function sign() {
-    if (!nurse.trim()) {
-      setSignErr(true)
-      return
-    }
-    rememberDeviceNurse(nurse)
-    setSignErr(false)
-    setSigned(true)
-  }
-
-  function reset() {
-    setChecks(emptyChecks(blocks))
-    setSigned(false)
   }
 
   // איסוף הפריטים שעדיין מסומנים X (חסרים), מקובצים לפי סעיף.
@@ -51,13 +45,53 @@ export default function ProcedureChecklist({ title, waTitle, blocks }) {
       .filter((g) => g.items.length > 0)
   }
 
+  const missing = missingByBlock()
+  const missingCount = missing.reduce((n, g) => n + g.items.length, 0)
+  const allReady = missingCount === 0
+  const canSend = signed && !allReady
+
+  // חתימה = שמירת שם האחות + שמירת דוח חתום בעמוד
+  function sign() {
+    if (!nurse.trim()) {
+      setSignErr(true)
+      return
+    }
+    rememberDeviceNurse(nurse)
+    saveProcedureReport({
+      procId,
+      procName: title,
+      nurse: nurse.trim(),
+      checks,
+      missing,
+      missingCount,
+      allReady,
+    })
+    setReports(listProcedureReports(procId))
+    setSignErr(false)
+    setSigned(true)
+    setSavedFlash(true)
+    setTimeout(() => setSavedFlash(false), 2600)
+  }
+
+  // מילוי חדש – ניקוי הרשימה לקראת בדיקה הבאה (הדוחות השמורים נשמרים)
+  function newFill() {
+    setChecks(emptyChecks(blocks))
+    setSigned(false)
+    setSignErr(false)
+  }
+
+  function removeReport(key) {
+    deleteProcedureReport(key)
+    setReports(listProcedureReports(procId))
+    if (openKey === key) setOpenKey(null)
+  }
+
   function sendWhatsApp() {
-    // חובה לחתום (לשמור שם) לפני שליחה
+    // חובה לחתום (לשמור דוח) לפני שליחה
     if (!signed) {
       setSignErr(true)
       return
     }
-    const groups = missingByBlock()
     const now = new Date()
     const dateHe = now.toLocaleDateString('he-IL')
     const timeHe = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })
@@ -66,7 +100,7 @@ export default function ProcedureChecklist({ title, waTitle, blocks }) {
     const lines = [waTitle, `תאריך ${dateHe} שעה ${timeHe}`]
     if (nurse.trim()) lines.push(`אחות: ${nurse.trim()}`)
     lines.push('')
-    for (const g of groups) {
+    for (const g of missing) {
       lines.push(g.title + ':')
       for (const it of g.items) lines.push(it)
       lines.push('')
@@ -76,10 +110,6 @@ export default function ProcedureChecklist({ title, waTitle, blocks }) {
     const url = 'https://wa.me/?text=' + encodeURIComponent(lines.join('\n').trim())
     window.open(url, '_blank', 'noopener')
   }
-
-  const missingCount = missingByBlock().reduce((n, g) => n + g.items.length, 0)
-  const allReady = missingCount === 0
-  const canSend = signed && !allReady
 
   return (
     <div className="glass plan-card ho-form">
@@ -123,11 +153,12 @@ export default function ProcedureChecklist({ title, waTitle, blocks }) {
             onClick={sign}
             disabled={signed}
           >
-            {signed ? '✓ נחתם ונשמר' : 'חתימה'}
+            {signed ? '✓ נחתם ונשמר' : 'חתימה ושמירת דוח'}
           </button>
           {signErr && !signed && (
             <div className="err">חובה לחתום (למלא ולשמור את שם האחות) לפני שליחה.</div>
           )}
+          {savedFlash && <div className="save-flash" style={{ marginTop: 10 }}>הדוח נשמר בעמוד ✓</div>}
         </div>
       </div>
 
@@ -140,8 +171,52 @@ export default function ProcedureChecklist({ title, waTitle, blocks }) {
             ? 'יש לחתום לפני שליחה'
             : `שלח חסרים לקבוצה (${missingCount})`}
         </button>
-        <button className="reset-btn" onClick={reset}>איפוס רשימה</button>
+        <button className="reset-btn" onClick={newFill}>מילוי חדש</button>
       </div>
+
+      {/* דוחות שמורים – באותו עמוד */}
+      {reports.length > 0 && (
+        <div className="ho-block">
+          <div className="ho-block-title">דוחות שמורים ({reports.length})</div>
+          {reports.map((r) => {
+            const rec = r.record
+            const open = openKey === r.key
+            return (
+              <div className="proc-report" key={r.key}>
+                <button
+                  className="proc-report-head"
+                  onClick={() => setOpenKey(open ? null : r.key)}
+                >
+                  <span className="proc-report-date">{r.dateLabel} · {r.timeLabel}</span>
+                  <span className="proc-report-nurse">{rec.nurse || '—'}</span>
+                  <span className={'proc-report-status' + (rec.allReady ? ' ok' : ' miss')}>
+                    {rec.allReady ? 'הכל תקין' : `חסרים: ${rec.missingCount}`}
+                  </span>
+                </button>
+                {open && (
+                  <div className="proc-report-body">
+                    {rec.allReady ? (
+                      <p className="proc-report-allok">כל הציוד נבדק, תקין וזמין.</p>
+                    ) : (
+                      (rec.missing || []).map((g, gi) => (
+                        <div key={gi} className="proc-report-group">
+                          <div className="proc-report-group-title">{g.title}</div>
+                          {g.items.map((it, ii) => (
+                            <div key={ii} className="proc-report-item">{it}</div>
+                          ))}
+                        </div>
+                      ))
+                    )}
+                    <button className="proc-report-del" onClick={() => removeReport(r.key)}>
+                      מחיקת דוח
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       <div className="ho-footer">הרצליה מדיקל סנטר</div>
     </div>

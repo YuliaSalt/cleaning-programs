@@ -28,6 +28,8 @@ export default function SpecialProcedures({ unit, onBack, onGoHome, onBackToCate
         <ScreenHeader title={procLabel} onBack={() => setProc(null)} trail={trail} />
         {checklist ? (
           <ProcedureChecklist
+            key={proc.id}
+            procId={proc.id}
             title={checklist.title}
             waTitle={checklist.waTitle}
             blocks={checklist.blocks}

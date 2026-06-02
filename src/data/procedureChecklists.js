@@ -2,6 +2,8 @@
 // כל פעולה: כותרת מסך, כותרת להודעת וואטסאפ, ורשימת סעיפים.
 // פריט מתחיל ב-✕ אדום (חסר) והופך ל-✓ ירוק בלחיצה. נשלחים לוואטסאפ רק הפריטים שנותרו אדומים.
 
+import { storage } from './storage.js'
+
 // המלצה זהה בראש הסעיף הראשון בכל הפעולות.
 const RECOMMENDATION =
   'המלצה לבדיקה לפני פעולה: יש לבצע את בדיקת המערך האופטי בזמן סביר לפני תחילת הפעולה ' +
@@ -60,7 +62,7 @@ export const PROCEDURE_CHECKLISTS = {
   },
 
   broncho: {
-    title: "צ'ק-ליסט הכנת ציוד · ברונכוסקופיה",
+    title: "צ'ק-ליסט הכנת ציוד · Bronchoscopy",
     waTitle: 'ברונכוסקופיה (Bronchoscopy) - ציוד חסר',
     blocks: [
       {
@@ -106,4 +108,38 @@ export const PROCEDURE_CHECKLISTS = {
 // מצב ריק: כל הפריטים מסומנים ✕ (false = חסר).
 export function emptyChecks(blocks) {
   return Object.fromEntries(blocks.map((b) => [b.id, {}]))
+}
+
+// ===== שמירת דוחות חתומים (נשמרים מקומית במכשיר ושורדים רענון) =====
+const REPORT_PREFIX = 'hmc:proc:'
+
+export function saveProcedureReport(rec) {
+  const r = { ...rec, savedAt: rec.savedAt || new Date().toISOString() }
+  const key = `${REPORT_PREFIX}${r.procId}:${Date.now()}`
+  storage.setJSON(key, r)
+  return key
+}
+
+export function listProcedureReports(procId) {
+  const pre = REPORT_PREFIX + procId + ':'
+  const out = []
+  for (const k of storage.keys()) {
+    if (!k.startsWith(pre)) continue
+    const r = storage.getJSON(k)
+    if (!r || !r.savedAt) continue
+    const d = new Date(r.savedAt)
+    out.push({
+      key: k,
+      record: r,
+      sortTs: d.getTime(),
+      dateLabel: d.toLocaleDateString('he-IL'),
+      timeLabel: d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
+    })
+  }
+  out.sort((a, b) => b.sortTs - a.sortTs)
+  return out
+}
+
+export function deleteProcedureReport(key) {
+  storage.removeItem(key)
 }

@@ -2146,6 +2146,88 @@ h1, h2, h3, h4 {
   transform: none;
 }
 
+/* דוחות שמורים – רשימה מתקפלת באותו עמוד */
+.proc-report {
+  margin-bottom: 9px;
+  border-radius: 14px;
+  border: 1px solid rgba(168, 220, 232, 0.6);
+  background: #fff;
+  box-shadow: var(--halo-soft);
+  overflow: hidden;
+}
+.proc-report-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 13px 16px;
+  text-align: right;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.proc-report-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+.proc-report-nurse {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  flex: 1;
+}
+.proc-report-status {
+  font-size: 13px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+}
+.proc-report-status.ok {
+  color: #15795a;
+  background: rgba(168, 224, 194, 0.3);
+}
+.proc-report-status.miss {
+  color: #b23b4b;
+  background: rgba(255, 200, 205, 0.4);
+}
+.proc-report-body {
+  padding: 4px 16px 16px;
+  border-top: 1px solid rgba(168, 220, 232, 0.4);
+}
+.proc-report-allok {
+  margin: 12px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #15795a;
+}
+.proc-report-group {
+  margin-top: 12px;
+}
+.proc-report-group-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--brand);
+  margin-bottom: 5px;
+}
+.proc-report-item {
+  font-size: 13.5px;
+  color: #33424d;
+  padding: 3px 0;
+}
+.proc-report-del {
+  margin-top: 14px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid #e6b3ba;
+  background: #fff;
+  color: #b23b4b;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 /* פעולות */
 .ho-actions {
   display: flex;

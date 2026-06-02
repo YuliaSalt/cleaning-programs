@@ -136,7 +136,7 @@ export const unitWindows = [
 // פעולות מיוחדות – ייחודי ליחידת גסטרו ופעולות.
 // פריט יכול להיות מחרוזת פשוטה, או אובייקט עם רישום באנגלית ומשמעות בעברית.
 export const specialProcedures = [
-  { id: 'broncho', he: 'ברונכו' },
+  { id: 'broncho', en: 'Bronchoscopy', he: 'ברונכוסקופיה' },
   'ניקור פלאורלי',
   { id: 'cystoscopy', en: 'Cystoscopy', he: 'ציסטוסקופיה' },
   'קוניזציה',
