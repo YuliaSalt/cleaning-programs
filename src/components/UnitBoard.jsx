@@ -16,7 +16,7 @@ export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, 
         <div className="section-head">
           <h2>בחירת חדר</h2>
         </div>
-        <div className="card-grid">
+        <div className={'card-grid' + (unit.rooms.length % 2 ? ' single-col' : '')}>
           {unit.rooms.map((r) => (
             <button key={r.id} className="unit-card" onClick={() => onSelectUnit(r.id)}>
               <span className="uc-name">{r.name}</span>
@@ -47,7 +47,7 @@ export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, 
         <h2>לוח חלונות</h2>
       </div>
 
-      <div className="card-grid">
+      <div className={'card-grid' + (windows.length % 2 ? ' single-col' : '')}>
         {windows.map((w) => (
           <div
             key={w.id}

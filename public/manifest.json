@@ -1,6 +1,6 @@
 {
-  "name": "מערכת גסטרו",
-  "short_name": "גסטרו",
+  "name": "Yplane HMC",
+  "short_name": "Yplane",
   "display": "standalone",
   "start_url": ".",
   "scope": ".",

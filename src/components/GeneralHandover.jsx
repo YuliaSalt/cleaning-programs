@@ -317,7 +317,7 @@ function GeneralView({ unit, record }) {
 
 /* ===== מסך ראשי ===== */
 export default function GeneralHandover({ unit, onBack, onGoHome, onBackToCategory, categoryName }) {
-  const [mode, setMode] = useState('list')
+  const [mode, setMode] = useState('form') // ברירת מחדל: ישר לטופס, ללא מסך ביניים
   const [openRec, setOpenRec] = useState(null)
   const [refresh, setRefresh] = useState(0)
   const [savedFlash, setSavedFlash] = useState(false)
@@ -327,14 +327,19 @@ export default function GeneralHandover({ unit, onBack, onGoHome, onBackToCatego
   if (categoryName) baseTrail.push({ label: categoryName, onClick: onBackToCategory })
   baseTrail.push({ label: unit.name, onClick: onBack })
 
-  const goList = () => { setMode('list'); setOpenRec(null) }
+  const goForm = () => { setMode('form'); setOpenRec(null) }
   const title = 'העברת משמרת - ' + unit.name
 
-  if (mode === 'form') {
+  if (mode === 'list') {
     return (
       <div>
-        <ScreenHeader title={title} onBack={goList} trail={[...baseTrail, { label: 'העברת משמרת', onClick: goList }, { label: 'רישום חדש' }]} />
-        <GeneralForm unit={unit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true); goList() }} />
+        <ScreenHeader title={title} onBack={goForm} trail={[...baseTrail, { label: 'העברת משמרת', onClick: goForm }, { label: 'העברות שמורות' }]} />
+        <HandoverArchive
+          records={records}
+          savedFlash={false}
+          onNew={goForm}
+          onOpen={(r) => { setOpenRec(r); setMode('view') }}
+        />
       </div>
     )
   }
@@ -342,21 +347,23 @@ export default function GeneralHandover({ unit, onBack, onGoHome, onBackToCatego
   if (mode === 'view' && openRec) {
     return (
       <div>
-        <ScreenHeader title={title} onBack={goList} trail={[...baseTrail, { label: 'העברת משמרת', onClick: goList }, { label: openRec.dateLabel }]} />
+        <ScreenHeader title={title} onBack={() => setMode('list')} trail={[...baseTrail, { label: 'העברת משמרת', onClick: goForm }, { label: openRec.dateLabel }]} />
         <GeneralView unit={unit} record={openRec.record} />
       </div>
     )
   }
 
+  // ברירת מחדל: טופס העברת משמרת ישירות
   return (
     <div>
       <ScreenHeader title={title} onBack={onBack} trail={[...baseTrail, { label: 'העברת משמרת' }]} />
-      <HandoverArchive
-        records={records}
-        savedFlash={savedFlash}
-        onNew={() => { setSavedFlash(false); setMode('form') }}
-        onOpen={(r) => { setSavedFlash(false); setOpenRec(r); setMode('view') }}
-      />
+      {savedFlash && <div className="save-flash">העברת המשמרת נשמרה ונשלחה ✓</div>}
+      <GeneralForm key={refresh} unit={unit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true) }} />
+      {records.length > 0 && (
+        <button className="ho-archive-link" onClick={() => { setSavedFlash(false); setMode('list') }}>
+          צפייה בהעברות שמורות ({records.length})
+        </button>
+      )}
     </div>
   )
 }

@@ -43,7 +43,7 @@ function buildReadable(skey, section, tasks, signoff, rec) {
 /* כפתורי דריל-דאון (זכוכית, בלי אייקונים) */
 function DrillGrid({ items }) {
   return (
-    <div className="card-grid drill-grid">
+    <div className={'card-grid drill-grid' + (items.length % 2 ? ' single-col' : '')}>
       {items.map((it) => (
         <button key={it.key} className={'unit-card drill-card' + (it.cls ? ' ' + it.cls : '')} onClick={it.onClick}>
           <span className="uc-name">{it.label}</span>
@@ -67,7 +67,7 @@ function flattenTasks(section) {
 }
 
 /* ===== סקשן "בין מטופלים" – סימון V בלבד, ללא חתימה וללא מונה +/- ===== */
-function QuickSection({ skey, section }) {
+function QuickSection({ skey, section, flat }) {
   const [state, setState] = useState(() => storage.getJSON(skey) || {})
   const save = (next) => {
     setState(next)
@@ -80,7 +80,7 @@ function QuickSection({ skey, section }) {
     <div className="glass plan-card section-card">
       <div className="sec-head">
         <span className="sec-tag quick">בין מטופלים</span>
-        <h3>{section.title}</h3>
+        {!flat && <h3>{section.title}</h3>}
         <span className="pill">{done}/{section.items.length}</span>
       </div>
       <p className="sec-note">צ׳ק ליסט מהיר ללא חתימה — סימון V. נשמר אוטומטית.</p>
@@ -119,7 +119,7 @@ function initNames(signoff) {
 }
 
 /* ===== סקשן "סגירה" – צ׳קליסט + חתימות חובה ונעילה (סופית) ===== */
-function SignedSection({ skey, section }) {
+function SignedSection({ skey, section, flat }) {
   const tasks = useMemo(() => flattenTasks(section), [section])
   const signoff = useMemo(
     () => section.signoff.map((label) => ({ label, type: signoffKind(label) })),
@@ -165,7 +165,7 @@ function SignedSection({ skey, section }) {
     <div className={'glass plan-card section-card' + (locked ? ' is-locked' : '')}>
       <div className="sec-head">
         <span className="sec-tag signed">סגירה וחתימה</span>
-        <h3>{section.title}</h3>
+        {!flat && <h3>{section.title}</h3>}
         {tasks.length > 0 && (
           <span className="pill">{doneCount}/{tasks.length}</span>
         )}
@@ -262,6 +262,7 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
   const [stationId, setStationId] = useState(null) // תחנה (שבועי/חודשי)
   const [room, setRoom] = useState(() => (plan && plan.rooms ? plan.rooms[0] : null))
   const [guideOpen, setGuideOpen] = useState(false)
+  const [disinfectOpen, setDisinfectOpen] = useState(false) // אקורדיון "שימוש בחומרי חיטוי" – סגור כברירת מחדל
 
   if (!plan) {
     return (
@@ -301,10 +302,8 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
         const present = new Set(candidates.map((s) => s.area))
         subGroups = tab.dailyAreas.filter((a) => present.has(a.id))
         groupMatch = (s, gid) => s.area === gid
-      } else if (plan.stationDaily && candidates.length > 1) {
-        subGroups = candidates.map((s) => ({ id: s.id, label: s.title }))
-        groupMatch = (s, gid) => s.id === gid
       }
+      // מחלקות אשפוז (stationDaily): ללא שלב בחירת אזור – רשימה רציפה אחת לכל משמרת
     } else if (tab.sections.length > 1) {
       subGroups = tab.sections.map((s) => ({ id: s.id, label: s.title }))
       groupMatch = (s, gid) => s.id === gid
@@ -390,12 +389,19 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
       {/* שלב 1: בחירת תדירות + דוחות ביצוע */}
       {view === 'freq' && (
         <>
-          {/* שימוש בחומרי חיטוי – בולט ופתוח, לפני כפתורי התדירות */}
-          <div className="glass plan-card disinfect-card">
-            <div className="disinfect-title">{DISINFECTANT_GUIDE.title}</div>
-            <ul className="disinfect-list">
-              {DISINFECTANT_GUIDE.items.map((g, i) => (<li key={i}>{g}</li>))}
-            </ul>
+          {/* שימוש בחומרי חיטוי – אקורדיון קומפקטי שנפתח בלחיצה */}
+          <div className="glass plan-card controls-card">
+            <div className="guide" style={{ marginTop: 0 }}>
+              <button className="guide-toggle" onClick={() => setDisinfectOpen((o) => !o)} aria-expanded={disinfectOpen}>
+                {DISINFECTANT_GUIDE.title}
+                <span className="chev">{disinfectOpen ? '▲' : '▼'}</span>
+              </button>
+              {disinfectOpen && (
+                <ul className="guide-list">
+                  {DISINFECTANT_GUIDE.items.map((g, i) => (<li key={i}>{g}</li>))}
+                </ul>
+              )}
+            </div>
           </div>
 
           {plan.guidance && (
@@ -460,13 +466,14 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
           {leafSections.length === 0 ? (
             <p className="empty-hint">אין משימות להצגה.</p>
           ) : (
-            leafSections.map((s) =>
-              s.kind === 'quick' ? (
-                <QuickSection key={baseKey(s)} skey={baseKey(s)} section={s} />
+            leafSections.map((s) => {
+              const flat = !!plan.stationDaily && tab.id === 'daily'
+              return s.kind === 'quick' ? (
+                <QuickSection key={baseKey(s)} skey={baseKey(s)} section={s} flat={flat} />
               ) : (
-                <SignedSection key={baseKey(s)} skey={baseKey(s)} section={s} />
+                <SignedSection key={baseKey(s)} skey={baseKey(s)} section={s} flat={flat} />
               )
-            )
+            })
           )}
           <div style={{ marginTop: 8 }}>
             <button className="btn ghost" onClick={back}>← חזרה</button>

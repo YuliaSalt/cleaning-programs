@@ -14,7 +14,7 @@ export default function CategoryView({ categoryId, onSelectUnit, onGoHome }) {
         trail={[{ label: 'ראשי', onClick: onGoHome }, { label: category.name }]}
       />
 
-      <div className="card-grid">
+      <div className={'card-grid' + (units.length % 2 ? ' single-col' : '')}>
         {units.map((u) => (
           <button key={u.id} className="unit-card" onClick={() => onSelectUnit(u.id)}>
             <span className="uc-name">{u.name}</span>

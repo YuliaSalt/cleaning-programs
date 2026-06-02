@@ -3,11 +3,15 @@ import { categories, getCategoryUnits } from '../data/departments.js'
 export default function Home({ onOpenCategory, onOpenDashboard }) {
   return (
     <div>
-      <div className="topbar">
-        <div>
-          <div className="breadcrumb">מסך ראשי</div>
-          <h1 className="page-title">מחלקות ויחידות</h1>
-        </div>
+      {/* מסך פתיחה – לוגו HMC ממורכז ומותג Yplane */}
+      <div className="home-hero">
+        <img
+          className="home-logo"
+          src={import.meta.env.BASE_URL + 'logo.png'}
+          alt="הרצליה מדיקל סנטר"
+        />
+        <h1 className="home-title">Yplane</h1>
+        <p className="home-sub">הרצליה מדיקל סנטר · כוחות עזר</p>
       </div>
 
       {/* כפתור רחב – דשבורד ביצועים */}
@@ -16,8 +20,8 @@ export default function Home({ onOpenCategory, onOpenDashboard }) {
         <span className="db-sub">מעקב אחוזי ביצוע יומי · שבועי · חודשי לכל מחלקה</span>
       </button>
 
-      {/* רשת 2x2 של קטגוריות */}
-      <div className="cat-grid">
+      {/* רשת קטגוריות – עמודה אחת אם המספר אי-זוגי */}
+      <div className={'cat-grid' + (categories.length % 2 ? ' single-col' : '')}>
         {categories.map((c) => {
           const count = getCategoryUnits(c.id).length
           return (

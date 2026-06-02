@@ -20,7 +20,7 @@ function ReportDetail({ unit, report, onBack }) {
 
       <div className="report-print">
         <div className="rp-head">
-          <div className="rp-brand">הרצליה מדיקל סנטר · תוכניות עבודה כוחות עזר</div>
+          <div className="rp-brand">Yplane · הרצליה מדיקל סנטר · כוחות עזר</div>
           <h2 className="rp-title">{report.title}</h2>
           <div className="rp-meta">
             <span><b>יחידה:</b> {unit.name}</span>

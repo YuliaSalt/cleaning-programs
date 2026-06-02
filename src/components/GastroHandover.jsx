@@ -244,7 +244,7 @@ function HandoverView({ record }) {
 
 /* ===== מסך ראשי של קוביית העברת משמרת ===== */
 export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategory, categoryName }) {
-  const [mode, setMode] = useState('list') // list | form | view
+  const [mode, setMode] = useState('form') // ברירת מחדל: ישר לטופס, ללא מסך ביניים
   const [openRec, setOpenRec] = useState(null)
   const [refresh, setRefresh] = useState(0)
   const [savedFlash, setSavedFlash] = useState(false)
@@ -254,17 +254,22 @@ export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategor
   if (categoryName) baseTrail.push({ label: categoryName, onClick: onBackToCategory })
   baseTrail.push({ label: unit.name, onClick: onBack })
 
-  const goList = () => { setMode('list'); setOpenRec(null) }
+  const goForm = () => { setMode('form'); setOpenRec(null) }
 
-  if (mode === 'form') {
+  if (mode === 'list') {
     return (
       <div>
         <ScreenHeader
           title="העברת משמרת גסטרו"
-          onBack={goList}
-          trail={[...baseTrail, { label: 'העברת משמרת', onClick: goList }, { label: 'רישום חדש' }]}
+          onBack={goForm}
+          trail={[...baseTrail, { label: 'העברת משמרת', onClick: goForm }, { label: 'העברות שמורות' }]}
         />
-        <HandoverForm unit={unit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true); goList() }} />
+        <HandoverArchive
+          records={records}
+          savedFlash={false}
+          onNew={goForm}
+          onOpen={(r) => { setOpenRec(r); setMode('view') }}
+        />
       </div>
     )
   }
@@ -274,15 +279,15 @@ export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategor
       <div>
         <ScreenHeader
           title="העברת משמרת גסטרו"
-          onBack={goList}
-          trail={[...baseTrail, { label: 'העברת משמרת', onClick: goList }, { label: openRec.dateLabel }]}
+          onBack={() => setMode('list')}
+          trail={[...baseTrail, { label: 'העברת משמרת', onClick: goForm }, { label: openRec.dateLabel }]}
         />
         <HandoverView record={openRec.record} />
       </div>
     )
   }
 
-  // mode === 'list'
+  // ברירת מחדל: טופס העברת משמרת ישירות
   return (
     <div>
       <ScreenHeader
@@ -290,12 +295,13 @@ export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategor
         onBack={onBack}
         trail={[...baseTrail, { label: 'העברת משמרת' }]}
       />
-      <HandoverArchive
-        records={records}
-        savedFlash={savedFlash}
-        onNew={() => { setSavedFlash(false); setMode('form') }}
-        onOpen={(r) => { setSavedFlash(false); setOpenRec(r); setMode('view') }}
-      />
+      {savedFlash && <div className="save-flash">העברת המשמרת נשמרה ונשלחה ✓</div>}
+      <HandoverForm key={refresh} unit={unit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true) }} />
+      {records.length > 0 && (
+        <button className="ho-archive-link" onClick={() => { setSavedFlash(false); setMode('list') }}>
+          צפייה בהעברות שמורות ({records.length})
+        </button>
+      )}
     </div>
   )
 }

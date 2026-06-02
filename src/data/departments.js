@@ -48,7 +48,7 @@ export const standaloneUnits = [
       { id: 'recovery-2', name: 'התאוששות 2' },
     ],
   },
-  { id: 'or', name: 'חדרי ניתוח', icon: 'department' },
+  { id: 'or', name: 'חדרי ניתוח - הנחיות כלליות לניקיון', icon: 'department' },
   { id: 'ivf', name: 'IVF', icon: 'department' },
   { id: 'cath', name: 'צינתורים', icon: 'department' },
   { id: 'gastro', name: 'גסטרו ופעולות', icon: 'department' },
