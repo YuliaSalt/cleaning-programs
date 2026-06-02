@@ -63,10 +63,10 @@ export async function pushReport(key, rec, action = 'save', readable = null) {
   }
 }
 
-// דחיפת העברת משמרת לענן – אותו מנגנון כמו דוחות, ללא ייצוג קריא נפרד.
-// כל שמירה היא מפתח חדש (חותמת זמן), ולכן זה לוג מצטבר ללא דריסה.
-export function pushHandover(key, rec) {
-  return pushReport(key, rec, 'save', null)
+// דחיפת העברת משמרת לענן – אותו מנגנון כמו דוחות. readable (אופציונלי) נכתב
+// לטאב הקריא "Handovers" בגיליון. כל שמירה היא מפתח חדש (חותמת זמן) → לוג מצטבר.
+export function pushHandover(key, rec, readable = null) {
+  return pushReport(key, rec, 'save', readable)
 }
 
 // ניסיון חוזר לכל הפריטים שבתור.

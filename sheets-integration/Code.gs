@@ -32,6 +32,10 @@ var RAW_HEADERS = ['key', 'savedAt', 'payload'];
 // עמודות קבועות (אנושיות) בתחילת טאב Reports; אחריהן עמודות דינמיות לפי התוויות.
 var REPORTS_FIXED = ['key', 'תאריך', 'שעה', 'מחלקה', 'תדירות', 'חדר', 'סקשן', 'מבצעים'];
 
+// טאב קריא להעברות משמרת (מפתחות hmc:handover:). עמודות קבועות + דינמיות לפי התוויות.
+var HANDOVERS_SHEET = 'Handovers';
+var HANDOVERS_FIXED = ['key', 'תאריך', 'שעה', 'מחלקה', 'משמרת', 'מוסר/ת', 'סוג'];
+
 function doGet(e) {
   e = e || {};
   var params = e.parameter || {};
@@ -123,12 +127,18 @@ function upsertRow(sh, keyCol, key, row) {
 }
 
 function saveReport(key, rec, readable) {
-  // 1) raw – לשחזור האפליקציה
+  // 1) raw – לשחזור האפליקציה (משותף לדוחות ולהעברות משמרת)
   var raw = getRawSheet();
   upsertRow(raw, 1, key, [key, rec.savedAt || '', JSON.stringify(rec)]);
 
-  // 2) Reports – קריא לבני אדם (עמודה לכל שדה/צ'קבוקס)
+  // 2) ייצוג קריא לבני אדם – לפי סוג המפתח: העברת משמרת או דוח ניקיון
   if (!readable) return;
+  if (key.indexOf('hmc:handover:') === 0) saveHandoverReadable(key, readable);
+  else saveCleaningReadable(key, readable);
+}
+
+// כותב שורה קריאה לטאב Reports (דוחות ניקיון).
+function saveCleaningReadable(key, readable) {
   var sh = getReportsSheet();
   var tz = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone() || 'Asia/Jerusalem';
   var meta = readable.meta || {};
@@ -143,6 +153,41 @@ function saveReport(key, rec, readable) {
   vals['חדר'] = meta.room || '';
   vals['סקשן'] = meta.sectionTitle || '';
   vals['מבצעים'] = meta.by || '';
+  var cols = readable.columns || [];
+  for (var i = 0; i < cols.length; i++) {
+    vals[String(cols[i][0])] = cols[i][1];
+  }
+
+  var headers = ensureHeaders(sh, Object.keys(vals));
+  var row = headers.map(function (h) { return Object.prototype.hasOwnProperty.call(vals, h) ? vals[h] : ''; });
+  upsertRow(sh, headers.indexOf('key') + 1, key, row);
+}
+
+function getHandoversSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(HANDOVERS_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(HANDOVERS_SHEET);
+    sh.getRange(1, 1, 1, HANDOVERS_FIXED.length).setValues([HANDOVERS_FIXED]);
+  }
+  return sh;
+}
+
+// כותב שורה קריאה לטאב Handovers (העברות משמרת).
+function saveHandoverReadable(key, readable) {
+  var sh = getHandoversSheet();
+  var tz = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone() || 'Asia/Jerusalem';
+  var meta = readable.meta || {};
+  var d = parseDate(meta.savedAt, tz);
+
+  var vals = {};
+  vals['key'] = key;
+  vals['תאריך'] = d ? Utilities.formatDate(d, tz, 'yyyy-MM-dd') : '';
+  vals['שעה'] = d ? Utilities.formatDate(d, tz, 'HH:mm') : '';
+  vals['מחלקה'] = meta.unitName || '';
+  vals['משמרת'] = meta.shift || '';
+  vals['מוסר/ת'] = meta.by || '';
+  vals['סוג'] = meta.kind || '';
   var cols = readable.columns || [];
   for (var i = 0; i < cols.length; i++) {
     vals[String(cols[i][0])] = cols[i][1];

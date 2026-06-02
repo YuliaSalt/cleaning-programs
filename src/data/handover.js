@@ -123,11 +123,46 @@ export function emptyHandover(unitId, unitName, shift) {
   }
 }
 
+// ייצוג קריא של העברת משמרת לגיליון (meta + עמודות label/value), בדומה לדוחות.
+// תומך בשני הסוגים: כללית (kind === 'general') וגסטרו.
+export function buildHandoverReadable(rec) {
+  const isGeneral = rec.kind === 'general'
+  const fmtReport = (r) => (r && r.has ? 'יש' + (r.text ? ' · ' + r.text : '') : 'אין')
+  const columns = []
+  if (isGeneral) {
+    columns.push(['אחות מקבלת', fullName(rec.nurseIn)])
+    GEN_OCC_NUMBERS.forEach((it) => columns.push([it.label, rec.numbers ? rec.numbers[it.id] ?? '' : '']))
+    if (rec.occNote) columns.push(['הערת תפוסה', rec.occNote])
+    GEN_REPORT_ITEMS.forEach((it) => columns.push([it.label, fmtReport(rec.reports && rec.reports[it.id])]))
+    GEN_CHECK_ITEMS.forEach((label, i) => {
+      const c = (rec.checks && rec.checks[i]) || {}
+      columns.push([label, (c.on ? '✓' : '✗') + (c.note ? ' · ' + c.note : '')])
+    })
+  } else {
+    GASTRO_REPORT_ITEMS.forEach((it) => columns.push([it.label, fmtReport(rec.reports && rec.reports[it.id])]))
+    GASTRO_CHECK_BLOCKS.forEach((b) => {
+      const blk = (rec.checks && rec.checks[b.id]) || {}
+      b.items.forEach((label, i) => columns.push([b.title + ' – ' + label, blk[i] ? '✓' : '✗']))
+    })
+  }
+  return {
+    meta: {
+      savedAt: rec.savedAt,
+      unitName: rec.unitName,
+      date: rec.date,
+      shift: rec.shift,
+      by: isGeneral ? fullName(rec.nurseOut) : rec.nurse || '',
+      kind: isGeneral ? 'כללית' : 'גסטרו',
+    },
+    columns,
+  }
+}
+
 export function saveHandover(record) {
   const rec = { ...record, savedAt: record.savedAt || new Date().toISOString() }
   const key = `${PREFIX}${rec.unitId}:${rec.date}:${rec.shift}:${Date.now()}`
   storage.setJSON(key, rec)
-  pushHandover(key, rec) // גיבוי/סנכרון ענן (best-effort, לא חוסם)
+  pushHandover(key, rec, buildHandoverReadable(rec)) // גיבוי/סנכרון ענן + שורה קריאה בגיליון (best-effort)
   return key
 }
 
