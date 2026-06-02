@@ -9,9 +9,11 @@ import GastroHandover from './components/GastroHandover.jsx'
 import SpecialProcedures from './components/SpecialProcedures.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import BottomNav from './components/BottomNav.jsx'
+import Login from './components/Login.jsx'
 import { findUnit, getCategory, findCategoryOfUnit } from './data/departments.js'
 import { syncReports } from './data/cloudSync.js'
 import { recordVisit, getAutoRedirectUnit } from './data/routing.js'
+import { getSession, logout } from './data/auth.js'
 
 // זיהוי מובייל לפי רוחב המסך – מאפשר פריסת מובייל ייעודית (ללא סרגל צד).
 function useIsMobile(breakpoint = 900) {
@@ -28,6 +30,7 @@ function useIsMobile(breakpoint = 900) {
 
 export default function App() {
   const isMobile = useIsMobile()
+  const [session, setSession] = useState(() => getSession()) // משתמש מחובר (או null)
   // ניווט מבוסס מצב: דשבורד | קטגוריה | יחידה | חלון | בית
   const [categoryId, setCategoryId] = useState(null)
   const [unitId, setUnitId] = useState(null)
@@ -102,9 +105,19 @@ export default function App() {
     if (unitId) return backToCategory()
     if (categoryId) return setCategoryId(null)
   }
+  function doLogout() {
+    logout()
+    setSession(null)
+    goHome()
+  }
   // האם יש לאן לחזור (משמש לכיבוי כפתור "חזרה" במסך הבית)
   const canBack = showDashboard || !!windowId || !!unitId || !!categoryId
   const atHome = !showDashboard && !categoryId && !unitId
+
+  // שער כניסה: ללא משתמש מחובר – מציגים מסך כניסה/הרשמה בלבד
+  if (!session) {
+    return <Login onAuthed={(name) => setSession(name)} />
+  }
 
   return (
     <div className="app-root">
@@ -128,7 +141,7 @@ export default function App() {
           )}
 
           {!showDashboard && !unit && !category && (
-            <Home onOpenCategory={openCategory} onOpenDashboard={openDashboard} />
+            <Home onOpenCategory={openCategory} onOpenDashboard={openDashboard} onLogout={doLogout} userName={session} />
           )}
 
           {!showDashboard && !unit && category && (
