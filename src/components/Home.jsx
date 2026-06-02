@@ -1,23 +1,16 @@
 import { categories, getCategoryUnits } from '../data/departments.js'
 
-export default function Home({ onOpenCategory, onOpenDashboard, onLogout, userName }) {
+export default function Home({ onOpenCategory, onOpenDashboard }) {
   return (
     <div>
-      {/* מסך פתיחה – לוגו HMC ממורכז ומותג Yplane */}
+      {/* מסך פתיחה – לוגו HMC ממורכז */}
       <div className="home-hero">
         <img
           className="home-logo"
           src={import.meta.env.BASE_URL + 'logo.png'}
           alt="הרצליה מדיקל סנטר"
         />
-        <h1 className="home-title">Yplane</h1>
         <p className="home-sub">הרצליה מדיקל סנטר · כוחות עזר</p>
-        {userName && (
-          <div className="home-user">
-            שלום {userName}
-            <button className="link-btn home-logout" onClick={onLogout}>התנתקות</button>
-          </div>
-        )}
       </div>
 
       {/* כפתור רחב – דשבורד ביצועים */}
