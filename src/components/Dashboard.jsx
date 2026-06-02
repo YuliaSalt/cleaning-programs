@@ -38,7 +38,7 @@ function Ring({ value, label }) {
             r={r}
             strokeWidth={stroke}
             fill="none"
-            stroke={color}
+            style={{ stroke: color }}
             strokeDasharray={c}
             strokeDashoffset={offset}
             strokeLinecap="round"
@@ -51,7 +51,7 @@ function Ring({ value, label }) {
           y="50%"
           dominantBaseline="central"
           textAnchor="middle"
-          fill={color || undefined}
+          style={has ? { fill: color } : undefined}
         >
           {has ? pct + '%' : '—'}
         </text>
