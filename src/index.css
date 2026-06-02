@@ -427,6 +427,7 @@ h1, h2, h3, h4 {
   font-weight: 800;
   color: var(--brand);
   margin-top: 2px;
+  text-align: right; /* שם המחלקה בצד, לא במרכז */
 }
 
 /* ===== כותרת מסך אחידה: חזרה + פירורי לחם ===== */
@@ -1593,6 +1594,38 @@ h1, h2, h3, h4 {
   margin-top: 16px;
 }
 
+.filters-label {
+  align-self: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--brand-soft);
+  white-space: nowrap;
+}
+
+/* סרגל פעולות בתצוגת דוח – כפתור "הדפסה" ממורכז */
+.rd-toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.rd-toolbar .back-link {
+  justify-self: start;
+}
+
+.rd-print {
+  grid-column: 2;
+  justify-self: center;
+}
+
+/* הודעת "נשמר" בתחתית עמוד העברת המשמרת */
+.save-flash-bottom {
+  margin-top: 18px;
+  margin-bottom: 0;
+}
+
 .filters-row .field {
   flex: 1;
   min-width: 150px;
@@ -2086,18 +2119,23 @@ h1, h2, h3, h4 {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* כפתורי יש/אין נשארים באותה שורה של המשימה */
 }
 
 .yn-label {
+  flex: 1;
+  min-width: 0; /* מאפשר לטקסט להישבר ולא לדחוף את הכפתורים מטה */
   font-size: 15px;
   font-weight: 700;
   color: var(--ink-strong);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .yn-btns {
   display: inline-flex;
   gap: 8px;
+  flex: none; /* רוחב קבוע – לא מתכווץ */
 }
 
 .yn-btn {

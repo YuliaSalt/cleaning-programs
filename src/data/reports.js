@@ -1,6 +1,7 @@
 // קריאת דוחות הביצוע השמורים (סקשני חתימה נעולים) של יחידה, מתוך ה-StorageAdapter.
 
 import { getCleaningPlan } from './cleaningTemplates.js'
+import { findUnit } from './departments.js'
 import { storage } from './storage.js'
 
 const PREFIX = 'hmc:plan:'
@@ -49,6 +50,12 @@ export function listReports(unitId) {
     const p = parseKey(key)
     const section = findSection(plan, p.tabId, p.sectionId)
     const saved = new Date(rec.savedAt)
+    const shift = p.tabId === 'daily' ? p.period.split(':')[1] || '' : ''
+    // שם הדוח: "[שם מחלקה] - יומי בוקר / יומי ערב" (תדירות + משמרת)
+    const unit = findUnit(p.unitId)
+    const unitName = unit ? unit.name : p.unitId
+    const freqLabel = TYPE_LABELS[p.tabId] || p.tabId
+    const title = `${unitName} - ${freqLabel}${shift ? ' ' + shift : ''}`
     out.push({
       key,
       room: p.room === '-' ? null : p.room,
@@ -56,7 +63,7 @@ export function listReports(unitId) {
       sectionId: p.sectionId,
       period: p.period,
       section,
-      title: section ? section.title : p.sectionId,
+      title,
       record: rec,
       savedAt: rec.savedAt,
       sortTs: saved.getTime(),
@@ -66,7 +73,7 @@ export function listReports(unitId) {
       dateLabel: saved.toLocaleDateString('he-IL'),
       timeLabel: saved.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
       dateISO: saved.toLocaleDateString('en-CA'),
-      shift: p.tabId === 'daily' ? p.period.split(':')[1] || '' : '',
+      shift,
       performers: Object.values(rec.names || {}).map((v) => (v || '').trim()).filter(Boolean),
       by: rec.by || '',
     })

@@ -43,10 +43,6 @@ export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, 
         }
       />
 
-      <div className="section-head">
-        <h2>לוח חלונות</h2>
-      </div>
-
       <div className={'card-grid' + (windows.length % 2 ? ' single-col' : '')}>
         {windows.map((w) => (
           <div

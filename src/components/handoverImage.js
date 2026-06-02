@@ -14,6 +14,17 @@ import {
 const W = 1080
 const PAD = 64
 
+// טעינת לוגו HMC מראש לציור על גבי הדוח (יחס מקורי 2048x618)
+const LOGO_W = 380
+const LOGO_H = Math.round((LOGO_W * 618) / 2048)
+const TOP_RESERVE = LOGO_H + 30
+let logoImg = null
+if (typeof Image !== 'undefined') {
+  const _img = new Image()
+  _img.onload = () => { logoImg = _img }
+  _img.src = ((typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || '/') + 'logo.png'
+}
+
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath()
   ctx.moveTo(x + r, y)
@@ -28,7 +39,7 @@ function roundRect(ctx, x, y, w, h, r) {
 function makeBuilder() {
   const m = document.createElement('canvas').getContext('2d')
   const ops = []
-  let y = PAD
+  let y = PAD + TOP_RESERVE // שמירת מקום ללוגו בראש הדוח
 
   const setFont = (c, s, b) => { c.font = `${b ? 700 : 400} ${s}px Heebo, Arial, sans-serif` }
   const wrapLine = (str, s, b, maxW) => {
@@ -60,7 +71,7 @@ function makeBuilder() {
     }
     return out
   }
-  const para = (str, { s = 30, b = false, color = '#1f2d36', align = 'right', indent = 0, gap = 0.34 } = {}) => {
+  const para = (str, { s = 36, b = false, color = '#1f2d36', align = 'right', indent = 0, gap = 0.34 } = {}) => {
     const maxW = W - PAD * 2 - indent
     for (const ln of wrap(str, s, b, maxW)) {
       y += s
@@ -69,27 +80,27 @@ function makeBuilder() {
     }
   }
   const statusRow = (label, status, color, b = false) => {
-    const s = 31
+    const s = 37
     y += s
     ops.push({ t: 'txt', str: label, s, b, color: '#1f2d36', align: 'right', x: W - PAD, y })
     ops.push({ t: 'txt', str: status, s, b: true, color, align: 'left', x: PAD, y })
     y += s * 0.4
   }
   const kv = (label, value, note) => {
-    const s = 30
+    const s = 36
     y += s
     ops.push({ t: 'txt', str: label + ':', s, b: true, color: '#0a4d8c', align: 'right', x: W - PAD, y })
     ops.push({ t: 'txt', str: value && String(value).trim() ? String(value) : '—', s, b: false, color: '#1f2d36', align: 'left', x: PAD, y })
     y += s * 0.4
-    if (note && note.trim()) para('הערה: ' + note.trim(), { s: 26, color: '#5b7493', indent: 26, gap: 0.3 })
+    if (note && note.trim()) para('הערה: ' + note.trim(), { s: 30, color: '#5b7493', indent: 30, gap: 0.3 })
   }
   const band = (title) => {
-    y += 22
+    y += 24
     const top = y
-    const H = 60
+    const H = 74
     ops.push({ t: 'rect', x: PAD - 18, y: top, w: W - (PAD - 18) * 2, h: H, fill: '#dff1f9', r: 16 })
-    ops.push({ t: 'txt', str: title, s: 34, b: true, color: '#0a4d8c', align: 'right', x: W - PAD, y: top + 42 })
-    y = top + H + 16
+    ops.push({ t: 'txt', str: title, s: 40, b: true, color: '#0a4d8c', align: 'right', x: W - PAD, y: top + 52 })
+    y = top + H + 18
   }
   const line = () => { y += 12; ops.push({ t: 'line', y }); y += 4 }
   const gap = (n) => { y += n }
@@ -98,7 +109,7 @@ function makeBuilder() {
     gap(26)
     line()
     gap(8)
-    para('הרצליה מדיקל סנטר', { s: 28, b: true, color: '#8194a0', align: 'center' })
+    para('הרצליה מדיקל סנטר', { s: 32, b: true, color: '#8194a0', align: 'center' })
     const H = Math.ceil(y + PAD)
     const canvas = document.createElement('canvas')
     canvas.width = W
@@ -108,6 +119,10 @@ function makeBuilder() {
     ctx.textBaseline = 'alphabetic'
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, W, H)
+    // לוגו HMC ממורכז בראש הדוח
+    if (logoImg) {
+      try { ctx.drawImage(logoImg, (W - LOGO_W) / 2, PAD, LOGO_W, LOGO_H) } catch (e) { /* noop */ }
+    }
     for (const op of ops) {
       if (op.t === 'rect') {
         roundRect(ctx, op.x, op.y, op.w, op.h, op.r)
@@ -137,9 +152,9 @@ function header(b, title, record) {
   const time = record.savedAt
     ? new Date(record.savedAt).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })
     : ''
-  b.para(title, { s: 48, b: true, color: '#0a4d8c' })
-  b.para(`${record.unitName || ''} · ${record.date}${time ? ' · ' + time : ''} · משמרת ${record.shift}`, { s: 30, color: '#5b7493' })
-  if (record.nurse) b.para(`אחות מוסרת (חתימה): ${record.nurse}`, { s: 31, b: true, color: '#0a4d8c' })
+  b.para(title, { s: 54, b: true, color: '#0a4d8c' })
+  b.para(`${record.unitName || ''} · ${record.date}${time ? ' · ' + time : ''} · משמרת ${record.shift}`, { s: 34, color: '#5b7493' })
+  if (record.nurse) b.para(`אחות מוסרת (חתימה): ${record.nurse}`, { s: 36, b: true, color: '#0a4d8c' })
   b.line()
 }
 
@@ -152,7 +167,7 @@ export function buildHandoverImage(record) {
   for (const it of GASTRO_REPORT_ITEMS) {
     const r = (record.reports && record.reports[it.id]) || {}
     b.statusRow(it.label, r.has ? 'יש' : 'אין', r.has ? '#15a34a' : '#8194a0', true)
-    if (r.has && r.text && r.text.trim()) b.para(r.text.trim(), { s: 28, color: '#33424d', indent: 26, gap: 0.3 })
+    if (r.text && r.text.trim()) b.para(r.text.trim(), { s: 32, color: '#33424d', indent: 30, gap: 0.32 })
     b.gap(6)
   }
   for (const blk of GASTRO_CHECK_BLOCKS) {
@@ -186,7 +201,7 @@ export function buildGeneralHandoverImage(record) {
   for (const it of GEN_REPORT_ITEMS) {
     const r = (record.reports && record.reports[it.id]) || {}
     b.statusRow(it.label, r.has ? 'יש' : 'אין', r.has ? '#15a34a' : '#8194a0', true)
-    if (r.has && r.text && r.text.trim()) b.para(r.text.trim(), { s: 28, color: '#33424d', indent: 26, gap: 0.3 })
+    if (r.text && r.text.trim()) b.para(r.text.trim(), { s: 32, color: '#33424d', indent: 30, gap: 0.32 })
     b.gap(6)
   }
 
@@ -194,7 +209,7 @@ export function buildGeneralHandoverImage(record) {
   GEN_CHECK_ITEMS.forEach((label, i) => {
     const c = (record.checks && record.checks[i]) || {}
     b.statusRow(label, c.on ? '✓ בוצע' : '— לא סומן', c.on ? '#15a34a' : '#a0adb8')
-    if (c.note && c.note.trim()) b.para('הערה: ' + c.note.trim(), { s: 26, color: '#5b7493', indent: 26, gap: 0.3 })
+    if (c.note && c.note.trim()) b.para('הערה: ' + c.note.trim(), { s: 30, color: '#5b7493', indent: 30, gap: 0.3 })
     b.gap(4)
   })
 

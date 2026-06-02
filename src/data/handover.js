@@ -89,7 +89,7 @@ export function emptyGeneralHandover(unitId, unitName, shift) {
     nurseIn: { first: '', last: '' },
     numbers: Object.fromEntries(GEN_OCC_NUMBERS.map((it) => [it.id, ''])),
     occNote: '',
-    reports: Object.fromEntries(GEN_REPORT_ITEMS.map((it) => [it.id, { has: false, text: '' }])),
+    reports: Object.fromEntries(GEN_REPORT_ITEMS.map((it) => [it.id, { has: null, text: '' }])),
     checks: Object.fromEntries(GEN_CHECK_ITEMS.map((_, i) => [i, { on: false, note: '' }])),
     nurse: '',
   }
@@ -118,7 +118,7 @@ export function emptyHandover(unitId, unitName, shift) {
     unitName,
     date: new Date().toLocaleDateString('en-CA'),
     shift,
-    reports: Object.fromEntries(GASTRO_REPORT_ITEMS.map((it) => [it.id, { has: false, text: '' }])),
+    reports: Object.fromEntries(GASTRO_REPORT_ITEMS.map((it) => [it.id, { has: null, text: '' }])),
     checks: Object.fromEntries(GASTRO_CHECK_BLOCKS.map((b) => [b.id, {}])),
   }
 }
@@ -127,7 +127,7 @@ export function emptyHandover(unitId, unitName, shift) {
 // תומך בשני הסוגים: כללית (kind === 'general') וגסטרו.
 export function buildHandoverReadable(rec) {
   const isGeneral = rec.kind === 'general'
-  const fmtReport = (r) => (r && r.has ? 'יש' + (r.text ? ' · ' + r.text : '') : 'אין')
+  const fmtReport = (r) => (r && r.has ? 'יש' : 'אין' + (r && r.text ? ' · ' + r.text : ''))
   const columns = []
   if (isGeneral) {
     columns.push(['אחות מקבלת', fullName(rec.nurseIn)])

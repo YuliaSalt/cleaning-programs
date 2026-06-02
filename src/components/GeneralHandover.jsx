@@ -49,7 +49,8 @@ function GeneralForm({ unit, onSent, onReset }) {
 
   const setName = (id, field, v) => setNames((n) => ({ ...n, [id]: { ...n[id], [field]: v } }))
   const setNum = (id, v) => setNumbers((o) => ({ ...o, [id]: v }))
-  const setHas = (id, has) => setReports((r) => ({ ...r, [id]: { ...r[id], has, text: has ? r[id].text : '' } }))
+  // הערה נשמרת רק במצב "אין" (has=false); בחירת "יש" מנקה את הטקסט
+  const setHas = (id, has) => setReports((r) => ({ ...r, [id]: { ...r[id], has, text: has ? '' : r[id].text } }))
   const setText = (id, v) => setReports((r) => ({ ...r, [id]: { ...r[id], text: v } }))
   const setChk = (i, field, v) => setChecks((c) => ({ ...c, [i]: { ...c[i], [field]: v } }))
 
@@ -182,11 +183,11 @@ function GeneralForm({ unit, onSent, onReset }) {
             <div className="yn-head">
               <span className="yn-label">{it.label}</span>
               <div className="yn-btns">
-                <button className={'yn-btn yes' + (reports[it.id].has ? ' active' : '')} onClick={() => setHas(it.id, true)}>יש</button>
-                <button className={'yn-btn no' + (!reports[it.id].has ? ' active' : '')} onClick={() => setHas(it.id, false)}>אין</button>
+                <button className={'yn-btn yes' + (reports[it.id].has === true ? ' active' : '')} onClick={() => setHas(it.id, true)}>יש</button>
+                <button className={'yn-btn no' + (reports[it.id].has === false ? ' active' : '')} onClick={() => setHas(it.id, false)}>אין</button>
               </div>
             </div>
-            <div className={'yn-detail' + (reports[it.id].has ? ' open' : '')}>
+            <div className={'yn-detail' + (reports[it.id].has === false ? ' open' : '')}>
               <textarea
                 className="input"
                 rows={3}
@@ -287,7 +288,7 @@ function GeneralView({ unit, record }) {
             <div className="ho-view-row" key={it.id}>
               <span className="vr-label">{it.label}</span>
               <span className={'vr-status' + (r.has ? ' yes' : '')}>{r.has ? 'יש' : 'אין'}</span>
-              {r.has && r.text && <p className="vr-text">{r.text}</p>}
+              {r.text && <p className="vr-text">{r.text}</p>}
             </div>
           )
         })}
@@ -357,13 +358,13 @@ export default function GeneralHandover({ unit, onBack, onGoHome, onBackToCatego
   return (
     <div>
       <ScreenHeader title={title} onBack={onBack} trail={[...baseTrail, { label: 'העברת משמרת' }]} />
-      {savedFlash && <div className="save-flash">העברת המשמרת נשמרה ונשלחה ✓</div>}
       <GeneralForm key={refresh} unit={unit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true) }} />
       {records.length > 0 && (
         <button className="ho-archive-link" onClick={() => { setSavedFlash(false); setMode('list') }}>
           צפייה בהעברות שמורות ({records.length})
         </button>
       )}
+      {savedFlash && <div className="save-flash save-flash-bottom">העברת המשמרת נשמרה ונשלחה ✓</div>}
     </div>
   )
 }

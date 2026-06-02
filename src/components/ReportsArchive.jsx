@@ -11,16 +11,16 @@ function ReportDetail({ unit, report, onBack }) {
 
   return (
     <div>
-      <div className="no-print" style={{ display: 'flex', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
+      <div className="no-print rd-toolbar">
         <button className="back-link" onClick={onBack}>
           <span className="bl-arrow">→</span> חזרה לרשימת הדוחות
         </button>
-        <button className="btn" onClick={() => window.print()}>הדפסה</button>
+        <button className="btn rd-print" onClick={() => window.print()}>הדפסה</button>
       </div>
 
       <div className="report-print">
         <div className="rp-head">
-          <div className="rp-brand">Yplane · הרצליה מדיקל סנטר · כוחות עזר</div>
+          <div className="rp-brand">הרצליה מדיקל סנטר · כוחות עזר</div>
           <h2 className="rp-title">{report.title}</h2>
           <div className="rp-meta">
             <span><b>יחידה:</b> {unit.name}</span>
@@ -153,6 +153,7 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
         <>
           <div className="glass plan-card controls-card">
             <div className="filters-row">
+              <span className="filters-label">חיפוש לפי:</span>
               <div className="field">
                 <label>מתאריך</label>
                 <input className="input" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
