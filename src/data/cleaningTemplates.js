@@ -305,10 +305,9 @@ PLANS.hospitalizations = {
     },
   ],
 }
-// ===== התאוששות (2 חדרים) =====
+// ===== התאוששות – תוכנית משותפת לחדר התאוששות 1 / התאוששות 2 (כל חדר נתונים נפרדים) =====
 PLANS.recovery = {
   shifts: SHIFTS_2,
-  rooms: ['התאוששות 1', 'התאוששות 2'],
   tabs: [
     {
       id: 'daily',
@@ -374,7 +373,6 @@ PLANS.recovery = {
     {
       id: 'weekly',
       label: 'שבועי',
-      note: 'עבור כל חדר התאוששות בנפרד',
       sections: [
         signed(
           'w1',
@@ -425,7 +423,7 @@ PLANS.recovery = {
     {
       id: 'monthly',
       label: 'חודשי',
-      note: MONTHLY_NOTE + ' · עבור כל חדר התאוששות בנפרד',
+      note: MONTHLY_NOTE,
       sections: [
         signed(
           'm1',
@@ -1916,6 +1914,8 @@ const UNIT_TO_PLAN = {
   'inpatient-e': 'hospitalizations',
   icu: 'hospitalizations',
   recovery: 'recovery',
+  'recovery-1': 'recovery',
+  'recovery-2': 'recovery',
   or: 'or',
   ivf: 'ivf',
   cath: 'cath',

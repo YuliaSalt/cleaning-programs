@@ -65,7 +65,10 @@ export default function Dashboard({ onGoHome, onSelectUnit }) {
             <h2>{cat.name}</h2>
           </div>
           <div className="dash-grid">
-            {getCategoryUnits(cat.id).map((u) => {
+            {/* יחידה עם חדרים (התאוששות) מוצגת כקלף נפרד לכל חדר – נתונים נפרדים. */}
+            {getCategoryUnits(cat.id)
+              .flatMap((u) => (u.rooms ? u.rooms : [u]))
+              .map((u) => {
               const p = computeUnitProgress(u.id)
               return (
                 <button

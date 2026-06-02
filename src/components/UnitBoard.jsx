@@ -1,13 +1,33 @@
 import { getUnitWindows, getCurrentShift } from '../data/departments.js'
 import ScreenHeader from './ScreenHeader.jsx'
 
-export default function UnitBoard({ unit, onOpenWindow, onGoHome, onBack, categoryName }) {
+export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, onBack, categoryName }) {
   const shift = getCurrentShift()
-  const windows = getUnitWindows(unit.id)
 
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBack })
   trail.push({ label: unit.name })
+
+  // יחידה עם חדרים (לדוגמה "התאוששות"): מסך בחירת חדר לפני לוח החלונות.
+  if (unit.rooms) {
+    return (
+      <div>
+        <ScreenHeader title={unit.name} onBack={onBack} trail={trail} />
+        <div className="section-head">
+          <h2>בחירת חדר</h2>
+        </div>
+        <div className="card-grid">
+          {unit.rooms.map((r) => (
+            <button key={r.id} className="unit-card" onClick={() => onSelectUnit(r.id)}>
+              <span className="uc-name">{r.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  const windows = getUnitWindows(unit.id)
 
   return (
     <div>

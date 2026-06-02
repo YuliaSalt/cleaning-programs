@@ -26,6 +26,10 @@ export default function App() {
 
   const unit = unitId ? findUnit(unitId) : null
   const category = categoryId ? getCategory(categoryId) : null
+  // יחידת אב (לדוגמה "התאוששות") כאשר היחידה הנוכחית היא תת-יחידה (חדר).
+  const parentUnit = unit && unit.parentId ? findUnit(unit.parentId) : null
+  // שם הרמה שמעל היחידה בפירורי הלחם: יחידת האב אם קיימת, אחרת הקטגוריה.
+  const parentName = parentUnit ? parentUnit.name : category ? category.name : null
 
   function openDashboard() {
     setShowDashboard(true)
@@ -42,7 +46,10 @@ export default function App() {
     setUnitId(id)
     setWindowId(null)
     setShowDashboard(false)
-    const cat = findCategoryOfUnit(id)
+    // תת-יחידה (חדר) שייכת לקטגוריה של יחידת האב שלה.
+    const u = findUnit(id)
+    const lookupId = u && u.parentId ? u.parentId : id
+    const cat = findCategoryOfUnit(lookupId)
     if (cat) setCategoryId(cat.id)
   }
   function goHome() {
@@ -52,7 +59,9 @@ export default function App() {
     setShowDashboard(false)
   }
   function backToCategory() {
-    setUnitId(null)
+    // מתת-יחידה (חדר) חוזרים למסך בחירת החדר של יחידת האב; אחרת לרשימת היחידות בקטגוריה.
+    if (parentUnit) setUnitId(parentUnit.id)
+    else setUnitId(null)
     setWindowId(null)
   }
   function openWindow(id) {
@@ -66,7 +75,7 @@ export default function App() {
     <div className="app-root">
       <header className="app-header">
         <button className="app-logo-btn" onClick={goHome} aria-label="מסך ראשי">
-          <img className="app-logo" src="/logo.png" alt="הרצליה מדיקל סנטר" />
+          <img className="app-logo" src={import.meta.env.BASE_URL + 'logo.png'} alt="הרצליה מדיקל סנטר" />
         </button>
       </header>
       <div className="app-shell">
@@ -98,9 +107,10 @@ export default function App() {
             <UnitBoard
               unit={unit}
               onOpenWindow={openWindow}
+              onSelectUnit={selectUnit}
               onGoHome={goHome}
               onBack={backToCategory}
-              categoryName={category ? category.name : null}
+              categoryName={parentName}
             />
           )}
 
@@ -110,7 +120,7 @@ export default function App() {
               onBack={backToBoard}
               onBackToCategory={backToCategory}
               onGoHome={goHome}
-              categoryName={category ? category.name : null}
+              categoryName={parentName}
             />
           )}
 
@@ -121,7 +131,7 @@ export default function App() {
                 onBack={backToBoard}
                 onBackToCategory={backToCategory}
                 onGoHome={goHome}
-                categoryName={category ? category.name : null}
+                categoryName={parentName}
               />
             ) : (
               <GeneralHandover
@@ -129,7 +139,7 @@ export default function App() {
                 onBack={backToBoard}
                 onBackToCategory={backToCategory}
                 onGoHome={goHome}
-                categoryName={category ? category.name : null}
+                categoryName={parentName}
               />
             )
           )}
@@ -140,7 +150,7 @@ export default function App() {
               onBack={backToBoard}
               onBackToCategory={backToCategory}
               onGoHome={goHome}
-              categoryName={category ? category.name : null}
+              categoryName={parentName}
             />
           )}
         </main>

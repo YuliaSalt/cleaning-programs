@@ -37,8 +37,17 @@ export const groups = [
 ]
 
 // יחידות עצמאיות (2 משמרות: בוקר / ערב). אייקון אחיד וניטרלי לכל היחידות.
+// יחידה עם rooms נפתחת תחילה למסך בחירת חדר; כל חדר הוא תת-יחידה עם נתונים נפרדים.
 export const standaloneUnits = [
-  { id: 'recovery', name: 'התאוששות', icon: 'department' },
+  {
+    id: 'recovery',
+    name: 'התאוששות',
+    icon: 'department',
+    rooms: [
+      { id: 'recovery-1', name: 'התאוששות 1' },
+      { id: 'recovery-2', name: 'התאוששות 2' },
+    ],
+  },
   { id: 'or', name: 'חדרי ניתוח', icon: 'department' },
   { id: 'ivf', name: 'IVF', icon: 'department' },
   { id: 'cath', name: 'צינתורים', icon: 'department' },
@@ -55,11 +64,21 @@ export function getAllUnits() {
       groupName: g.name,
     }))
   )
-  const standalone = standaloneUnits.map((u) => ({
-    ...u,
-    groupId: null,
-    groupName: null,
-  }))
+  // יחידות עצמאיות; יחידה עם rooms מתרחבת גם לתת-היחידות (חדרים) שלה.
+  const standalone = standaloneUnits.flatMap((u) => {
+    const base = { ...u, groupId: null, groupName: null }
+    if (!u.rooms) return [base]
+    const children = u.rooms.map((r) => ({
+      id: r.id,
+      name: r.name,
+      icon: u.icon,
+      shifts: u.shifts,
+      parentId: u.id,
+      groupId: null,
+      groupName: null,
+    }))
+    return [base, ...children]
+  })
   return [...fromGroups, ...standalone]
 }
 

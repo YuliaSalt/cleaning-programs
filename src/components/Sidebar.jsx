@@ -1,7 +1,10 @@
 import { useState } from 'react'
-import { categories, getCategoryUnits } from '../data/departments.js'
+import { categories, getCategoryUnits, findUnit } from '../data/departments.js'
 
 export default function Sidebar({ activeUnitId, onSelectUnit, onGoHome, onOpenDashboard, dashboardActive }) {
+  // כשיחידה פעילה היא תת-יחידה (חדר), נסמן גם את יחידת האב ברשימה.
+  const activeUnit = activeUnitId ? findUnit(activeUnitId) : null
+  const activeParentId = activeUnit && activeUnit.parentId ? activeUnit.parentId : null
   // קטגוריות פתוחות כברירת מחדל
   const [open, setOpen] = useState(() =>
     Object.fromEntries(categories.map((c) => [c.id, true]))
@@ -50,7 +53,7 @@ export default function Sidebar({ activeUnitId, onSelectUnit, onGoHome, onOpenDa
               {getCategoryUnits(c.id).map((u) => (
                 <button
                   key={u.id}
-                  className={'tree-leaf' + (activeUnitId === u.id ? ' active' : '')}
+                  className={'tree-leaf' + (activeUnitId === u.id || activeParentId === u.id ? ' active' : '')}
                   onClick={() => onSelectUnit(u.id)}
                 >
                   <span>{u.name}</span>
