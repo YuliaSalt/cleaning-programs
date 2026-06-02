@@ -1,6 +1,7 @@
 // העברת משמרת – אפיון גסטרו + שמירה/קריאה מהארכיון דרך ה-StorageAdapter.
 
 import { storage } from './storage.js'
+import { pushHandover } from './cloudSync.js'
 
 // בלוק 1 – דיווח ובקרה (יש/אין דינמי עם טקסט חופשי)
 export const GASTRO_REPORT_ITEMS = [
@@ -126,6 +127,7 @@ export function saveHandover(record) {
   const rec = { ...record, savedAt: record.savedAt || new Date().toISOString() }
   const key = `${PREFIX}${rec.unitId}:${rec.date}:${rec.shift}:${Date.now()}`
   storage.setJSON(key, rec)
+  pushHandover(key, rec) // גיבוי/סנכרון ענן (best-effort, לא חוסם)
   return key
 }
 

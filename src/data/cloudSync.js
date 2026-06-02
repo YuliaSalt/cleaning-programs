@@ -1,15 +1,24 @@
-// סנכרון דוחות ביצוע אל/מ-Google Sheets (גיבוי ענן, offline-first).
+// סנכרון דוחות ביצוע והעברות משמרת אל/מ-Google Sheets (גיבוי ענן, offline-first).
 //
 // עיקרון: localStorage הוא האחסון המהיר/אופליין. כל שמירה ומחיקה נדחפת גם לענן,
-// ובעליית האפליקציה מושכים מהענן וממזגים חזרה – כך שאם הדפדפן התאפס, הדוחות משוחזרים.
+// ובעליית האפליקציה מושכים מהענן וממזגים חזרה – כך שאם הדפדפן התאפס, הנתונים משוחזרים.
+// מסונכרנים שני סוגי רשומות לפי קידומת המפתח:
+//   hmc:plan:...      – דוחות ביצוע (סקשני חתימה נעולים)
+//   hmc:handover:...  – העברות משמרת
 //
-// המבנה בגיליון (טאב "Reports"): key | savedAt | unitId | tabId | by | payload(JSON)
+// המבנה בגיליון (טאב טכני "ReportsRaw"): key | savedAt | payload(JSON) – משותף לשני הסוגים.
 
 import { storage } from './storage.js'
 import { SHEETS_API_URL, cloudEnabled } from './cloudConfig.js'
 
 const QUEUE_KEY = 'hmc:syncqueue'
 const REPORT_PREFIX = 'hmc:plan:'
+const HANDOVER_PREFIX = 'hmc:handover:'
+
+// מפתח שמסונכרן לענן (דוח ביצוע או העברת משמרת).
+function isSyncableKey(key) {
+  return key.indexOf(REPORT_PREFIX) === 0 || key.indexOf(HANDOVER_PREFIX) === 0
+}
 
 /* ===================== תור ניסיונות חוזרים (לאופליין) ===================== */
 function loadQueue() {
@@ -52,6 +61,12 @@ export async function pushReport(key, rec, action = 'save', readable = null) {
   } catch {
     enqueue(item)
   }
+}
+
+// דחיפת העברת משמרת לענן – אותו מנגנון כמו דוחות, ללא ייצוג קריא נפרד.
+// כל שמירה היא מפתח חדש (חותמת זמן), ולכן זה לוג מצטבר ללא דריסה.
+export function pushHandover(key, rec) {
+  return pushReport(key, rec, 'save', null)
 }
 
 // ניסיון חוזר לכל הפריטים שבתור.
@@ -127,7 +142,7 @@ export async function pullReports() {
   let merged = 0
   for (const row of payload.data) {
     const key = row.key
-    if (!key || key.indexOf(REPORT_PREFIX) !== 0) continue
+    if (!key || !isSyncableKey(key)) continue
     let cloudRec = row.payload
     if (typeof cloudRec === 'string') {
       try { cloudRec = JSON.parse(cloudRec) } catch { continue }
