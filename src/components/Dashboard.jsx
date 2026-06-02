@@ -2,6 +2,13 @@ import { categories, getCategoryUnits } from '../data/departments.js'
 import { computeUnitProgress } from '../data/progress.js'
 import ScreenHeader from './ScreenHeader.jsx'
 
+// צבע לפי אחוז ביצוע: 0–60% אדום · 60–90% צהוב · 90–100% מנטה
+function progColor(v) {
+  if (v >= 90) return '#1faf8f' // מנטה
+  if (v >= 60) return '#e6b400' // צהוב
+  return '#e2554e' // אדום
+}
+
 /* טבעת התקדמות עגולה (שעון) */
 function Ring({ value, label }) {
   const size = 78
@@ -11,6 +18,7 @@ function Ring({ value, label }) {
   const has = value !== null && value !== undefined
   const pct = has ? value : 0
   const offset = c - (pct / 100) * c
+  const color = has ? progColor(pct) : null
   return (
     <div className="ring">
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -30,13 +38,21 @@ function Ring({ value, label }) {
             r={r}
             strokeWidth={stroke}
             fill="none"
+            stroke={color}
             strokeDasharray={c}
             strokeDashoffset={offset}
             strokeLinecap="round"
             transform={`rotate(-90 ${size / 2} ${size / 2})`}
           />
         )}
-        <text className="ring-text" x="50%" y="50%" dominantBaseline="central" textAnchor="middle">
+        <text
+          className="ring-text"
+          x="50%"
+          y="50%"
+          dominantBaseline="central"
+          textAnchor="middle"
+          fill={color || undefined}
+        >
           {has ? pct + '%' : '—'}
         </text>
       </svg>
