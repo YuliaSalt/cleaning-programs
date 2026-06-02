@@ -101,8 +101,6 @@ function GeneralForm({ unit, onSent, onReset }) {
 
   return (
     <div className="glass plan-card ho-form">
-      <div className="ho-title">העברת משמרת - {unit.name}</div>
-
       <div className="ho-subrow">
         <span className="ho-date">מחלקה: {unit.name} · תאריך: {dateHe}</span>
       </div>
@@ -257,7 +255,6 @@ function GeneralView({ unit, record }) {
   const time = record.savedAt ? new Date(record.savedAt).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : ''
   return (
     <div className="glass plan-card ho-form">
-      <div className="ho-title">העברת משמרת - {unit.name}</div>
       <div className="ho-subrow">
         <span className="ho-date">מחלקה: {unit.name} · תאריך: {record.date}{time ? ' · שעה: ' + time : ''} · משמרת {record.shift}</span>
       </div>

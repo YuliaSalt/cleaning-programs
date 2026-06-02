@@ -18,7 +18,6 @@ export default function CategoryView({ categoryId, onSelectUnit, onGoHome }) {
         {units.map((u) => (
           <button key={u.id} className="unit-card" onClick={() => onSelectUnit(u.id)}>
             <span className="uc-name">{u.name}</span>
-            <span className="uc-meta">{u.shifts.join(' · ')}</span>
           </button>
         ))}
       </div>

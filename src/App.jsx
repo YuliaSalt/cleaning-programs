@@ -11,7 +11,21 @@ import Dashboard from './components/Dashboard.jsx'
 import { findUnit, getCategory, findCategoryOfUnit } from './data/departments.js'
 import { syncReports } from './data/cloudSync.js'
 
+// זיהוי מובייל לפי רוחב המסך – מאפשר פריסת מובייל ייעודית (ללא סרגל צד).
+function useIsMobile(breakpoint = 900) {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth <= breakpoint
+  )
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= breakpoint)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [breakpoint])
+  return isMobile
+}
+
 export default function App() {
+  const isMobile = useIsMobile()
   // ניווט מבוסס מצב: דשבורד | קטגוריה | יחידה | חלון | בית
   const [categoryId, setCategoryId] = useState(null)
   const [unitId, setUnitId] = useState(null)
@@ -73,19 +87,20 @@ export default function App() {
 
   return (
     <div className="app-root">
-      <header className="app-header">
-        <button className="app-logo-btn" onClick={goHome} aria-label="מסך ראשי">
-          <img className="app-logo" src={import.meta.env.BASE_URL + 'logo.png'} alt="הרצליה מדיקל סנטר" />
-        </button>
-      </header>
+      {/* לוגו בית החולים כסימן מים רקעי, חצי-שקוף */}
+      <div className="app-watermark" aria-hidden="true">
+        <img src={import.meta.env.BASE_URL + 'logo.png'} alt="" />
+      </div>
       <div className="app-shell">
-        <Sidebar
-          activeUnitId={unitId}
-          onSelectUnit={selectUnit}
-          onGoHome={goHome}
-          onOpenDashboard={openDashboard}
-          dashboardActive={showDashboard}
-        />
+        {!isMobile && (
+          <Sidebar
+            activeUnitId={unitId}
+            onSelectUnit={selectUnit}
+            onGoHome={goHome}
+            onOpenDashboard={openDashboard}
+            dashboardActive={showDashboard}
+          />
+        )}
         <main className="main-area">
           {showDashboard && (
             <Dashboard onGoHome={goHome} onSelectUnit={selectUnit} />

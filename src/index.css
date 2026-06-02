@@ -44,6 +44,13 @@ body,
   margin: 0;
 }
 
+/* מניעה מוחלטת של גלילה אופקית במובייל */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   font-family: 'Heebo', system-ui, 'Segoe UI', Arial, sans-serif;
   color: var(--ink);
@@ -53,6 +60,23 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.01em;
+}
+
+/* ===== לוגו בית החולים כסימן מים רקעי, חצי-שקוף ===== */
+.app-watermark {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.app-watermark img {
+  width: min(58vw, 440px);
+  max-width: 80%;
+  opacity: 0.05;
+  filter: grayscale(0.15);
 }
 
 /* אורות רקע גדולים ומטושטשים – תחושת חלל זוהר עתידני */
@@ -96,6 +120,7 @@ h1, h2, h3, h4 {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .app-header {
@@ -164,9 +189,9 @@ h1, h2, h3, h4 {
 /* ===== סרגל צד ===== */
 .sidebar {
   position: sticky;
-  top: var(--header-h);
+  top: 0;
   align-self: start;
-  height: calc(100vh - var(--header-h));
+  height: 100vh;
   padding: 26px 20px;
   background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(24px) saturate(130%);
@@ -2369,29 +2394,25 @@ textarea.input {
   flex: 1;
 }
 
-/* ===== רספונסיב ===== */
+/* ===== רספונסיב – פריסת מובייל ייעודית (Mobile-First) ===== */
 @media (max-width: 900px) {
+  /* ללא סרגל צד במובייל – תוכן ברוחב מלא */
   .app-shell {
     grid-template-columns: 1fr;
-  }
-  .sidebar {
-    position: relative;
-    top: 0;
-    height: auto;
-    border-inline-start: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.7);
   }
   .form-row {
     grid-template-columns: 1fr;
   }
+  /* כל הכרטיסים/טפסים ברוחב 100% עם 16px ריווח צדדי */
   .main-area {
-    padding: 24px 18px 56px;
+    padding: 18px 16px 56px;
+    width: 100%;
   }
-  .app-logo {
-    height: 34px;
-  }
-  .cat-grid {
-    grid-template-columns: 1fr;
+  /* רשת 2 עמודות במובייל לקטגוריות וליחידות */
+  .cat-grid,
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
   }
   .ho-2col {
     grid-template-columns: 1fr;
@@ -2399,5 +2420,88 @@ textarea.input {
   }
   .occ-numbers {
     grid-template-columns: 1fr 1fr;
+  }
+  /* טפסים/כרטיסים תופסים את כל הרוחב, בלי לחרוג מהמסך */
+  .plan-wrap,
+  .plan-wrap.wide {
+    max-width: 100%;
+  }
+}
+
+/* ===== טלפונים – הקטנת כותרות וריווח, התאמה ל-1–2 שורות בעברית ===== */
+@media (max-width: 600px) {
+  .main-area {
+    padding: 16px 16px 48px;
+  }
+  /* טיפוגרפיה – כותרות קטנות יותר כדי למנוע שבירת מילים מביכה */
+  .page-title {
+    font-size: 20px;
+  }
+  .section-head h2 {
+    font-size: 17px;
+  }
+  .cat-card .cc-name {
+    font-size: 17px;
+  }
+  .cat-card .cc-sub {
+    font-size: 12px;
+  }
+  .cat-card .cc-count {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+  .unit-card .uc-name {
+    font-size: 17px;
+  }
+  .dash-btn .db-title {
+    font-size: 18px;
+  }
+  .dash-btn .db-sub {
+    font-size: 12px;
+  }
+  .window-card h3 {
+    font-size: 16px;
+  }
+  .window-card p {
+    font-size: 13px;
+  }
+  .ho-title {
+    font-size: 19px;
+  }
+  /* כותרות לא נשברות בצורה מכוערת */
+  .page-title,
+  .section-head h2,
+  .cat-card .cc-name,
+  .unit-card .uc-name {
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+  /* כרטיסים קומפקטיים יותר במסך צר */
+  .cat-card {
+    min-height: 112px;
+    padding: 20px 14px;
+    gap: 6px;
+  }
+  .unit-card {
+    min-height: 92px;
+    padding: 20px 14px;
+  }
+  .cat-grid,
+  .card-grid {
+    gap: 12px;
+    margin-bottom: 26px;
+  }
+  .plan-card,
+  .section-card,
+  .ho-form,
+  .window-card {
+    padding: 18px 16px;
+  }
+  .glass {
+    border-radius: var(--radius);
+  }
+  /* תאי בחירה (תדירות/משמרת/תחנות) ברוחב מלא וקריאים */
+  .occ-numbers {
+    grid-template-columns: 1fr;
   }
 }

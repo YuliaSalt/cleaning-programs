@@ -14,19 +14,6 @@ export default function Sidebar({ activeUnitId, onSelectUnit, onGoHome, onOpenDa
 
   return (
     <aside className="sidebar">
-      <button
-        className="brand"
-        onClick={onGoHome}
-        style={{ background: 'transparent', border: 'none', width: '100%', cursor: 'pointer' }}
-      >
-        <span style={{ textAlign: 'right' }}>
-          <span className="brand-title" style={{ display: 'block' }}>
-            הרצליה מדיקל סנטר
-          </span>
-          <span className="brand-sub">תוכניות עבודה · כוחות עזר</span>
-        </span>
-      </button>
-
       <button className="nav-flat home" onClick={onGoHome}>
         <span className="bl-arrow">→</span> מסך ראשי
       </button>
@@ -38,7 +25,6 @@ export default function Sidebar({ activeUnitId, onSelectUnit, onGoHome, onOpenDa
         דשבורד ביצועים
       </button>
 
-      <div className="nav-section-label">קטגוריות</div>
       {categories.map((c) => (
         <div className="tree-group" key={c.id}>
           <button
@@ -57,7 +43,6 @@ export default function Sidebar({ activeUnitId, onSelectUnit, onGoHome, onOpenDa
                   onClick={() => onSelectUnit(u.id)}
                 >
                   <span>{u.name}</span>
-                  <span className="tree-badge">{u.shifts.length} משמרות</span>
                 </button>
               ))}
             </div>

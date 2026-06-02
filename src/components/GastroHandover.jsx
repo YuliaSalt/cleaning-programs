@@ -89,8 +89,6 @@ function HandoverForm({ unit, onSent, onReset }) {
 
   return (
     <div className="glass plan-card ho-form">
-      <div className="ho-title">העברת משמרת גסטרו</div>
-
       <div className="ho-subrow">
         <span className="ho-date">תאריך: {dateHe} · שעה: {timeHe}</span>
       </div>
@@ -198,7 +196,6 @@ function HandoverView({ record }) {
   }
   return (
     <div className="glass plan-card ho-form">
-      <div className="ho-title">העברת משמרת גסטרו</div>
       <div className="ho-subrow">
         <span className="ho-date">
           תאריך: {record.date}

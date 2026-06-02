@@ -45,7 +45,6 @@ export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, 
 
       <div className="section-head">
         <h2>לוח חלונות</h2>
-        <span className="pill">{unit.shifts.length} משמרות · {unit.shifts.join(' / ')}</span>
       </div>
 
       <div className="card-grid">
