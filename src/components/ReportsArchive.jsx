@@ -20,6 +20,7 @@ function ReportDetail({ unit, report, onBack }) {
 
       <div className="report-print">
         <div className="rp-head">
+          <img className="rp-logo" src={import.meta.env.BASE_URL + 'logo.png'} alt="הרצליה מדיקל סנטר" />
           <div className="rp-brand">הרצליה מדיקל סנטר · כוחות עזר</div>
           <h2 className="rp-title">{report.title}</h2>
           <div className="rp-meta">

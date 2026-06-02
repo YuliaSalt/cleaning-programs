@@ -1739,6 +1739,15 @@ h1, h2, h3, h4 {
   margin-bottom: 18px;
 }
 
+/* לוגו HMC בראש דוח שמור / דוח ניקיון להדפסה */
+.rp-logo {
+  display: block;
+  height: 48px;
+  width: auto;
+  margin: 0 auto 12px;
+  filter: drop-shadow(0 3px 8px rgba(45, 115, 150, 0.2));
+}
+
 .rp-brand {
   font-size: 12px;
   font-weight: 700;
