@@ -71,7 +71,7 @@ function makeBuilder() {
     }
     return out
   }
-  const para = (str, { s = 36, b = false, color = '#1f2d36', align = 'right', indent = 0, gap = 0.34 } = {}) => {
+  const para = (str, { s = 38, b = false, color = '#1f2d36', align = 'right', indent = 0, gap = 0.34 } = {}) => {
     const maxW = W - PAD * 2 - indent
     for (const ln of wrap(str, s, b, maxW)) {
       y += s
@@ -80,14 +80,21 @@ function makeBuilder() {
     }
   }
   const statusRow = (label, status, color, b = false) => {
-    const s = 37
-    y += s
-    ops.push({ t: 'txt', str: label, s, b, color: '#1f2d36', align: 'right', x: W - PAD, y })
-    ops.push({ t: 'txt', str: status, s, b: true, color, align: 'left', x: PAD, y })
+    const s = 38
+    // התווית נשברת לשורות כדי לא לחרוג מהמסגרת; הסטטוס נשאר בצד שמאל בשורה הראשונה
+    setFont(m, s, true)
+    const reserve = m.measureText(String(status)).width + 36
+    const lines = wrapLine(label, s, b, W - PAD * 2 - reserve)
+    lines.forEach((ln, i) => {
+      y += s
+      ops.push({ t: 'txt', str: ln, s, b, color: '#1f2d36', align: 'right', x: W - PAD, y })
+      if (i === 0) ops.push({ t: 'txt', str: status, s, b: true, color, align: 'left', x: PAD, y })
+      if (i < lines.length - 1) y += s * 0.3
+    })
     y += s * 0.4
   }
   const kv = (label, value, note) => {
-    const s = 36
+    const s = 38
     y += s
     ops.push({ t: 'txt', str: label + ':', s, b: true, color: '#0a4d8c', align: 'right', x: W - PAD, y })
     ops.push({ t: 'txt', str: value && String(value).trim() ? String(value) : '—', s, b: false, color: '#1f2d36', align: 'left', x: PAD, y })
@@ -97,9 +104,9 @@ function makeBuilder() {
   const band = (title) => {
     y += 24
     const top = y
-    const H = 74
+    const H = 80
     ops.push({ t: 'rect', x: PAD - 18, y: top, w: W - (PAD - 18) * 2, h: H, fill: '#dff1f9', r: 16 })
-    ops.push({ t: 'txt', str: title, s: 40, b: true, color: '#0a4d8c', align: 'right', x: W - PAD, y: top + 52 })
+    ops.push({ t: 'txt', str: title, s: 42, b: true, color: '#0a4d8c', align: 'right', x: W - PAD, y: top + 56 })
     y = top + H + 18
   }
   const line = () => { y += 12; ops.push({ t: 'line', y }); y += 4 }
@@ -109,7 +116,7 @@ function makeBuilder() {
     gap(26)
     line()
     gap(8)
-    para('הרצליה מדיקל סנטר', { s: 32, b: true, color: '#8194a0', align: 'center' })
+    para('הרצליה מדיקל סנטר', { s: 36, b: true, color: '#8194a0', align: 'center' })
     const H = Math.ceil(y + PAD)
     const canvas = document.createElement('canvas')
     canvas.width = W
@@ -152,9 +159,9 @@ function header(b, title, record) {
   const time = record.savedAt
     ? new Date(record.savedAt).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })
     : ''
-  b.para(title, { s: 54, b: true, color: '#0a4d8c' })
-  b.para(`${record.unitName || ''} · ${record.date}${time ? ' · ' + time : ''} · משמרת ${record.shift}`, { s: 34, color: '#5b7493' })
-  if (record.nurse) b.para(`אחות מוסרת (חתימה): ${record.nurse}`, { s: 36, b: true, color: '#0a4d8c' })
+  b.para(title, { s: 56, b: true, color: '#0a4d8c' })
+  b.para(`${record.unitName || ''} · ${record.date}${time ? ' · ' + time : ''} · משמרת ${record.shift}`, { s: 36, color: '#5b7493' })
+  if (record.nurse) b.para(`אחות מוסרת (חתימה): ${record.nurse}`, { s: 38, b: true, color: '#0a4d8c' })
   b.line()
 }
 
@@ -167,7 +174,7 @@ export function buildHandoverImage(record) {
   for (const it of GASTRO_REPORT_ITEMS) {
     const r = (record.reports && record.reports[it.id]) || {}
     b.statusRow(it.label, r.has ? 'יש' : 'אין', r.has ? '#15a34a' : '#8194a0', true)
-    if (r.has && r.text && r.text.trim()) b.para(r.text.trim(), { s: 32, color: '#33424d', indent: 30, gap: 0.32 })
+    if (r.has && r.text && r.text.trim()) b.para(r.text.trim(), { s: 34, color: '#33424d', indent: 30, gap: 0.32 })
     b.gap(6)
   }
   for (const blk of GASTRO_CHECK_BLOCKS) {
@@ -201,7 +208,7 @@ export function buildGeneralHandoverImage(record) {
   for (const it of GEN_REPORT_ITEMS) {
     const r = (record.reports && record.reports[it.id]) || {}
     b.statusRow(it.label, r.has ? 'יש' : 'אין', r.has ? '#15a34a' : '#8194a0', true)
-    if (r.has && r.text && r.text.trim()) b.para(r.text.trim(), { s: 32, color: '#33424d', indent: 30, gap: 0.32 })
+    if (r.has && r.text && r.text.trim()) b.para(r.text.trim(), { s: 34, color: '#33424d', indent: 30, gap: 0.32 })
     b.gap(6)
   }
 

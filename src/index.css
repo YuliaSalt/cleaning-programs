@@ -1382,12 +1382,13 @@ h1, h2, h3, h4 {
   color: var(--muted);
 }
 
-/* לוגו קומפקטי בכותרות המסך */
+/* לוגו HMC בכל עמוד – שורה משלו, ממורכז, מעל הכותרת (התוכן יורד מעט) */
 .sh-logo {
-  height: 32px;
+  display: block;
+  height: 42px;
   width: auto;
-  flex: none;
-  filter: drop-shadow(0 3px 8px rgba(45, 115, 150, 0.22));
+  margin: 2px auto 16px;
+  filter: drop-shadow(0 4px 10px rgba(45, 115, 150, 0.25));
 }
 
 /* ===== מסך ראשי – כפתור דשבורד + רשת קטגוריות ===== */
