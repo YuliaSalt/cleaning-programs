@@ -1,18 +1,20 @@
 import { useState } from 'react'
 import ScreenHeader from './ScreenHeader.jsx'
 import { specialProcedures } from '../data/departments.js'
-import CystoscopyChecklist from './CystoscopyChecklist.jsx'
+import ProcedureChecklist from './ProcedureChecklist.jsx'
+import { PROCEDURE_CHECKLISTS } from '../data/procedureChecklists.js'
 
 // נרמול פריט (מחרוזת פשוטה או אובייקט עם רישום באנגלית + משמעות בעברית).
 function normalize(p) {
   if (typeof p === 'string') return { id: p, title: p, sub: null }
-  return { id: p.id, title: p.en, sub: p.he }
+  return { id: p.id, title: p.en || p.he, sub: p.en ? p.he : null }
 }
 
 export default function SpecialProcedures({ unit, onBack, onGoHome, onBackToCategory, categoryName }) {
   const [proc, setProc] = useState(null)
 
   const procLabel = proc ? (proc.sub ? `${proc.title} · ${proc.sub}` : proc.title) : ''
+  const checklist = proc ? PROCEDURE_CHECKLISTS[proc.id] : null
 
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBackToCategory })
@@ -24,8 +26,12 @@ export default function SpecialProcedures({ unit, onBack, onGoHome, onBackToCate
     return (
       <div>
         <ScreenHeader title={procLabel} onBack={() => setProc(null)} trail={trail} />
-        {proc.id === 'cystoscopy' ? (
-          <CystoscopyChecklist />
+        {checklist ? (
+          <ProcedureChecklist
+            title={checklist.title}
+            waTitle={checklist.waTitle}
+            blocks={checklist.blocks}
+          />
         ) : (
           <div className="glass plan-card" style={{ padding: 40, textAlign: 'center' }}>
             <p className="empty-hint" style={{ fontSize: 16 }}>התוכן יתווסף בהמשך.</p>

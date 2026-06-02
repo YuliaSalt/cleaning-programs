@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CYSTO_BLOCKS, CYSTO_SIGN_NOTE, emptyCystoChecks } from '../data/cystoscopy.js'
+import { SIGN_NOTE, emptyChecks } from '../data/procedureChecklists.js'
 import { getDeviceNurse, rememberDeviceNurse } from '../data/handover.js'
 
 function WhatsAppIcon() {
@@ -11,8 +11,8 @@ function WhatsAppIcon() {
   )
 }
 
-export default function CystoscopyChecklist() {
-  const [checks, setChecks] = useState(() => emptyCystoChecks())
+export default function ProcedureChecklist({ title, waTitle, blocks }) {
+  const [checks, setChecks] = useState(() => emptyChecks(blocks))
   const [nurse, setNurse] = useState(() => getDeviceNurse())
   const [signed, setSigned] = useState(false) // חתימה = שמירת השם; חובה לפני שליחה
   const [signErr, setSignErr] = useState(false)
@@ -37,16 +37,18 @@ export default function CystoscopyChecklist() {
   }
 
   function reset() {
-    setChecks(emptyCystoChecks())
+    setChecks(emptyChecks(blocks))
     setSigned(false)
   }
 
   // איסוף הפריטים שעדיין מסומנים X (חסרים), מקובצים לפי סעיף.
   function missingByBlock() {
-    return CYSTO_BLOCKS.map((blk) => ({
-      title: blk.title,
-      items: blk.items.filter((_, i) => !checks[blk.id][i]),
-    })).filter((g) => g.items.length > 0)
+    return blocks
+      .map((blk) => ({
+        title: blk.title,
+        items: blk.items.filter((_, i) => !checks[blk.id][i]),
+      }))
+      .filter((g) => g.items.length > 0)
   }
 
   function sendWhatsApp() {
@@ -61,7 +63,7 @@ export default function CystoscopyChecklist() {
     const timeHe = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })
 
     // ללא אימוג'ים/סימנים בתחילת שורה (חלקם נשלחים כסימני שאלה במכשירים מסוימים)
-    const lines = ['ציסטוסקופיה (Cystoscopy) - ציוד חסר', `תאריך ${dateHe} שעה ${timeHe}`]
+    const lines = [waTitle, `תאריך ${dateHe} שעה ${timeHe}`]
     if (nurse.trim()) lines.push(`אחות: ${nurse.trim()}`)
     lines.push('')
     for (const g of groups) {
@@ -81,9 +83,9 @@ export default function CystoscopyChecklist() {
 
   return (
     <div className="glass plan-card ho-form">
-      <div className="ho-title">צ'ק-ליסט הכנת ציוד · Cystoscopy</div>
+      <div className="ho-title">{title}</div>
 
-      {CYSTO_BLOCKS.map((blk) => (
+      {blocks.map((blk) => (
         <div className="ho-block" key={blk.id}>
           <div className="ho-block-title">{blk.title}</div>
           {blk.note && <div className="cysto-note">{blk.note}</div>}
@@ -105,8 +107,7 @@ export default function CystoscopyChecklist() {
 
       {/* שם האחות – נשמר מקומית ומופיע אוטומטית בכניסה הבאה */}
       <div className="ho-block">
-        <div className="ho-block-title">חתימה</div>
-        <div className="cysto-sign-note">{CYSTO_SIGN_NOTE}</div>
+        <div className="cysto-sign-note">{SIGN_NOTE}</div>
         <div className="field">
           <label>שם האחות <span className="req">*</span></label>
           <input
