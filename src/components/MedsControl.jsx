@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, Fragment } from 'react'
 import ScreenHeader from './ScreenHeader.jsx'
 import { getMedList, emptyMedState, saveMedReport, listMedReports } from '../data/meds.js'
 import { getDeviceNurse, rememberDeviceNurse, HE_MONTHS } from '../data/handover.js'
@@ -66,33 +66,40 @@ function MedForm({ unit, onSaved }) {
       </div>
 
       <div className="med-list">
-        {list.map((name, i) => {
+        {list.map((med, i) => {
           const it = items[i]
           const st = STATUS[it.status]
+          const showGroup = med.group && (i === 0 || list[i - 1].group !== med.group)
           return (
-            <div key={i} className={'med-row ' + st.cls}>
-              <button type="button" className="med-status" onClick={() => cycle(i)} title="לחיצה להחלפת סטטוס">
-                <span className="med-mark">{st.mark}</span>
-                <span className="med-status-label">{st.label}</span>
-              </button>
-              <span className="med-name">{name}</span>
-              <div className="med-expiry">
-                <label>תוקף</label>
-                <input className="input" type="date" value={it.expiry} onChange={(e) => update(i, { expiry: e.target.value })} />
-              </div>
-              {it.status === 'expired' && (
-                <div className="med-actions">
-                  <button
-                    type="button"
-                    className={'med-act order' + (it.order ? ' on' : '')}
-                    onClick={() => update(i, { order: !it.order })}
-                  >
-                    {it.order ? '✓ סומן להזמנה' : 'חסר – יש להזמין'}
-                  </button>
-                  <button type="button" className="med-act replace" onClick={() => replaced(i)}>הוחלף (עדכון תוקף)</button>
+            <Fragment key={i}>
+              {showGroup && <div className="med-group">{med.group}</div>}
+              <div className={'med-row ' + st.cls}>
+                <button type="button" className="med-status" onClick={() => cycle(i)} title="לחיצה להחלפת סטטוס">
+                  <span className="med-mark">{st.mark}</span>
+                  <span className="med-status-label">{st.label}</span>
+                </button>
+                <span className="med-name">
+                  {med.name}
+                  {med.sku && <span className="med-sku">מק״ט {med.sku}</span>}
+                </span>
+                <div className="med-expiry">
+                  <label>תוקף</label>
+                  <input className="input" type="date" value={it.expiry} onChange={(e) => update(i, { expiry: e.target.value })} />
                 </div>
-              )}
-            </div>
+                {it.status === 'expired' && (
+                  <div className="med-actions">
+                    <button
+                      type="button"
+                      className={'med-act order' + (it.order ? ' on' : '')}
+                      onClick={() => update(i, { order: !it.order })}
+                    >
+                      {it.order ? '✓ סומן להזמנה' : 'חסר – יש להזמין'}
+                    </button>
+                    <button type="button" className="med-act replace" onClick={() => replaced(i)}>הוחלף (עדכון תוקף)</button>
+                  </div>
+                )}
+              </div>
+            </Fragment>
           )
         })}
       </div>
@@ -114,18 +121,25 @@ function MedView({ unit, record }) {
       <div className="ho-block-title">בקרת תרופות · {monthLabel(record.month)}</div>
       {record.by && <div className="ho-nurse">מבצע הבקרה: <b>{record.by}</b></div>}
       <div className="med-list">
-        {list.map((name, i) => {
+        {list.map((med, i) => {
           const it = (record.items && record.items[i]) || { status: 'ok', expiry: '' }
           const st = STATUS[it.status] || STATUS.ok
+          const showGroup = med.group && (i === 0 || list[i - 1].group !== med.group)
           return (
-            <div key={i} className={'med-row ' + st.cls}>
-              <span className="med-status static"><span className="med-mark">{st.mark}</span></span>
-              <span className="med-name">{name}</span>
-              <span className="med-view-meta">
-                {it.expiry ? 'תוקף: ' + it.expiry : ''}
-                {it.status === 'expired' && it.order ? ' · להזמנה' : ''}
-              </span>
-            </div>
+            <Fragment key={i}>
+              {showGroup && <div className="med-group">{med.group}</div>}
+              <div className={'med-row ' + st.cls}>
+                <span className="med-status static"><span className="med-mark">{st.mark}</span></span>
+                <span className="med-name">
+                  {med.name}
+                  {med.sku && <span className="med-sku">מק״ט {med.sku}</span>}
+                </span>
+                <span className="med-view-meta">
+                  {it.expiry ? 'תוקף: ' + it.expiry : ''}
+                  {it.status === 'expired' && it.order ? ' · להזמנה' : ''}
+                </span>
+              </div>
+            </Fragment>
           )
         })}
       </div>

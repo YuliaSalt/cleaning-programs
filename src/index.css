@@ -2655,6 +2655,37 @@ textarea.input {
 }
 
 /* ===== בקרת תרופות חודשית ===== */
+/* התראת צבע לכרטיס "בקרת תרופות" בלוח החלונות */
+.window-card.alert-yellow {
+  border-color: rgba(230, 180, 0, 0.85);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 244, 200, 0.85));
+}
+.window-card.alert-yellow h3 {
+  color: #9a7b00;
+}
+.window-card.alert-red {
+  border-color: rgba(226, 85, 78, 0.9);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 220, 218, 0.9));
+}
+.window-card.alert-red h3 {
+  color: #c0392b;
+}
+
+.med-group {
+  margin: 16px 2px 2px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.med-sku {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
 .med-list {
   display: flex;
   flex-direction: column;

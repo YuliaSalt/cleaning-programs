@@ -1,8 +1,16 @@
 import { getUnitWindows, getCurrentShift } from '../data/departments.js'
+import { listMedReports } from '../data/meds.js'
+import { medsAlertLevel } from '../data/shiftAlert.js'
 import ScreenHeader from './ScreenHeader.jsx'
+
+const monthKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
 
 export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, onBack, categoryName }) {
   const shift = getCurrentShift()
+
+  // בקרת תרופות נחתמה החודש? (לצביעת כפתור "בקרת תרופות חודשית")
+  const medsDone = listMedReports(unit.id).some((r) => r.record.month === monthKey())
+  const medsLevel = medsAlertLevel(medsDone)
 
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBack })
@@ -48,7 +56,8 @@ export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, 
           <div
             key={w.id}
             className={
-              'window-card' + (w.enabled ? ' clickable' : ' disabled')
+              'window-card' + (w.enabled ? ' clickable' : ' disabled') +
+              (w.id === 'meds' && medsLevel ? ' alert-' + medsLevel : '')
             }
             role={w.enabled ? 'button' : undefined}
             tabIndex={w.enabled ? 0 : undefined}

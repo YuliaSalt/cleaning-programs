@@ -49,3 +49,12 @@ export function freqAlertLevel(tabId, done, now = new Date()) {
   }
   return null
 }
+
+// בקרת תרופות חודשית: צהוב מה-20 לחודש, אדום מה-25, כל עוד לא נחתם החודש.
+export function medsAlertLevel(done, now = new Date()) {
+  if (done) return null
+  const d = now.getDate()
+  if (d >= 25) return 'red'
+  if (d >= 20) return 'yellow'
+  return null
+}
