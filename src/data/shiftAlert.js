@@ -18,7 +18,9 @@ export function shiftAlertLevel(shift, done, now = new Date()) {
     return null
   }
   if (shift === 'לילה') {
-    if (t >= M(22)) return null // משמרת לילה חדשה מתחילה – ללא התראה
+    // משמרת לילה 23:00→07:00: בעיצומה (23:00–06:00) ללא התראה; 06:00 צהוב, 07:00 אדום;
+    // נשאר אדום עד שמתחילה משמרת לילה חדשה ב-23:00.
+    if (t >= M(23)) return null
     if (t >= M(7)) return 'red'
     if (t >= M(6)) return 'yellow'
     return null
