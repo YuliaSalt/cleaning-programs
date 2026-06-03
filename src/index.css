@@ -2759,8 +2759,11 @@ textarea.input {
   flex: 1;
   width: auto;
   min-width: 0;
-  max-width: 220px;
-  min-height: 42px;
+  max-width: 170px;
+  min-height: 38px;
+  padding: 7px 10px;
+  font-size: 14px;
+  border-radius: 10px;
 }
 
 .med-actions {
@@ -2840,12 +2843,12 @@ textarea.input {
 .med-stbtn {
   flex: 1;
   min-width: 0;
-  min-height: 40px;
-  padding: 6px 8px;
-  border-radius: 10px;
+  min-height: 36px;
+  padding: 5px 6px;
+  border-radius: 9px;
   border: 1.5px solid rgba(168, 220, 232, 0.7);
   background: #fff;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--muted);
   transition: all 0.14s ease;

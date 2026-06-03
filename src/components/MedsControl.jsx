@@ -39,7 +39,7 @@ function MedForm({ unit, onSaved }) {
   const list = useMemo(() => getMedList(unit.id), [unit.id])
   const [items, setItems] = useState(() => emptyMedState(list))
   const [nurse, setNurse] = useState(() => getDeviceNurse())
-  const [err, setErr] = useState(false)
+  const [err, setErr] = useState('') // '' | 'nurse' | 'expiry'
 
   const now = new Date()
   const dateHe = now.toLocaleDateString('he-IL')
@@ -60,9 +60,16 @@ function MedForm({ unit, onSaved }) {
   // פריטים חסרים/לא בתוקף – לשליחה לוואטסאפ
   const shortItems = list.filter((_, i) => items[i].status === 'missing' || items[i].status === 'expired')
 
+  // לא ניתן לחתום אם לתרופה תקינה חסר תוקף
+  const missingExpiry = list.some((_, i) => items[i].status === 'ok' && !items[i].expiry)
+
   function sign() {
     if (!nurse.trim()) {
-      setErr(true)
+      setErr('nurse')
+      return
+    }
+    if (missingExpiry) {
+      setErr('expiry')
       return
     }
     rememberDeviceNurse(nurse)
@@ -85,7 +92,9 @@ function MedForm({ unit, onSaved }) {
 
   return (
     <div className="glass plan-card ho-form">
-      <div className="med-meta">תאריך: {dateHe} · שעה: {timeHe} · {monthLabel(monthKey())}</div>
+      <div className="ho-subrow">
+        <span className="ho-date">תאריך: {dateHe} · שעה: {timeHe}</span>
+      </div>
 
       <div className="med-list">
         {list.map((med, i) => {
@@ -105,10 +114,10 @@ function MedForm({ unit, onSaved }) {
                 <div className="med-expiry">
                   <label>תוקף</label>
                   <input
-                    className={'input' + (soon ? ' expiry-soon' : '')}
+                    className={'input' + (soon ? ' expiry-soon' : '') + (err === 'expiry' && it.status === 'ok' && !it.expiry ? ' invalid' : '')}
                     type="date"
                     value={it.expiry}
-                    onChange={(e) => update(i, { expiry: e.target.value })}
+                    onChange={(e) => { update(i, { expiry: e.target.value }); if (err === 'expiry') setErr('') }}
                   />
                 </div>
                 {it.status === 'expired' && (
@@ -140,16 +149,17 @@ function MedForm({ unit, onSaved }) {
         <div className="field" style={{ flex: 1, minWidth: 180 }}>
           <label>חתימת אחות <span className="req">*</span></label>
           <input
-            className={'input' + (err && !nurse.trim() ? ' invalid' : '')}
+            className={'input' + (err === 'nurse' ? ' invalid' : '')}
             type="text"
             placeholder="שם מלא"
             value={nurse}
-            onChange={(e) => { setNurse(e.target.value); setErr(false) }}
+            onChange={(e) => { setNurse(e.target.value); if (err === 'nurse') setErr('') }}
           />
         </div>
         <button className="btn cysto-sign-btn" style={{ width: 'auto' }} onClick={sign}>חתימה ושמירה</button>
       </div>
-      {err && <div className="err">יש להזין שם אחות חותמת לפני שמירה.</div>}
+      {err === 'nurse' && <div className="err">יש להזין שם אחות חותמת לפני שמירה.</div>}
+      {err === 'expiry' && <div className="err">יש להזין תאריך תוקף לכל תרופה תקינה לפני חתימה (השדות החסרים מסומנים).</div>}
 
       {/* ואחר כך – שליחת חוסרים לקבוצת וואטסאפ (רק חסר/לא בתוקף, עם מק״ט) */}
       <div className="ho-actions">
