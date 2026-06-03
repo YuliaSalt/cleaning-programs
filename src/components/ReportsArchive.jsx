@@ -89,9 +89,9 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
   const [folder, setFolder] = useState('all') // תיקייה: יומי בוקר/ערב · שבועי · חודשי
   const [open, setOpen] = useState(null)
 
-  // שם התיקייה של דוח: יומי מפוצל לפי משמרת, שאר התדירויות לפי שמן
-  const folderOf = (r) => (r.tabId === 'daily' ? 'יומי ' + (r.shift || '') : TYPE_LABELS[r.tabId] || r.tabId)
-  const FOLDER_ORDER = ['יומי בוקר', 'יומי ערב', 'יומי לילה', 'שבועי', 'חודשי']
+  // תיקייה לפי תדירות: יומי (כל המשמרות) · שבועי · חודשי
+  const folderOf = (r) => TYPE_LABELS[r.tabId] || r.tabId
+  const FOLDER_ORDER = ['יומי', 'שבועי', 'חודשי', 'חולה בבידוד']
   const folders = [...new Set(reports.map(folderOf))].sort(
     (a, b) => (FOLDER_ORDER.indexOf(a) + 1 || 99) - (FOLDER_ORDER.indexOf(b) + 1 || 99)
   )

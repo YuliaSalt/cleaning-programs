@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { HE_MONTHS } from '../data/handover.js'
+import DatePicker from './DatePicker.jsx'
 
-// רשימת רישומי העברת משמרת: כפתור "חדש" למעלה, חיפוש, ואז ארכיון לפי שנה>חודש>תאריך.
+// רשימת רישומי העברת משמרת: כפתור "חדש" למעלה, חיפוש (תאריכים/שם/משמרת), וארכיון לפי שנה>חודש>תאריך.
 export default function HandoverArchive({ records, onNew, onOpen, savedFlash }) {
   const [q, setQ] = useState('')
   const [folder, setFolder] = useState('all') // תיקייה לפי משמרת
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
   const query = q.trim()
 
   // תיקיות לפי משמרת (בוקר/ערב/לילה) – רק אלו שקיימות בפועל
@@ -12,6 +15,9 @@ export default function HandoverArchive({ records, onNew, onOpen, savedFlash }) 
 
   const filtered = records.filter((r) => {
     if (folder !== 'all' && r.record.shift !== folder) return false
+    const date = r.record.date || ''
+    if (from && date < from) return false
+    if (to && date > to) return false
     if (query) {
       const hay = [r.dateLabel, r.timeLabel, r.record.shift, r.record.nurse || '', HE_MONTHS[r.month], String(r.year)].join(' ')
       if (!hay.includes(query)) return false
@@ -37,7 +43,7 @@ export default function HandoverArchive({ records, onNew, onOpen, savedFlash }) 
       <button className="btn wide-btn" onClick={onNew}>+ העברת משמרת חדשה</button>
 
       {records.length > 0 && (
-        <>
+        <div className="glass plan-card controls-card">
           {folders.length > 1 && (
             <div className="folder-row">
               <span className="folder-label">תיקיות:</span>
@@ -49,17 +55,19 @@ export default function HandoverArchive({ records, onNew, onOpen, savedFlash }) 
               </div>
             </div>
           )}
-          <div className="ho-search">
+          <div className="filters-row">
             <span className="filters-label">חיפוש לפי:</span>
-            <input
-              className="input"
-              type="text"
-              placeholder="תאריך, חודש, שנה, שם או משמרת"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
+            <div className="field"><label>מתאריך</label><DatePicker value={from} onChange={setFrom} placeholder="מתאריך" /></div>
+            <div className="field"><label>עד תאריך</label><DatePicker value={to} onChange={setTo} placeholder="עד תאריך" /></div>
+            <div className="field">
+              <label>שם</label>
+              <input className="input" type="text" placeholder="שם אחות" value={q} onChange={(e) => setQ(e.target.value)} />
+            </div>
+            {(from || to || query) && (
+              <button className="btn ghost sm" onClick={() => { setFrom(''); setTo(''); setQ('') }}>ניקוי</button>
+            )}
           </div>
-        </>
+        </div>
       )}
 
       {records.length === 0 ? (
