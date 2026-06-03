@@ -111,20 +111,31 @@ function MedForm({ unit, onSaved }) {
                     onChange={(e) => update(i, { expiry: e.target.value })}
                   />
                 </div>
+                {it.status === 'expired' && (
+                  <div className="med-actions">
+                    <button
+                      type="button"
+                      className={'med-act order' + (it.order ? ' on' : '')}
+                      onClick={() => update(i, { order: !it.order })}
+                    >
+                      {it.order ? '✓ חסר – להזמין' : 'חסר – יש להזמין'}
+                    </button>
+                    <button
+                      type="button"
+                      className="med-act replace"
+                      onClick={() => update(i, { status: 'ok', order: false, expiry: '' })}
+                    >
+                      הוחלף → תקין + תוקף חדש
+                    </button>
+                  </div>
+                )}
               </div>
             </Fragment>
           )
         })}
       </div>
 
-      {/* שליחת חוסרים לקבוצת וואטסאפ – רק מה שחסר/לא בתוקף, עם מק״ט */}
-      <div className="ho-actions">
-        <button className="wa-btn" onClick={sendWhatsApp}>
-          <WhatsAppIcon /> שליחת חוסרים לקבוצה ({shortItems.length})
-        </button>
-      </div>
-
-      {/* חתימת אחות – בלחיצה נשמר */}
+      {/* חתימת אחות – בלחיצה נחתם ונשמר */}
       <div className="med-sign">
         <div className="field" style={{ flex: 1, minWidth: 180 }}>
           <label>חתימת אחות <span className="req">*</span></label>
@@ -139,6 +150,13 @@ function MedForm({ unit, onSaved }) {
         <button className="btn cysto-sign-btn" style={{ width: 'auto' }} onClick={sign}>חתימה ושמירה</button>
       </div>
       {err && <div className="err">יש להזין שם אחות חותמת לפני שמירה.</div>}
+
+      {/* ואחר כך – שליחת חוסרים לקבוצת וואטסאפ (רק חסר/לא בתוקף, עם מק״ט) */}
+      <div className="ho-actions">
+        <button className="wa-btn" onClick={sendWhatsApp}>
+          <WhatsAppIcon /> שליחת חוסרים לקבוצה ({shortItems.length})
+        </button>
+      </div>
     </div>
   )
 }
