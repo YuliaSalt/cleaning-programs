@@ -1,5 +1,5 @@
 import { getUnitWindows, getCurrentShift } from '../data/departments.js'
-import { listMedReports } from '../data/meds.js'
+import { listMedReports, hasMedList } from '../data/meds.js'
 import { medsAlertLevel } from '../data/shiftAlert.js'
 import ScreenHeader from './ScreenHeader.jsx'
 
@@ -8,9 +8,9 @@ const monthKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth()
 export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, onBack, categoryName }) {
   const shift = getCurrentShift()
 
-  // בקרת תרופות נחתמה החודש? (לצביעת כפתור "בקרת תרופות חודשית")
+  // בקרת תרופות נחתמה החודש? (לצביעת כפתור "בקרת תרופות חודשית") – רק למחלקה עם רשימה
   const medsDone = listMedReports(unit.id).some((r) => r.record.month === monthKey())
-  const medsLevel = medsAlertLevel(medsDone)
+  const medsLevel = hasMedList(unit.id) ? medsAlertLevel(medsDone) : null
 
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBack })

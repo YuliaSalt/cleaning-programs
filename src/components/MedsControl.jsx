@@ -25,6 +25,16 @@ const STATUS = {
 /* ===== טופס מילוי בקרת תרופות ===== */
 function MedForm({ unit, onSaved }) {
   const list = useMemo(() => getMedList(unit.id), [unit.id])
+
+  if (!list.length) {
+    return (
+      <div className="glass plan-card" style={{ padding: 36, textAlign: 'center' }}>
+        <p className="empty-hint" style={{ fontSize: 16 }}>
+          רשימת התרופות למחלקה זו טרם הוגדרה — תתווסף בהמשך.
+        </p>
+      </div>
+    )
+  }
   const [month, setMonth] = useState(monthKey())
   const [nurse, setNurse] = useState(() => getDeviceNurse())
   const [items, setItems] = useState(() => emptyMedState(list))
