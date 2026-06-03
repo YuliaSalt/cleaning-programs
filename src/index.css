@@ -2818,6 +2818,74 @@ textarea.input {
   color: #c0392b;
 }
 
+/* שורת תאריך/שעה אוטומטית בראש הבקרה */
+.med-meta {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand-soft);
+  margin-bottom: 10px;
+}
+
+/* שלושה כפתורי סטטוס נפרדים */
+.med-stbtns {
+  display: flex;
+  gap: 6px;
+  flex: none;
+  flex-wrap: wrap;
+}
+
+.med-stbtn {
+  min-height: 42px;
+  padding: 7px 13px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(168, 220, 232, 0.7);
+  background: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: all 0.14s ease;
+}
+.med-stbtn.ok.on {
+  background: rgba(31, 175, 143, 0.15);
+  border-color: #1faf8f;
+  color: #15795a;
+}
+.med-stbtn.missing.on {
+  background: rgba(230, 180, 0, 0.2);
+  border-color: #e6b400;
+  color: #9a7b00;
+}
+.med-stbtn.expired.on {
+  background: rgba(226, 85, 78, 0.15);
+  border-color: #e2554e;
+  color: #c0392b;
+}
+
+/* תוקף קצר (≤ חודשיים) – באדום */
+input.expiry-soon {
+  border-color: #e2554e;
+  color: #c0392b;
+  font-weight: 700;
+}
+.med-view-meta.expiry-soon {
+  color: #c0392b;
+  font-weight: 800;
+}
+
+/* חתימת אחות בתחתית */
+.med-sign {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(168, 220, 232, 0.5);
+}
+.med-sign .field {
+  margin: 0;
+}
+
 /* ===== סרגל ניווט תחתון קבוע "4D" (מובייל) ===== */
 .bottom-nav {
   position: fixed;
