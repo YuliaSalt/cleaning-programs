@@ -9,6 +9,7 @@ import GastroHandover from './components/GastroHandover.jsx'
 import SpecialProcedures from './components/SpecialProcedures.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import BottomNav from './components/BottomNav.jsx'
+import MedsControl from './components/MedsControl.jsx'
 import { findUnit, getCategory, findCategoryOfUnit } from './data/departments.js'
 import { syncReports } from './data/cloudSync.js'
 import { recordVisit, getAutoRedirectUnit } from './data/routing.js'
@@ -182,6 +183,16 @@ export default function App() {
 
           {!showDashboard && unit && windowId === 'special' && (
             <SpecialProcedures
+              unit={unit}
+              onBack={backToBoard}
+              onBackToCategory={backToCategory}
+              onGoHome={goHome}
+              categoryName={parentName}
+            />
+          )}
+
+          {!showDashboard && unit && windowId === 'meds' && (
+            <MedsControl
               unit={unit}
               onBack={backToBoard}
               onBackToCategory={backToCategory}

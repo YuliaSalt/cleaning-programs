@@ -174,6 +174,12 @@ export function getUnitWindows(unitId) {
       description: 'Bronchoscopy · Pleural Puncture · Cystoscopy · Pain Clinic · Conization · POEM · TIF',
       enabled: true,
     })
+    windows.push({
+      id: 'meds',
+      title: 'בקרת תרופות חודשית',
+      description: 'בדיקת מלאי ותוקף תרופות · שמירה חודשית · חיפוש לפי תאריך/תקופה',
+      enabled: true,
+    })
   }
   return windows
 }
