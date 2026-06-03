@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { getCurrentShift, findUnit } from '../data/departments.js'
 import { getCleaningPlan, signoffKind, DISINFECTANT_GUIDE, getMergedDailySection } from '../data/cleaningTemplates.js'
 import { dateStr, periodKey, planKey } from '../data/progress.js'
-import { shiftAlertLevel } from '../data/shiftAlert.js'
+import { shiftAlertLevel, freqAlertLevel } from '../data/shiftAlert.js'
 import { storage } from '../data/storage.js'
 import { pushReport } from '../data/cloudSync.js'
 import { TYPE_LABELS } from '../data/reports.js'
@@ -328,6 +328,16 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
   const period = tab ? periodKey(tab.id, shift) : ''
   const baseKey = (s) => planKey(unit.id, s.roomScoped && room ? room : '-', tab.id, s.id, period)
 
+  // האם כל הדוחות החתומים של התדירות נחתמו לתקופה הנוכחית? (חודשי/שבועי – לצביעת הכפתור)
+  function freqSigned(tabId) {
+    const t = plan.tabs.find((x) => x.id === tabId)
+    if (!t) return true
+    const signed = t.sections.filter((s) => s.kind === 'signed')
+    if (signed.length === 0) return true // אין מה לחתום → ללא התראה
+    const per = periodKey(tabId)
+    return signed.every((s) => storage.has(planKey(unit.id, '-', tabId, s.id, per)))
+  }
+
   // האם דוח היומי של המשמרת נחתם היום? (לצביעת כפתור המשמרת)
   function dailyShiftSigned(sh) {
     const per = periodKey('daily', sh)
@@ -435,12 +445,16 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
           )}
           <DrillGrid
             items={[
-              ...plan.tabs.map((t) => ({
-                key: t.id,
-                label: t.label,
-                meta: t.meta ?? (t.id === 'daily' ? plan.shifts.join(' · ') : t.sections.length + ' תחנות'),
-                onClick: () => { setFreq(t.id); setShift(null); setStationId(null) },
-              })),
+              ...plan.tabs.map((t) => {
+                const lvl = freqAlertLevel(t.id, freqSigned(t.id))
+                return {
+                  key: t.id,
+                  label: t.label,
+                  meta: lvl === 'red' ? 'טרם נחתם – באיחור' : lvl === 'yellow' ? 'טרם נחתם החודש' : (t.meta ?? (t.id === 'daily' ? plan.shifts.join(' · ') : t.sections.length + ' תחנות')),
+                  cls: lvl === 'red' ? 'shift-red' : lvl === 'yellow' ? 'shift-yellow' : '',
+                  onClick: () => { setFreq(t.id); setShift(null); setStationId(null) },
+                }
+              }),
               {
                 key: 'reports',
                 label: 'דוחות ביצוע',
