@@ -2,6 +2,7 @@ import { useState, useMemo, Fragment } from 'react'
 import ScreenHeader from './ScreenHeader.jsx'
 import { getMedList, saveMedReport, listMedReports, getLatestMedItems } from '../data/meds.js'
 import { getDeviceNurse, rememberDeviceNurse, HE_MONTHS } from '../data/handover.js'
+import DatePicker from './DatePicker.jsx'
 
 const monthKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
 const monthLabel = (mk) => {
@@ -245,8 +246,8 @@ export default function MedsControl({ unit, onBack, onGoHome, onBackToCategory, 
         <div className="glass plan-card controls-card">
           <div className="filters-row">
             <span className="filters-label">חיפוש לפי:</span>
-            <div className="field"><label>מתאריך</label><input className="input" type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></div>
-            <div className="field"><label>עד תאריך</label><input className="input" type="date" value={to} onChange={(e) => setTo(e.target.value)} /></div>
+            <div className="field"><label>מתאריך</label><DatePicker value={from} onChange={setFrom} placeholder="מתאריך" /></div>
+            <div className="field"><label>עד תאריך</label><DatePicker value={to} onChange={setTo} placeholder="עד תאריך" /></div>
             <div className="field"><label>חודש / שנה</label><input className="input" type="month" value={ym} onChange={(e) => setYm(e.target.value)} /></div>
             {(from || to || ym) && <button className="btn ghost sm" onClick={() => { setFrom(''); setTo(''); setYm('') }}>ניקוי</button>}
           </div>

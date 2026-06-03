@@ -2654,6 +2654,152 @@ textarea.input {
   flex: 1;
 }
 
+/* ===== בורר תאריך מותאם (Glassmorphism) ===== */
+.dp {
+  position: relative;
+  width: 100%;
+}
+
+.dp-input {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(168, 220, 232, 0.8);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: right;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.dp-input:hover {
+  border-color: var(--ice-2);
+}
+
+.dp-input.empty .dp-val {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.dp-cal-ic {
+  display: inline-flex;
+  color: var(--brand-soft);
+}
+
+.dp-val {
+  flex: 1;
+}
+
+.dp-pop {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 8px);
+  inset-inline-start: 0;
+  width: 300px;
+  max-width: min(92vw, 320px);
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(26px) saturate(150%);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 10px 24px rgba(35, 90, 120, 0.18),
+    0 26px 50px rgba(45, 115, 150, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.dp-head {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.dp-sel {
+  flex: 1;
+  min-height: 42px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(168, 220, 232, 0.8);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--brand);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.dp-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  direction: rtl;
+}
+
+.dp-dow {
+  margin-bottom: 4px;
+}
+
+.dp-dow-c {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--brand-soft);
+  padding: 4px 0;
+}
+
+.dp-empty {
+  aspect-ratio: 1 / 1;
+}
+
+.dp-day {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.14s ease, color 0.14s ease, transform 0.1s ease;
+}
+
+.dp-day:hover {
+  background: var(--fill-ice);
+  transform: translateY(-1px);
+}
+
+.dp-day.today {
+  border: 1.5px solid var(--mint);
+  color: var(--accent-strong);
+  font-weight: 800;
+}
+
+.dp-day.sel {
+  background: linear-gradient(135deg, var(--ice-2), var(--mint-2));
+  color: var(--brand);
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(45, 115, 150, 0.25);
+}
+
+.dp-clear {
+  width: 100%;
+  margin-top: 12px;
+  min-height: 40px;
+  border: 1px solid rgba(168, 220, 232, 0.7);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--brand-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 /* ===== בקרת תרופות חודשית ===== */
 /* התראת צבע לכרטיס "בקרת תרופות" בלוח החלונות */
 .window-card.alert-yellow {

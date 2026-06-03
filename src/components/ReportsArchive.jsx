@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import ScreenHeader from './ScreenHeader.jsx'
 import { signoffKind } from '../data/cleaningTemplates.js'
 import { listReports, flattenSectionTasks, TYPE_LABELS, HE_MONTHS } from '../data/reports.js'
+import DatePicker from './DatePicker.jsx'
 
 /* ===== תצוגת דוח בודד (קריאה בלבד) + הדפסה ===== */
 function ReportDetail({ unit, report, onBack }) {
@@ -177,11 +178,11 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
               <span className="filters-label">חיפוש לפי:</span>
               <div className="field">
                 <label>מתאריך</label>
-                <input className="input" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+                <DatePicker value={from} onChange={setFrom} placeholder="מתאריך" />
               </div>
               <div className="field">
                 <label>עד תאריך</label>
-                <input className="input" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+                <DatePicker value={to} onChange={setTo} placeholder="עד תאריך" />
               </div>
               <div className="field">
                 <label>שם מבצע / חותם</label>
