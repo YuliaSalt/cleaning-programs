@@ -2869,11 +2869,24 @@ textarea.input {
   color: #c0392b;
 }
 
-/* תוקף קצר (≤ חודשיים) – באדום */
+/* תוקף מתקרב (≤ חודשיים) – אזהרה בהירה (חום-ענבר) */
+input.expiry-near {
+  border-color: #e0a23c;
+  color: #9a6b00;
+  font-weight: 700;
+  background: rgba(255, 244, 220, 0.9);
+}
+.med-view-meta.expiry-near {
+  color: #9a6b00;
+  font-weight: 800;
+}
+
+/* תוקף קצר (≤ חודש או פג) – אדום חזק */
 input.expiry-soon {
   border-color: #e2554e;
   color: #c0392b;
-  font-weight: 700;
+  font-weight: 800;
+  background: rgba(255, 226, 224, 0.95);
 }
 .med-view-meta.expiry-soon {
   color: #c0392b;

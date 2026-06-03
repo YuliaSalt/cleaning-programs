@@ -1,6 +1,6 @@
 import { useState, useMemo, Fragment } from 'react'
 import ScreenHeader from './ScreenHeader.jsx'
-import { getMedList, emptyMedState, saveMedReport, listMedReports } from '../data/meds.js'
+import { getMedList, saveMedReport, listMedReports, getLatestMedItems } from '../data/meds.js'
 import { getDeviceNurse, rememberDeviceNurse, HE_MONTHS } from '../data/handover.js'
 
 const monthKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
@@ -15,14 +15,20 @@ const STATUS = {
   expired: { mark: '✗', label: 'לא בתוקף', cls: 'med-expired' },
 }
 
-// תוקף "קצר": פג או יפוג בתוך חודשיים מהיום
-function expiringSoon(exp) {
-  if (!exp) return false
+// דרגת התראת תוקף: 'soon' = ≤ חודש או פג (אדום חזק) · 'near' = ≤ חודשיים (אזהרה בהירה)
+function expiryLevel(exp) {
+  if (!exp) return ''
   const d = new Date(exp)
-  if (isNaN(d.getTime())) return false
-  const limit = new Date()
-  limit.setMonth(limit.getMonth() + 2)
-  return d <= limit
+  if (isNaN(d.getTime())) return ''
+  const m1 = new Date(); m1.setMonth(m1.getMonth() + 1)
+  const m2 = new Date(); m2.setMonth(m2.getMonth() + 2)
+  if (d <= m1) return 'soon'
+  if (d <= m2) return 'near'
+  return ''
+}
+const expiryClass = (exp) => {
+  const l = expiryLevel(exp)
+  return l === 'soon' ? ' expiry-soon' : l === 'near' ? ' expiry-near' : ''
 }
 
 function WhatsAppIcon() {
@@ -37,7 +43,7 @@ function WhatsAppIcon() {
 /* ===== טופס בקרת תרופות ===== */
 function MedForm({ unit, onSaved }) {
   const list = useMemo(() => getMedList(unit.id), [unit.id])
-  const [items, setItems] = useState(() => emptyMedState(list))
+  const [items, setItems] = useState(() => getLatestMedItems(unit.id, list))
   const [nurse, setNurse] = useState(() => getDeviceNurse())
   const [err, setErr] = useState('') // '' | 'nurse' | 'expiry'
 
@@ -100,7 +106,6 @@ function MedForm({ unit, onSaved }) {
         {list.map((med, i) => {
           const it = items[i]
           const showGroup = med.group && (i === 0 || list[i - 1].group !== med.group)
-          const soon = expiringSoon(it.expiry)
           return (
             <Fragment key={i}>
               {showGroup && <div className="med-group">{med.group}</div>}
@@ -114,7 +119,7 @@ function MedForm({ unit, onSaved }) {
                 <div className="med-expiry">
                   <label>תוקף</label>
                   <input
-                    className={'input' + (soon ? ' expiry-soon' : '') + (err === 'expiry' && it.status === 'ok' && !it.expiry ? ' invalid' : '')}
+                    className={'input' + expiryClass(it.expiry) + (err === 'expiry' && it.status === 'ok' && !it.expiry ? ' invalid' : '')}
                     type="date"
                     value={it.expiry}
                     onChange={(e) => { update(i, { expiry: e.target.value }); if (err === 'expiry') setErr('') }}
@@ -189,7 +194,7 @@ function MedView({ unit, record }) {
               <div className={'med-row ' + st.cls}>
                 <span className="med-status static"><span className="med-mark">{st.mark}</span></span>
                 <span className="med-name">{med.name}</span>
-                <span className={'med-view-meta' + (expiringSoon(it.expiry) ? ' expiry-soon' : '')}>
+                <span className={'med-view-meta' + expiryClass(it.expiry)}>
                   {it.expiry ? 'תוקף: ' + it.expiry : ''}
                 </span>
               </div>

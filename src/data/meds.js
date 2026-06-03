@@ -98,6 +98,18 @@ export function saveMedReport(unitId, month, items, by) {
   return key
 }
 
+// מצב התחלתי לטופס: ממשיכים מהדוח האחרון שנחתם (תוקף/סטטוס נשמרים בין פתיחות).
+// משתנה רק כשמזינים מחדש וחותמים שוב. אם אין דוח קודם – מצב נקי (הכל תקין).
+export function getLatestMedItems(unitId, list) {
+  const base = emptyMedState(list)
+  const reports = listMedReports(unitId) // ממוין מהחדש לישן
+  if (!reports.length) return base
+  const prev = reports[0].record.items || []
+  return base.map((def, i) =>
+    prev[i] ? { status: prev[i].status || 'ok', expiry: prev[i].expiry || '', order: !!prev[i].order } : def
+  )
+}
+
 export function listMedReports(unitId) {
   const pre = PREFIX + unitId + ':'
   const out = []
