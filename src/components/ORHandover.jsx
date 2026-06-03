@@ -29,7 +29,7 @@ function Field({ field, value, onChange }) {
     <div className="field">
       <label>{field.label}</label>
       {field.type === 'textarea' ? (
-        <textarea className="input" rows={2} value={value} onChange={(e) => onChange(e.target.value)} />
+        <textarea className="input or-textarea" rows={3} value={value} onChange={(e) => onChange(e.target.value)} />
       ) : (
         <input className="input" type={field.type === 'time' ? 'time' : 'text'} value={value} onChange={(e) => onChange(e.target.value)} />
       )}

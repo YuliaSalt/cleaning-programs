@@ -236,12 +236,12 @@ export function buildORHandoverImage(record) {
       if (s.multi) {
         ;(st.rows || []).forEach((row, idx) => {
           const parts = s.fields.map((f) => (row[f.id] && String(row[f.id]).trim() ? f.label + ': ' + row[f.id] : '')).filter(Boolean)
-          if (parts.length) b.para(idx + 1 + '. ' + parts.join(' · '), { s: 30, color: '#33424d', indent: 26, gap: 0.3 })
+          if (parts.length) b.para(idx + 1 + '. ' + parts.join(' · '), { s: 34, color: '#33424d', indent: 26, gap: 0.32 })
         })
       } else {
         s.fields.forEach((f) => {
           const v = (st.fields || {})[f.id]
-          if (v && String(v).trim()) b.para(f.label + ': ' + String(v).trim(), { s: 30, color: '#33424d', indent: 26, gap: 0.3 })
+          if (v && String(v).trim()) b.para(f.label + ': ' + String(v).trim(), { s: 34, color: '#33424d', indent: 26, gap: 0.32 })
         })
       }
     }

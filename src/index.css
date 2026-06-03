@@ -2748,6 +2748,12 @@ textarea.input {
 .or-rowfields textarea.input {
   resize: vertical;
 }
+/* מלל חופשי גדול וקריא בטופס */
+.or-textarea {
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 76px;
+}
 .or-rm {
   align-self: end;
   min-height: 38px;
