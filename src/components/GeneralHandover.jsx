@@ -15,6 +15,7 @@ import {
 } from '../data/handover.js'
 import { buildGeneralHandoverImage, shareHandoverImage } from './handoverImage.js'
 import HandoverArchive from './HandoverArchive.jsx'
+import { shiftAlertLevel } from '../data/shiftAlert.js'
 
 function WhatsAppIcon() {
   return (
@@ -46,6 +47,11 @@ function GeneralForm({ unit, onSent, onReset }) {
 
   const dateHe = new Date().toLocaleDateString('he-IL')
   const outName = fullName(names.nurseOut)
+  // משמרות שכבר מולא להן טופס היום – לצביעת כפתורי המשמרת לפי שעה
+  const doneShifts = useMemo(() => {
+    const today = todayStr()
+    return new Set(listHandovers(unit.id).filter((r) => r.record.date === today).map((r) => r.record.shift))
+  }, [unit.id])
 
   const setName = (id, field, v) => setNames((n) => ({ ...n, [id]: { ...n[id], [field]: v } }))
   const setNum = (id, v) => setNumbers((o) => ({ ...o, [id]: v }))
@@ -110,16 +116,19 @@ function GeneralForm({ unit, onSent, onReset }) {
         <div className="ho-shift-title">משמרת</div>
         <div className="ho-shift-sub">נבחרה אוטומטית לפי השעה — ניתן לשנות</div>
         <div className="ho-shift-btns">
-          {shifts.map((s) => (
-            <button
-              key={s}
-              className={'ho-shift-btn' + (shift === s ? ' active' : '') + (s === suggested ? ' suggested' : '')}
-              onClick={() => setShift(s)}
-            >
-              <span className="ho-shift-name">{s}</span>
-              {s === suggested && <span className="ho-shift-tag">מומלץ לפי השעה</span>}
-            </button>
-          ))}
+          {shifts.map((s) => {
+            const lvl = shiftAlertLevel(s, doneShifts.has(s))
+            return (
+              <button
+                key={s}
+                className={'ho-shift-btn' + (shift === s ? ' active' : '') + (s === suggested ? ' suggested' : '') + (lvl ? ' shift-' + lvl : '')}
+                onClick={() => setShift(s)}
+              >
+                <span className="ho-shift-name">{s}</span>
+                {s === suggested && <span className="ho-shift-tag">מומלץ לפי השעה</span>}
+              </button>
+            )
+          })}
         </div>
       </div>
 

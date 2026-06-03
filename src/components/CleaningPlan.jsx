@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { getCurrentShift, findUnit } from '../data/departments.js'
 import { getCleaningPlan, signoffKind, DISINFECTANT_GUIDE, getMergedDailySection } from '../data/cleaningTemplates.js'
 import { dateStr, periodKey, planKey } from '../data/progress.js'
+import { shiftAlertLevel } from '../data/shiftAlert.js'
 import { storage } from '../data/storage.js'
 import { pushReport } from '../data/cloudSync.js'
 import { TYPE_LABELS } from '../data/reports.js'
@@ -327,6 +328,15 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
   const period = tab ? periodKey(tab.id, shift) : ''
   const baseKey = (s) => planKey(unit.id, s.roomScoped && room ? room : '-', tab.id, s.id, period)
 
+  // האם דוח היומי של המשמרת נחתם היום? (לצביעת כפתור המשמרת)
+  function dailyShiftSigned(sh) {
+    const per = periodKey('daily', sh)
+    if (plan.stationDaily) return storage.has(planKey(unit.id, '-', 'daily', 'day', per))
+    const dtab = plan.tabs.find((t) => t.id === 'daily')
+    const signed = (dtab ? dtab.sections : []).filter((x) => x.kind === 'signed' && (!x.shift || x.shift === sh))
+    return signed.length > 0 && signed.every((x) => storage.has(planKey(unit.id, '-', 'daily', x.id, per)))
+  }
+
   function back() {
     if (view === 'leaf') {
       if (stationStep) setStationId(null)
@@ -446,12 +456,17 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
       {/* שלב 2 (יומי): בחירת משמרת */}
       {view === 'shift' && (
         <DrillGrid
-          items={shifts.map((s) => ({
-            key: s,
-            label: s,
-            meta: s === getCurrentShift() ? 'משמרת נוכחית' : '',
-            onClick: () => setShift(s),
-          }))}
+          items={shifts.map((s) => {
+            const level = shiftAlertLevel(s, dailyShiftSigned(s))
+            const current = s === getCurrentShift() ? 'משמרת נוכחית' : ''
+            return {
+              key: s,
+              label: s,
+              meta: level === 'red' ? 'טרם נחתם – באיחור' : level === 'yellow' ? 'טרם נחתם' : current,
+              cls: level === 'red' ? 'shift-red' : level === 'yellow' ? 'shift-yellow' : '',
+              onClick: () => setShift(s),
+            }
+          })}
         />
       )}
 

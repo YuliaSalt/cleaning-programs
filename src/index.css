@@ -1217,6 +1217,26 @@ h1, h2, h3, h4 {
   line-height: 1.55;
 }
 
+/* כפתורי משמרת – התראת צבע לפי שעה כשטרם נחתם דוח */
+.drill-card.shift-yellow {
+  border-color: rgba(230, 180, 0, 0.8);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 244, 200, 0.85));
+}
+.drill-card.shift-yellow .uc-name,
+.drill-card.shift-yellow .uc-meta {
+  color: #9a7b00;
+  font-weight: 800;
+}
+.drill-card.shift-red {
+  border-color: rgba(226, 85, 78, 0.85);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 220, 218, 0.9));
+}
+.drill-card.shift-red .uc-name,
+.drill-card.shift-red .uc-meta {
+  color: #c0392b;
+  font-weight: 800;
+}
+
 /* כפתור דוחות ביצוע בתוך תוכניות ניקיון */
 .drill-card.reports-tile {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.62), rgba(207, 234, 243, 0.62));
@@ -2023,6 +2043,19 @@ h1, h2, h3, h4 {
 }
 .ho-shift-btn.active .ho-shift-name {
   color: var(--brand);
+}
+/* התראת צבע לכפתור משמרת בטופס – כל עוד לא מולא דוח (גובר על מצב לא-פעיל) */
+.ho-shift-btn.shift-yellow:not(.active) {
+  background: rgba(255, 244, 200, 0.9);
+}
+.ho-shift-btn.shift-yellow:not(.active) .ho-shift-name {
+  color: #9a7b00;
+}
+.ho-shift-btn.shift-red:not(.active) {
+  background: rgba(255, 220, 218, 0.95);
+}
+.ho-shift-btn.shift-red:not(.active) .ho-shift-name {
+  color: #c0392b;
 }
 .ho-shift-locked {
   margin: 14px 0 4px;

@@ -12,6 +12,7 @@ import {
 } from '../data/handover.js'
 import { buildHandoverImage, shareHandoverImage } from './handoverImage.js'
 import HandoverArchive from './HandoverArchive.jsx'
+import { shiftAlertLevel } from '../data/shiftAlert.js'
 
 function WhatsAppIcon() {
   return (
@@ -38,6 +39,11 @@ function HandoverForm({ unit, onSent, onReset }) {
   const [busy, setBusy] = useState(false)
 
   const dateHe = now.toLocaleDateString('he-IL')
+  // משמרות שכבר מולא להן טופס היום – לצביעת כפתורי המשמרת לפי שעה
+  const doneShifts = useMemo(() => {
+    const today = todayStr()
+    return new Set(listHandovers(unit.id).filter((r) => r.record.date === today).map((r) => r.record.shift))
+  }, [unit.id])
   const timeHe = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })
 
   const setHas = (id, has) =>
@@ -98,16 +104,19 @@ function HandoverForm({ unit, onSent, onReset }) {
         <div className="ho-shift-title">משמרת</div>
         <div className="ho-shift-sub">נבחרה אוטומטית לפי השעה — ניתן לשנות</div>
         <div className="ho-shift-btns">
-          {SHIFTS.map((s) => (
-            <button
-              key={s}
-              className={'ho-shift-btn' + (shift === s ? ' active' : '') + (s === suggested ? ' suggested' : '')}
-              onClick={() => setShift(s)}
-            >
-              <span className="ho-shift-name">{s}</span>
-              {s === suggested && <span className="ho-shift-tag">מומלץ לפי השעה</span>}
-            </button>
-          ))}
+          {SHIFTS.map((s) => {
+            const lvl = shiftAlertLevel(s, doneShifts.has(s))
+            return (
+              <button
+                key={s}
+                className={'ho-shift-btn' + (shift === s ? ' active' : '') + (s === suggested ? ' suggested' : '') + (lvl ? ' shift-' + lvl : '')}
+                onClick={() => setShift(s)}
+              >
+                <span className="ho-shift-name">{s}</span>
+                {s === suggested && <span className="ho-shift-tag">מומלץ לפי השעה</span>}
+              </button>
+            )
+          })}
         </div>
       </div>
 
