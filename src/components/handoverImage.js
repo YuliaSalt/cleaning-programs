@@ -228,6 +228,10 @@ export function buildGeneralHandoverImage(record) {
 export function buildORHandoverImage(record) {
   const b = makeBuilder()
   header(b, 'העברת משמרת – חדרי ניתוח', record)
+  if (record.nurseIn && record.nurseIn.trim()) {
+    b.para('אחות מקבלת: ' + record.nurseIn.trim(), { s: 32, b: true, color: '#0a4d8c' })
+    b.line()
+  }
   for (const s of OR_SECTIONS) {
     if (s.part) { b.band(s.part); continue }
     const st = (record.sections && record.sections[s.id]) || { flag: false }

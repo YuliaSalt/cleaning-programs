@@ -43,7 +43,8 @@ function ORForm({ unit, onSent }) {
   const suggested = shifts.includes(getCurrentShift()) ? getCurrentShift() : shifts[shifts.length - 1]
   const [shift, setShift] = useState(suggested)
   const [sections, setSections] = useState(() => emptyORHandover(unit.id, unit.name, suggested).sections)
-  const [nurse, setNurse] = useState(() => getDeviceNurse())
+  const [nurseOut, setNurseOut] = useState(() => getDeviceNurse()) // אחות מוסרת – נשמרת במכשיר
+  const [nurseIn, setNurseIn] = useState('') // אחות מקבלת
   const [err, setErr] = useState(false)
 
   const now = new Date()
@@ -65,14 +66,14 @@ function ORForm({ unit, onSent }) {
   })
 
   function send() {
-    if (!nurse.trim()) { setErr(true); return }
-    rememberDeviceNurse(nurse)
-    const record = { kind: 'or', unitId: unit.id, unitName: unit.name, date: todayStr(), shift, savedAt: new Date().toISOString(), nurse: nurse.trim(), sections }
+    if (!nurseOut.trim()) { setErr(true); return }
+    rememberDeviceNurse(nurseOut)
+    const record = { kind: 'or', unitId: unit.id, unitName: unit.name, date: todayStr(), shift, savedAt: new Date().toISOString(), nurse: nurseOut.trim(), nurseIn: nurseIn.trim(), sections }
     saveHandover(record)
     try { shareHandoverImage(buildORHandoverImage(record)).catch(() => {}) } catch (e) { /* נשמר */ }
     onSent()
   }
-  function reset() { setSections(emptyORHandover(unit.id, unit.name, shift).sections); setErr(false) }
+  function reset() { setSections(emptyORHandover(unit.id, unit.name, shift).sections); setNurseIn(''); setErr(false) }
 
   return (
     <div className="glass plan-card ho-form">
@@ -137,15 +138,26 @@ function ORForm({ unit, onSent }) {
       })}
 
       <div className="ho-block" style={{ marginTop: 22 }}>
-        <div className="ho-block-title">חתימת אחות מוסרת</div>
+        <div className="ho-block-title">חתימת אחיות</div>
         <div className="field">
-          <label>שם האחות המוסרת <span className="req">*</span></label>
+          <label>אחות מוסרת <span className="req">*</span></label>
           <input
-            className={'input' + (err && !nurse.trim() ? ' invalid' : '')}
+            className={'input' + (err && !nurseOut.trim() ? ' invalid' : '')}
             type="text"
             placeholder="שם מלא"
-            value={nurse}
-            onChange={(e) => { setNurse(e.target.value); setErr(false) }}
+            value={nurseOut}
+            onChange={(e) => { setNurseOut(e.target.value); setErr(false) }}
+          />
+          <span className="ho-auto-hint">נשמר במכשיר ויופיע מראש בפעם הבאה</span>
+        </div>
+        <div className="field">
+          <label>אחות מקבלת</label>
+          <input
+            className="input"
+            type="text"
+            placeholder="שם מלא"
+            value={nurseIn}
+            onChange={(e) => setNurseIn(e.target.value)}
           />
         </div>
         {err && <div className="err">חובה לרשום שם אחות מוסרת לפני שמירה ושליחה.</div>}
@@ -172,7 +184,12 @@ function ORView({ record }) {
       <div className="ho-subrow">
         <span className="ho-date">תאריך: {record.date}{time ? ' · שעה: ' + time : ''} · משמרת {record.shift}</span>
       </div>
-      {record.nurse && <div className="ho-nurse">אחות מוסרת: <b>{record.nurse}</b></div>}
+      {(record.nurse || record.nurseIn) && (
+        <div className="ho-nurse">
+          {record.nurse && <>אחות מוסרת: <b>{record.nurse}</b></>}
+          {record.nurseIn && <> · אחות מקבלת: <b>{record.nurseIn}</b></>}
+        </div>
+      )}
       {OR_SECTIONS.map((s, idx) => {
         if (s.part) return <div className="ho-block-title" key={'p' + idx}>{s.part}</div>
         const st = (record.sections || {})[s.id] || { flag: false }
