@@ -39,5 +39,13 @@ export function freqAlertLevel(tabId, done, now = new Date()) {
     if (d >= 3) return 'yellow'
     return null
   }
+  if (tabId === 'weekly') {
+    // רק ביום ראשון: צהוב מ-15:00, אדום מ-18:00
+    if (now.getDay() !== 0) return null
+    const t = now.getHours() * 60 + now.getMinutes()
+    if (t >= M(18)) return 'red'
+    if (t >= M(15)) return 'yellow'
+    return null
+  }
   return null
 }

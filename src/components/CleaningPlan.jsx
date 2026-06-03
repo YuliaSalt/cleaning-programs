@@ -450,7 +450,7 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
                 return {
                   key: t.id,
                   label: t.label,
-                  meta: lvl === 'red' ? 'טרם נחתם – באיחור' : lvl === 'yellow' ? 'טרם נחתם החודש' : (t.meta ?? (t.id === 'daily' ? plan.shifts.join(' · ') : t.sections.length + ' תחנות')),
+                  meta: lvl === 'red' ? 'טרם נחתם – באיחור' : lvl === 'yellow' ? 'טרם נחתם' : (t.meta ?? (t.id === 'daily' ? plan.shifts.join(' · ') : t.sections.length + ' תחנות')),
                   cls: lvl === 'red' ? 'shift-red' : lvl === 'yellow' ? 'shift-yellow' : '',
                   onClick: () => { setFreq(t.id); setShift(null); setStationId(null) },
                 }
