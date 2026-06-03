@@ -77,8 +77,6 @@ function ORForm({ unit, onSent }) {
 
   return (
     <div className="glass plan-card ho-form">
-      <div className="ho-subrow"><span className="ho-date">תאריך: {dateHe} · שעה: {timeHe}</span></div>
-
       <div className="ho-shift-pick">
         <div className="ho-shift-title">משמרת</div>
         <div className="ho-shift-sub">נבחרה אוטומטית לפי השעה — ניתן לשנות</div>

@@ -95,10 +95,6 @@ function HandoverForm({ unit, onSent, onReset }) {
 
   return (
     <div className="glass plan-card ho-form">
-      <div className="ho-subrow">
-        <span className="ho-date">תאריך: {dateHe} · שעה: {timeHe}</span>
-      </div>
-
       {/* בחירת משמרת – שלב חובה ובולט לפני מילוי הטופס */}
       <div className="ho-shift-pick">
         <div className="ho-shift-title">משמרת</div>

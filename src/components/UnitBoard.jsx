@@ -1,4 +1,4 @@
-import { getUnitWindows, getCurrentShift } from '../data/departments.js'
+import { getUnitWindows } from '../data/departments.js'
 import { listMedReports, hasMedList } from '../data/meds.js'
 import { medsAlertLevel } from '../data/shiftAlert.js'
 import ScreenHeader from './ScreenHeader.jsx'
@@ -6,8 +6,6 @@ import ScreenHeader from './ScreenHeader.jsx'
 const monthKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
 
 export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, onBack, categoryName }) {
-  const shift = getCurrentShift()
-
   // בקרת תרופות נחתמה החודש? (לצביעת כפתור "בקרת תרופות חודשית") – רק למחלקה עם רשימה
   const medsDone = listMedReports(unit.id).some((r) => r.record.month === monthKey())
   const medsLevel = hasMedList(unit.id) ? medsAlertLevel(medsDone) : null
@@ -39,17 +37,7 @@ export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, 
 
   return (
     <div>
-      <ScreenHeader
-        title={unit.name}
-        onBack={onBack}
-        trail={trail}
-        right={
-          <div className="shift-chip">
-            <span className="dot" />
-            משמרת נוכחית: {shift}
-          </div>
-        }
-      />
+      <ScreenHeader title={unit.name} onBack={onBack} trail={trail} />
 
       <div className={'card-grid' + (windows.length % 2 ? ' single-col' : '')}>
         {windows.map((w) => (

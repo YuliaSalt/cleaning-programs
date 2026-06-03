@@ -99,10 +99,6 @@ function MedForm({ unit, onSaved }) {
 
   return (
     <div className="glass plan-card ho-form">
-      <div className="ho-subrow">
-        <span className="ho-date">תאריך: {dateHe} · שעה: {timeHe}</span>
-      </div>
-
       <div className="med-list">
         {list.map((med, i) => {
           const it = items[i]

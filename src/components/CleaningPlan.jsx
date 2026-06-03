@@ -389,12 +389,7 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
 
   return (
     <div className="plan-wrap wide">
-      <ScreenHeader
-        title={title}
-        onBack={back}
-        trail={trail}
-        right={<div className="shift-chip"><span className="dot" /> {dateStr()}</div>}
-      />
+      <ScreenHeader title={title} onBack={back} trail={trail} />
 
       {/* בורר חדרים – לאורך כל הדריל */}
       {plan.rooms && (

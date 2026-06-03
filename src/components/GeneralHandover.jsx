@@ -107,10 +107,6 @@ function GeneralForm({ unit, onSent, onReset }) {
 
   return (
     <div className="glass plan-card ho-form">
-      <div className="ho-subrow">
-        <span className="ho-date">מחלקה: {unit.name} · תאריך: {dateHe}</span>
-      </div>
-
       {/* בחירת משמרת – שלב חובה ובולט לפני מילוי הטופס */}
       <div className="ho-shift-pick">
         <div className="ho-shift-title">משמרת</div>

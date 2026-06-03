@@ -522,6 +522,32 @@ h1, h2, h3, h4 {
   flex: 1 1 100%;
 }
 
+/* שורת תאריך/שעה/משמרת אוטומטית במסגרת, מתחת לכותרת – אחידה בכל העמודים */
+.screen-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 9px 16px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(168, 220, 232, 0.75);
+  color: var(--brand);
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: var(--halo-soft);
+}
+
+.screen-meta .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #7fd0c4;
+  box-shadow: 0 0 0 4px rgba(127, 208, 196, 0.25);
+}
+
 .shift-chip {
   margin-inline-start: auto;
   display: inline-flex;

@@ -1,6 +1,12 @@
-// כותרת מסך אחידה: כפתור "חזרה" ברור, פירורי לחם (breadcrumb), כותרת ואלמנט ימני אופציונלי.
+// כותרת מסך אחידה: כפתור "חזרה" ברור, פירורי לחם (breadcrumb), כותרת,
+// ושורת תאריך/שעה/משמרת אוטומטית במסגרת מתחת לכותרת (אחידה בכל העמודים).
+import { getCurrentShift } from '../data/departments.js'
 
 export default function ScreenHeader({ title, trail = [], onBack, right }) {
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('he-IL')
+  const timeStr = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })
+  const shift = getCurrentShift()
   return (
     <div className="screen-head">
       <div className="crumb-bar">
@@ -31,6 +37,10 @@ export default function ScreenHeader({ title, trail = [], onBack, right }) {
       <div className="screen-head-main">
         <h1 className="page-title">{title}</h1>
         {right}
+      </div>
+      <div className="screen-meta">
+        <span className="dot" />
+        <span>{dateStr} · {timeStr} · משמרת {shift}</span>
       </div>
     </div>
   )
