@@ -2708,12 +2708,18 @@ textarea.input {
   border-color: #e6b3ba;
   color: #c0392b;
 }
+.or-row,
+.or-head,
+.or-label {
+  min-width: 0;
+}
 .or-detail {
   margin-top: 12px;
   padding-top: 10px;
   border-top: 1px dashed rgba(168, 220, 232, 0.8);
   display: grid;
   gap: 10px;
+  min-width: 0;
 }
 .or-rowfields {
   display: grid;
@@ -2722,9 +2728,25 @@ textarea.input {
   padding: 10px 12px;
   border-radius: 12px;
   background: rgba(214, 238, 245, 0.4);
+  min-width: 0;
 }
+/* שדות נשברים ולא חורגים מגבולות הטופס (כמו בטפסים הקיימים) */
+.or-detail .field,
 .or-rowfields .field {
   margin: 0;
+  min-width: 0;
+}
+.or-detail .input,
+.or-rowfields .input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.or-detail textarea.input,
+.or-rowfields textarea.input {
+  resize: vertical;
 }
 .or-rm {
   align-self: end;
