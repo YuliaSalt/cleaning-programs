@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import ScreenHeader from './ScreenHeader.jsx'
 import { signoffKind } from '../data/cleaningTemplates.js'
 import { listReports, flattenSectionTasks, TYPE_LABELS, HE_MONTHS } from '../data/reports.js'
+import { getCleaningPlan } from '../data/cleaningTemplates.js'
 import DatePicker from './DatePicker.jsx'
 
 /* ===== תצוגת דוח בודד (קריאה בלבד) + הדפסה ===== */
@@ -89,12 +90,10 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
   const [folder, setFolder] = useState('all') // תיקייה: יומי בוקר/ערב · שבועי · חודשי
   const [open, setOpen] = useState(null)
 
-  // תיקייה לפי תדירות: יומי (כל המשמרות) · שבועי · חודשי
+  // תיקיות לפי תדירות – מתוך התוכנית (יומי/שבועי/חודשי), כך שהכפתורים תמיד מוצגים
   const folderOf = (r) => TYPE_LABELS[r.tabId] || r.tabId
-  const FOLDER_ORDER = ['יומי', 'שבועי', 'חודשי', 'חולה בבידוד']
-  const folders = [...new Set(reports.map(folderOf))].sort(
-    (a, b) => (FOLDER_ORDER.indexOf(a) + 1 || 99) - (FOLDER_ORDER.indexOf(b) + 1 || 99)
-  )
+  const plan = getCleaningPlan(unit.id)
+  const folders = plan ? [...new Set(plan.tabs.map((t) => TYPE_LABELS[t.id] || t.id))] : []
 
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBackToCategory })
@@ -163,7 +162,7 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
       ) : (
         <>
           <div className="glass plan-card controls-card">
-            {folders.length > 1 && (
+            {folders.length > 0 && (
               <div className="folder-row">
                 <span className="folder-label">תיקיות:</span>
                 <div className="chips">

@@ -6,6 +6,7 @@ import UnitBoard from './components/UnitBoard.jsx'
 import CleaningPlan from './components/CleaningPlan.jsx'
 import GeneralHandover from './components/GeneralHandover.jsx'
 import GastroHandover from './components/GastroHandover.jsx'
+import ORHandover from './components/ORHandover.jsx'
 import SpecialProcedures from './components/SpecialProcedures.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import BottomNav from './components/BottomNav.jsx'
@@ -164,6 +165,14 @@ export default function App() {
           {!showDashboard && unit && windowId === 'handover' && (
             unit.id === 'gastro' ? (
               <GastroHandover
+                unit={unit}
+                onBack={backToBoard}
+                onBackToCategory={backToCategory}
+                onGoHome={goHome}
+                categoryName={parentName}
+              />
+            ) : unit.id === 'or' ? (
+              <ORHandover
                 unit={unit}
                 onBack={backToBoard}
                 onBackToCategory={backToCategory}

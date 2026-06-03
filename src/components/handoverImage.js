@@ -8,6 +8,7 @@ import {
   GEN_OCC_NUMBERS,
   GEN_REPORT_ITEMS,
   GEN_CHECK_ITEMS,
+  OR_SECTIONS,
   fullName,
 } from '../data/handover.js'
 
@@ -220,6 +221,32 @@ export function buildGeneralHandoverImage(record) {
     b.gap(4)
   })
 
+  return b.finish()
+}
+
+// ===== טופס חדרי ניתוח =====
+export function buildORHandoverImage(record) {
+  const b = makeBuilder()
+  header(b, 'העברת משמרת – חדרי ניתוח', record)
+  for (const s of OR_SECTIONS) {
+    if (s.part) { b.band(s.part); continue }
+    const st = (record.sections && record.sections[s.id]) || { flag: false }
+    b.statusRow(s.label, st.flag ? s.bad : s.good, st.flag ? '#c0392b' : '#15a34a', true)
+    if (st.flag) {
+      if (s.multi) {
+        ;(st.rows || []).forEach((row, idx) => {
+          const parts = s.fields.map((f) => (row[f.id] && String(row[f.id]).trim() ? f.label + ': ' + row[f.id] : '')).filter(Boolean)
+          if (parts.length) b.para(idx + 1 + '. ' + parts.join(' · '), { s: 30, color: '#33424d', indent: 26, gap: 0.3 })
+        })
+      } else {
+        s.fields.forEach((f) => {
+          const v = (st.fields || {})[f.id]
+          if (v && String(v).trim()) b.para(f.label + ': ' + String(v).trim(), { s: 30, color: '#33424d', indent: 26, gap: 0.3 })
+        })
+      }
+    }
+    b.gap(6)
+  }
   return b.finish()
 }
 

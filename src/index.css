@@ -2654,6 +2654,93 @@ textarea.input {
   flex: 1;
 }
 
+/* ===== העברת משמרת חדרי ניתוח – מתגי אין/יש עם פתיחת שדות ===== */
+.or-row {
+  margin-bottom: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(168, 220, 232, 0.5);
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.or-row.open {
+  border-color: rgba(226, 85, 78, 0.55);
+  background: rgba(255, 248, 247, 0.95);
+}
+.or-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.or-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  overflow-wrap: anywhere;
+}
+.or-toggle {
+  display: inline-flex;
+  gap: 6px;
+  flex: none;
+}
+.or-tg {
+  min-width: 54px;
+  min-height: 42px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid rgba(168, 220, 232, 0.8);
+  background: #fff;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.14s ease;
+}
+.or-tg.good.on {
+  background: linear-gradient(135deg, #cfeede, #a7e0c2);
+  border-color: #7fcfa3;
+  color: #15795a;
+}
+.or-tg.bad.on {
+  background: linear-gradient(135deg, #ffe3e3, #ffc9c9);
+  border-color: #e6b3ba;
+  color: #c0392b;
+}
+.or-detail {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(168, 220, 232, 0.8);
+  display: grid;
+  gap: 10px;
+}
+.or-rowfields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(214, 238, 245, 0.4);
+}
+.or-rowfields .field {
+  margin: 0;
+}
+.or-rm {
+  align-self: end;
+  min-height: 38px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1px solid #e6b3ba;
+  background: #fff;
+  color: #b23b4b;
+  font-size: 13px;
+  font-weight: 700;
+}
+.vr-status.bad {
+  color: #c0392b;
+}
+
 /* ===== בורר תאריך מותאם (Glassmorphism) ===== */
 .dp {
   position: relative;

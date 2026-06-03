@@ -110,6 +110,70 @@ export function rememberDeviceNurse(name) {
   if (v) storage.setItem(DEVICE_NURSE_KEY, v)
 }
 
+// ===== העברת משמרת – חדרי ניתוח (טופס ייעודי מבוסס מתגי אין/יש עם פתיחת שדות) =====
+export const OR_SECTIONS = [
+  { part: 'חלק א׳: סטטוס וזרימת התוכנית הניתוחית' },
+  {
+    id: 'waiting', label: 'מטופלים ממתינים / עיכובים בבלוקים', good: 'אין', bad: 'יש', multi: true,
+    fields: [
+      { id: 'patient', label: 'מספר מטופל / ת.ז', type: 'text' },
+      { id: 'reason', label: 'סיבת העיכוב', type: 'text' },
+      { id: 'time', label: 'צפוי להיכנס בשעה', type: 'time' },
+    ],
+  },
+  {
+    id: 'surgeonDelay', label: 'איחורים של מנתחים', good: 'אין', bad: 'יש',
+    fields: [
+      { id: 'surgeon', label: 'שם המנתח / חדר', type: 'text' },
+      { id: 'details', label: 'פרטי האיחור וצפי הגעה', type: 'textarea' },
+    ],
+  },
+  {
+    id: 'roomChanges', label: 'שינוי חדרים והתאמת התוכנית', good: 'אין', bad: 'יש',
+    fields: [{ id: 'detail', label: 'פירוט ההעברות (מחדר X לחדר Y)', type: 'textarea' }],
+  },
+  { part: 'חלק ב׳: לוגיסטיקה, ציוד ותשתיות' },
+  {
+    id: 'equipMissing', label: 'חוסר בציוד הנדרש לניתוח', good: 'אין', bad: 'יש',
+    fields: [{ id: 'detail', label: 'פירוט הציוד החסר וסטטוס טיפול (למי פנינו)', type: 'textarea' }],
+  },
+  {
+    id: 'faults', label: 'ליקויים בציוד, ריהוט ותשתיות', good: 'אין', bad: 'יש',
+    fields: [
+      { id: 'detail', label: 'תיאור התקלה', type: 'textarea' },
+      { id: 'service', label: 'מספר קריאת שירות (אם נפתחה)', type: 'text' },
+    ],
+  },
+  { part: 'חלק ג׳: כוח אדם ואירועים חריגים' },
+  {
+    id: 'staffing', label: 'הפקדת כוח אדם מותאמת לתוכנית', good: 'מותאם', bad: 'לא מותאם',
+    fields: [{ id: 'detail', label: 'פירוט חוסרים באחיות / כוחות עזר והערכות נדרשת', type: 'textarea' }],
+  },
+  {
+    id: 'eventClinical', label: 'אירועים חריגים – מטופלים', good: 'אין', bad: 'יש',
+    fields: [{ id: 'detail', label: 'תיאור האירוע הקליני / המורכבות וההתערבות', type: 'textarea' }],
+  },
+  {
+    id: 'eventMgmt', label: 'אירועים חריגים – ניהול', good: 'אין', bad: 'יש',
+    fields: [{ id: 'detail', label: 'תיאור אירוע ניהולי (צוות / תהליכים / בטיחות)', type: 'textarea' }],
+  },
+  { part: 'חלק ד׳: בקרת בטיחות' },
+  { id: 'isbar', label: 'העברת מידע על פי דוח ISBAR', good: 'תקין', bad: 'הערות', fields: [{ id: 'note', label: 'הערות', type: 'textarea' }] },
+  { id: 'narcotics', label: 'ספירת נרקוטיקה', good: 'תקין', bad: 'הערות', fields: [{ id: 'note', label: 'הערות', type: 'textarea' }] },
+  { id: 'crash', label: 'בדיקת עגלת החייאה', good: 'תקין', bad: 'הערות', fields: [{ id: 'note', label: 'הערות', type: 'textarea' }] },
+]
+
+const emptyFields = (s) => Object.fromEntries(s.fields.map((f) => [f.id, '']))
+
+export function emptyORHandover(unitId, unitName, shift) {
+  const sections = {}
+  for (const s of OR_SECTIONS) {
+    if (!s.id) continue
+    sections[s.id] = s.multi ? { flag: false, rows: [emptyFields(s)] } : { flag: false, fields: emptyFields(s) }
+  }
+  return { kind: 'or', unitId, unitName, date: new Date().toLocaleDateString('en-CA'), shift, sections }
+}
+
 const PREFIX = 'hmc:handover:'
 
 export function emptyHandover(unitId, unitName, shift) {

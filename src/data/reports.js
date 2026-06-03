@@ -1,7 +1,6 @@
 // קריאת דוחות הביצוע השמורים (סקשני חתימה נעולים) של יחידה, מתוך ה-StorageAdapter.
 
 import { getCleaningPlan, getMergedDailySection } from './cleaningTemplates.js'
-import { findUnit } from './departments.js'
 import { storage } from './storage.js'
 
 const PREFIX = 'hmc:plan:'
@@ -54,11 +53,17 @@ export function listReports(unitId) {
     const section = p.sectionId === 'day'
       ? getMergedDailySection(plan, shift)
       : findSection(plan, p.tabId, p.sectionId)
-    // שם הדוח: "[שם מחלקה] - יומי בוקר / יומי ערב" (תדירות + משמרת)
-    const unit = findUnit(p.unitId)
-    const unitName = unit ? unit.name : p.unitId
+    // שם הדוח: תדירות + משמרת + אזור/תחנה (לדוגמה "יומי בוקר התאוששות / קבלה / חדר שיקוף")
     const freqLabel = TYPE_LABELS[p.tabId] || p.tabId
-    const title = `${unitName} - ${freqLabel}${shift ? ' ' + shift : ''}`
+    const tab = plan ? plan.tabs.find((t) => t.id === p.tabId) : null
+    let extra = ''
+    if (section && section.area && tab && tab.dailyAreas) {
+      const a = tab.dailyAreas.find((x) => x.id === section.area)
+      extra = a ? a.label : ''
+    } else if (p.tabId !== 'daily' && section && section.title) {
+      extra = section.title
+    }
+    const title = `${freqLabel}${shift ? ' ' + shift : ''}${extra ? ' ' + extra : ''}`
     out.push({
       key,
       room: p.room === '-' ? null : p.room,
