@@ -146,15 +146,14 @@ export const unitWindows = [
   {
     id: 'meds',
     title: 'בקרת תרופות חודשית',
-    description: 'בדיקת מלאי ותוקף תרופות · שמירה חודשית · חיפוש לפי תאריך/תקופה',
+    description: 'בדיקת מלאי ותוקף תרופות',
     enabled: true,
   },
   {
     id: 'shortages',
     title: 'דיווח על חסרים',
-    description: 'רישום ודיווח על חוסרים בציוד ובחומרים',
-    enabled: false,
-    soonLabel: 'לא פעיל',
+    description: 'דיווח חוסרים בציוד אנדוסקופי, ציוד מהמחסן ותרופות · שליחה לוואטסאפ',
+    enabled: true,
   },
 ]
 

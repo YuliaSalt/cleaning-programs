@@ -3358,6 +3358,94 @@ textarea.input {
   color: #c0392b;
 }
 
+/* ===== דיווח על חסרים (Shortages) ===== */
+.sh-search {
+  width: 100%;
+}
+
+.sh-cat-head {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--brand);
+  margin-bottom: 4px;
+}
+
+.sh-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.sh-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(168, 220, 232, 0.5);
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.sh-mark {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  border: 2px solid #1faf8f;
+  color: #1faf8f;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.sh-name {
+  flex: 1;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  overflow-wrap: anywhere;
+}
+
+.sh-toggle {
+  flex: none;
+  min-height: 38px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #e6b3ba;
+  background: #fff;
+  color: #c0392b;
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.14s ease;
+}
+
+.sh-hint {
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* מצב "חסר" – שורה באדום בהיר */
+.sh-row.missing {
+  background: rgba(255, 220, 218, 0.6);
+  border-color: rgba(226, 85, 78, 0.55);
+}
+.sh-row.missing .sh-mark {
+  border-color: #e2554e;
+  color: #c0392b;
+}
+.sh-toggle.on {
+  background: #e2554e;
+  border-color: #e2554e;
+  color: #fff;
+}
+
 /* תוקף מתקרב (≤ חודשיים) – אזהרה בהירה (חום-ענבר) */
 input.expiry-near {
   border-color: #e0a23c;
