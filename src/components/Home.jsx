@@ -26,9 +26,21 @@ export default function Home({ onOpenCategory, onOpenDashboard }) {
           )
         })}
         {/* דשבורד ביצועים – קובייה חמישית, לרוחב מלא */}
-        <button className={'cat-card cat-dash tint-' + (categories.length % 5)} onClick={onOpenDashboard}>
+        <button className="cat-card cat-dash" onClick={onOpenDashboard}>
           <span className="cc-name">דשבורד ביצועים</span>
           <span className="cc-sub">מעקב אחוזי ביצוע יומי · שבועי · חודשי לכל מחלקה</span>
+        </button>
+
+        {/* השותף שלך למשמרת (AI) – לא פעיל כרגע */}
+        <button className="cat-card cat-ai" disabled aria-disabled="true">
+          <span className="cc-name">
+            השותף שלך למשמרת (AI)
+            <span className="ai-soon">בקרוב</span>
+          </span>
+          <span className="cc-sub">
+            💬 תמיד ער, תמיד איתך. התייעצות חכמה, מתן תשובות מיידיות ושליפה מהירה של פרוטוקולים,
+            נהלים ובקרות משרד הבריאות בכל שעה.
+          </span>
         </button>
       </div>
     </div>

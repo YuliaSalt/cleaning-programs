@@ -1579,18 +1579,80 @@ h1, h2, h3, h4 {
   justify-content: center;
   gap: 4px 14px;
   min-height: 0;
-  padding: 22px 24px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.62) 0%, rgba(197, 232, 242, 0.62) 100%);
-  border-color: rgba(168, 220, 232, 0.9);
+  padding: 24px 24px;
+  /* מראה מטלי מלוטש + זוהר מסביב בולט */
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(216, 230, 240, 0.9) 34%, rgba(178, 201, 217, 0.88) 60%, rgba(236, 244, 249, 0.95) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 0 0 1px rgba(118, 152, 178, 0.5),
+    0 12px 30px rgba(40, 92, 132, 0.3),
+    0 0 22px rgba(122, 196, 224, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -3px 10px rgba(118, 152, 178, 0.28);
+}
+
+.cat-dash:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 0 0 1px rgba(118, 152, 178, 0.6),
+    0 16px 38px rgba(40, 92, 132, 0.36),
+    0 0 30px rgba(122, 196, 224, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -3px 10px rgba(118, 152, 178, 0.3);
 }
 
 .cat-dash .cc-name {
   color: var(--brand);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 .cat-dash .cc-sub {
   flex-basis: 100%;
   opacity: 0.9;
+}
+
+/* השותף למשמרת (AI) – כרטיס רחב, גוון סגול-מטלי, לא פעיל כרגע */
+.cat-ai {
+  grid-column: 1 / -1;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: start;
+  gap: 8px;
+  min-height: 0;
+  padding: 20px 22px;
+  cursor: not-allowed;
+  background:
+    linear-gradient(135deg, rgba(243, 240, 255, 0.92) 0%, rgba(223, 227, 252, 0.86) 48%, rgba(238, 232, 252, 0.92) 100%);
+  border: 1.5px solid rgba(160, 148, 224, 0.5);
+  box-shadow:
+    0 10px 26px rgba(92, 70, 162, 0.2),
+    0 0 18px rgba(150, 130, 230, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  opacity: 0.95;
+}
+
+.cat-ai .cc-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #5b46b0;
+  font-weight: 800;
+}
+
+.cat-ai .cc-sub {
+  opacity: 0.88;
+  line-height: 1.55;
+}
+
+.ai-soon {
+  font-size: 12px;
+  font-weight: 800;
+  color: #5b46b0;
+  background: rgba(150, 130, 230, 0.22);
+  border: 1px solid rgba(150, 130, 230, 0.5);
+  border-radius: var(--radius-pill);
+  padding: 3px 11px;
 }
 
 .back-btn {
