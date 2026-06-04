@@ -114,12 +114,12 @@ export function rememberDeviceNurse(name) {
 export const OR_SECTIONS = [
   { part: 'חלק א׳: סטטוס וזרימת התוכנית הניתוחית' },
   {
-    id: 'waiting', label: 'מטופלים ממתינים / עיכובים בבלוקים', good: 'אין', bad: 'יש', multi: true,
-    fields: [
-      { id: 'patient', label: 'מספר מטופל / ת.ז', type: 'text' },
-      { id: 'reason', label: 'סיבת העיכוב', type: 'text' },
-      { id: 'time', label: 'צפוי להיכנס בשעה', type: 'time' },
-    ],
+    id: 'waiting', label: 'מטופלים ממתינים / עיכובים בבלוקים', good: 'אין', bad: 'יש',
+    fields: [{ id: 'detail', label: 'פירוט (מטופל / סיבה / צפי כניסה)', type: 'textarea' }],
+  },
+  {
+    id: 'blockerSolution', label: 'פתרון חסמים / עיכובים', good: 'אין', bad: 'יש',
+    fields: [{ id: 'detail', label: 'פירוט הפתרון שננקט', type: 'textarea' }],
   },
   {
     id: 'surgeonDelay', label: 'איחורים של מנתחים', good: 'אין', bad: 'יש',
