@@ -773,6 +773,37 @@ h1, h2, h3, h4 {
   box-shadow: var(--halo-lg);
 }
 
+/* צבע עדין ושונה לכל סוג כפתור (כדי שלא יתבלבלו) – פס מבטא + גוון רקע + כותרת */
+.window-card.win-cleaning {
+  border-inline-start: 5px solid #2aa9c9;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(207, 234, 243, 0.55));
+}
+.window-card.win-cleaning h3 { color: #1782a6; }
+
+.window-card.win-handover {
+  border-inline-start: 5px solid #5b8def;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(216, 226, 250, 0.55));
+}
+.window-card.win-handover h3 { color: #3a63b8; }
+
+.window-card.win-meds {
+  border-inline-start: 5px solid #9b7fd0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(231, 224, 247, 0.55));
+}
+.window-card.win-meds h3 { color: #6f4fb0; }
+
+.window-card.win-shortages {
+  border-inline-start: 5px solid #e0a23c;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 240, 214, 0.6));
+}
+.window-card.win-shortages h3 { color: #9a6b00; }
+
+.window-card.win-special {
+  border-inline-start: 5px solid #d678a8;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(250, 222, 237, 0.55));
+}
+.window-card.win-special h3 { color: #a8497d; }
+
 .window-card.disabled {
   opacity: 0.6;
 }
@@ -2544,7 +2575,21 @@ h1, h2, h3, h4 {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: center;
   margin-top: 24px;
+}
+
+/* אינדיקציה "נחתם ונשמר" – לפני שליחה לוואטסאפ */
+.ho-signed-ok {
+  display: inline-flex;
+  align-items: center;
+  padding: 11px 18px;
+  border-radius: var(--radius-pill);
+  background: rgba(168, 224, 194, 0.3);
+  border: 1px solid #7fcfa3;
+  color: #15795a;
+  font-weight: 800;
+  font-size: 14px;
 }
 
 .wa-btn {

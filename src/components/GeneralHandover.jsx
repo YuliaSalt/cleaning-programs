@@ -43,7 +43,7 @@ function GeneralForm({ unit, onSent, onReset }) {
   const [reports, setReports] = useState(blank.reports)
   const [checks, setChecks] = useState(blank.checks)
   const [err, setErr] = useState(false)
-  const [busy, setBusy] = useState(false)
+  const [signedRec, setSignedRec] = useState(null) // נחתם ונשמר – רק אז שולחים לוואטסאפ
 
   const dateHe = new Date().toLocaleDateString('he-IL')
   const outName = fullName(names.nurseOut)
@@ -67,10 +67,11 @@ function GeneralForm({ unit, onSent, onReset }) {
     setReports(e.reports)
     setChecks(e.checks)
     setErr(false)
+    setSignedRec(null)
     if (onReset) onReset()
   }
 
-  function send() {
+  function sign() {
     if (!names.nurseOut.first.trim()) {
       setErr(true)
       return
@@ -92,17 +93,12 @@ function GeneralForm({ unit, onSent, onReset }) {
       checks,
       nurse: outName,
     }
-    // 1) שמירה לארכיון (תמיד, לפני כל דבר אחר)
-    saveHandover(record)
-    // 2) יצירת תמונה ושיתוף לוואטסאפ – ברקע, לא חוסם את השמירה/הניווט
-    try {
-      const canvas = buildGeneralHandoverImage(record)
-      shareHandoverImage(canvas).catch(() => {})
-    } catch (e) {
-      /* הרישום כבר נשמר */
-    }
-    // 3) חזרה לרשימה + אישור שמירה
+    saveHandover(record) // שמירה לארכיון
+    setSignedRec(record)
     onSent()
+  }
+  function shareWa() {
+    if (signedRec) { try { shareHandoverImage(buildGeneralHandoverImage(signedRec)).catch(() => {}) } catch (e) { /* noop */ } }
   }
 
   return (
@@ -238,10 +234,15 @@ function GeneralForm({ unit, onSent, onReset }) {
       </div>
 
       <div className="ho-actions">
-        <button className="wa-btn" onClick={send} disabled={busy}>
-          <WhatsAppIcon /> {busy ? 'מכין תמונה...' : 'שלח לקבוצה'}
-        </button>
-        <button className="reset-btn" onClick={reset}>איפוס רשימה</button>
+        {!signedRec ? (
+          <button className="btn cysto-sign-btn" style={{ width: 'auto' }} onClick={sign}>חתימה ושמירה</button>
+        ) : (
+          <>
+            <span className="ho-signed-ok">✓ נחתם ונשמר</span>
+            <button className="wa-btn" onClick={shareWa}><WhatsAppIcon /> שליחה לוואטסאפ</button>
+            <button className="reset-btn" onClick={reset}>דו״ח חדש</button>
+          </>
+        )}
       </div>
         </>
       )}
@@ -333,12 +334,12 @@ export default function GeneralHandover({ unit, onBack, onGoHome, onBackToCatego
   baseTrail.push({ label: unit.name, onClick: onBack })
 
   const goForm = () => { setMode('form'); setOpenRec(null) }
-  const title = 'העברת משמרת - ' + unit.name
+  const title = 'דו״ח אחראית משמרת - ' + unit.name
 
   if (mode === 'list') {
     return (
       <div>
-        <ScreenHeader title={title} onBack={goForm} trail={[...baseTrail, { label: 'העברת משמרת', onClick: goForm }, { label: 'העברות שמורות' }]} />
+        <ScreenHeader title={title} onBack={goForm} trail={[...baseTrail, { label: 'דו״ח אחראית משמרת', onClick: goForm }, { label: 'דו״חות שמורים' }]} />
         <HandoverArchive
           records={records}
           savedFlash={false}
@@ -352,20 +353,20 @@ export default function GeneralHandover({ unit, onBack, onGoHome, onBackToCatego
   if (mode === 'view' && openRec) {
     return (
       <div>
-        <ScreenHeader title={title} onBack={() => setMode('list')} trail={[...baseTrail, { label: 'העברת משמרת', onClick: goForm }, { label: openRec.dateLabel }]} />
+        <ScreenHeader title={title} onBack={() => setMode('list')} trail={[...baseTrail, { label: 'דו״ח אחראית משמרת', onClick: goForm }, { label: openRec.dateLabel }]} />
         <GeneralView unit={unit} record={openRec.record} />
       </div>
     )
   }
 
-  // ברירת מחדל: טופס העברת משמרת ישירות
+  // ברירת מחדל: טופס דו״ח אחראית משמרת ישירות
   return (
     <div>
-      <ScreenHeader title={title} onBack={onBack} trail={[...baseTrail, { label: 'העברת משמרת' }]} />
-      <GeneralForm key={refresh} unit={unit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true) }} />
+      <ScreenHeader title={title} onBack={onBack} trail={[...baseTrail, { label: 'דו״ח אחראית משמרת' }]} />
+      <GeneralForm unit={unit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true) }} />
       {records.length > 0 && (
         <button className="ho-archive-link" onClick={() => { setSavedFlash(false); setMode('list') }}>
-          צפייה בהעברות שמורות ({records.length})
+          צפייה בדו״חות שמורים ({records.length})
         </button>
       )}
       {savedFlash && <div className="save-flash save-flash-bottom">העברת המשמרת נשמרה ונשלחה ✓</div>}

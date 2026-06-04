@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { HE_MONTHS } from '../data/handover.js'
 import DatePicker from './DatePicker.jsx'
 
-// רשימת רישומי העברת משמרת: כפתור "חדש" למעלה, חיפוש (תאריכים/שם/משמרת), וארכיון לפי שנה>חודש>תאריך.
+// רשימת דו״חות אחראית משמרת: כפתור "חדש" למעלה, חיפוש (תאריכים/שם/משמרת), וארכיון לפי שנה>חודש>תאריך.
 export default function HandoverArchive({ records, onNew, onOpen, savedFlash }) {
   const [q, setQ] = useState('')
   const [folder, setFolder] = useState('all') // תיקייה לפי משמרת
@@ -40,7 +40,7 @@ export default function HandoverArchive({ records, onNew, onOpen, savedFlash }) 
         <div className="save-flash">✓ הרישום נשמר בארכיון בהצלחה</div>
       )}
 
-      <button className="btn wide-btn" onClick={onNew}>+ העברת משמרת חדשה</button>
+      <button className="btn wide-btn" onClick={onNew}>+ דו״ח אחראית משמרת חדשה</button>
 
       {records.length > 0 && (
         <div className="glass plan-card controls-card">
@@ -72,7 +72,7 @@ export default function HandoverArchive({ records, onNew, onOpen, savedFlash }) 
 
       {records.length === 0 ? (
         <div className="glass plan-card" style={{ padding: 36, textAlign: 'center' }}>
-          <p className="empty-hint" style={{ fontSize: 16 }}>אין עדיין רישומי העברת משמרת ביחידה זו.</p>
+          <p className="empty-hint" style={{ fontSize: 16 }}>אין עדיין דו״חות אחראית משמרת ביחידה זו.</p>
         </div>
       ) : filtered.length === 0 ? (
         <p className="empty-hint" style={{ marginTop: 6 }}>לא נמצאו רישומים תואמים לחיפוש.</p>
@@ -86,7 +86,7 @@ export default function HandoverArchive({ records, onNew, onOpen, savedFlash }) 
             return (
               <button key={i} className="report-card" onClick={() => onOpen(r)}>
                 <div className="rc-main">
-                  <span className="rc-title">העברת משמרת · {r.record.shift}</span>
+                  <span className="rc-title">דו״ח אחראית משמרת · {r.record.shift}</span>
                   <span className="rc-sub">{r.timeLabel}{r.record.nurse ? ' · ' + r.record.nurse : ''}</span>
                 </div>
                 <span className="rc-by">צפייה</span>

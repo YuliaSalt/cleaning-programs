@@ -36,7 +36,7 @@ function HandoverForm({ unit, onSent, onReset }) {
   const [checks, setChecks] = useState(() => emptyHandover(unit.id, unit.name, shift).checks)
   const [nurse, setNurse] = useState(() => getDeviceNurse()) // שם מלא בשדה אחד; נשמר במכשיר
   const [err, setErr] = useState(false)
-  const [busy, setBusy] = useState(false)
+  const [signedRec, setSignedRec] = useState(null) // נחתם ונשמר – רק אז שולחים לוואטסאפ
 
   const dateHe = now.toLocaleDateString('he-IL')
   // משמרות שכבר מולא להן טופס היום – לצביעת כפתורי המשמרת לפי שעה
@@ -57,40 +57,33 @@ function HandoverForm({ unit, onSent, onReset }) {
     setChecks(e.checks)
     setNurse(getDeviceNurse()) // שומר על שם האחות המוסרת השמור במכשיר
     setErr(false)
+    setSignedRec(null)
     if (onReset) onReset()
   }
 
-  function send() {
-    // חובה לרשום את שם האחות המוסרת לפני שמירה ושליחה
+  function sign() {
     if (!nurse.trim()) {
       setErr(true)
       return
     }
     setErr(false)
-    rememberDeviceNurse(nurse) // שמירת שם האחות המוסרת קבוע במכשיר
-    // תאריך, שעה ומשמרת נרשמים אוטומטית בעת השליחה
-    const at = new Date()
+    rememberDeviceNurse(nurse)
     const record = {
       unitId: unit.id,
       unitName: unit.name,
       date: todayStr(),
-      shift, // המשמרת שנבחרה ידנית
-      savedAt: at.toISOString(),
+      shift,
+      savedAt: new Date().toISOString(),
       nurse: nurse.trim(),
       reports,
       checks,
     }
-    // 1) שמירה לארכיון (תמיד, ראשון)
     saveHandover(record)
-    // 2) תמונה ושיתוף לוואטסאפ – ברקע, לא חוסם
-    try {
-      const canvas = buildHandoverImage(record)
-      shareHandoverImage(canvas).catch(() => {})
-    } catch (e) {
-      /* הרישום כבר נשמר */
-    }
-    // 3) חזרה לרשימה + אישור
+    setSignedRec(record)
     onSent()
+  }
+  function shareWa() {
+    if (signedRec) { try { shareHandoverImage(buildHandoverImage(signedRec)).catch(() => {}) } catch (e) { /* noop */ } }
   }
 
   return (
@@ -179,10 +172,15 @@ function HandoverForm({ unit, onSent, onReset }) {
       </div>
 
       <div className="ho-actions">
-        <button className="wa-btn" onClick={send} disabled={busy}>
-          <WhatsAppIcon /> {busy ? 'מכין תמונה...' : 'שלח לקבוצה'}
-        </button>
-        <button className="reset-btn" onClick={reset}>איפוס רשימה</button>
+        {!signedRec ? (
+          <button className="btn cysto-sign-btn" style={{ width: 'auto' }} onClick={sign}>חתימה ושמירה</button>
+        ) : (
+          <>
+            <span className="ho-signed-ok">✓ נחתם ונשמר</span>
+            <button className="wa-btn" onClick={shareWa}><WhatsAppIcon /> שליחה לוואטסאפ</button>
+            <button className="reset-btn" onClick={reset}>דו״ח חדש</button>
+          </>
+        )}
       </div>
         </>
       )}
@@ -247,7 +245,7 @@ function HandoverView({ record }) {
   )
 }
 
-/* ===== מסך ראשי של קוביית העברת משמרת ===== */
+/* ===== מסך ראשי של קוביית דו״ח אחראית משמרת ===== */
 export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategory, categoryName }) {
   const [mode, setMode] = useState('form') // ברירת מחדל: ישר לטופס, ללא מסך ביניים
   const [openRec, setOpenRec] = useState(null)
@@ -265,9 +263,9 @@ export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategor
     return (
       <div>
         <ScreenHeader
-          title="העברת משמרת גסטרו"
+          title="דו״ח אחראית משמרת גסטרו"
           onBack={goForm}
-          trail={[...baseTrail, { label: 'העברת משמרת', onClick: goForm }, { label: 'העברות שמורות' }]}
+          trail={[...baseTrail, { label: 'דו״ח אחראית משמרת', onClick: goForm }, { label: 'דו״חות שמורים' }]}
         />
         <HandoverArchive
           records={records}
@@ -283,27 +281,27 @@ export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategor
     return (
       <div>
         <ScreenHeader
-          title="העברת משמרת גסטרו"
+          title="דו״ח אחראית משמרת גסטרו"
           onBack={() => setMode('list')}
-          trail={[...baseTrail, { label: 'העברת משמרת', onClick: goForm }, { label: openRec.dateLabel }]}
+          trail={[...baseTrail, { label: 'דו״ח אחראית משמרת', onClick: goForm }, { label: openRec.dateLabel }]}
         />
         <HandoverView record={openRec.record} />
       </div>
     )
   }
 
-  // ברירת מחדל: טופס העברת משמרת ישירות
+  // ברירת מחדל: טופס דו״ח אחראית משמרת ישירות
   return (
     <div>
       <ScreenHeader
-        title="העברת משמרת גסטרו"
+        title="דו״ח אחראית משמרת גסטרו"
         onBack={onBack}
-        trail={[...baseTrail, { label: 'העברת משמרת' }]}
+        trail={[...baseTrail, { label: 'דו״ח אחראית משמרת' }]}
       />
-      <HandoverForm key={refresh} unit={unit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true) }} />
+      <HandoverForm unit={unit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true) }} />
       {records.length > 0 && (
         <button className="ho-archive-link" onClick={() => { setSavedFlash(false); setMode('list') }}>
-          צפייה בהעברות שמורות ({records.length})
+          צפייה בדו״חות שמורים ({records.length})
         </button>
       )}
       {savedFlash && <div className="save-flash save-flash-bottom">העברת המשמרת נשמרה ונשלחה ✓</div>}

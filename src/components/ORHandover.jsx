@@ -60,7 +60,7 @@ function Field({ field, value, onChange }) {
   )
 }
 
-/* ===== טופס העברת משמרת – חדרי ניתוח ===== */
+/* ===== טופס דו״ח אחראית משמרת – חדרי ניתוח ===== */
 function ORForm({ unit, onSent }) {
   const shifts = unit.shifts || ['בוקר', 'ערב']
   const suggested = shifts.includes(getCurrentShift()) ? getCurrentShift() : shifts[shifts.length - 1]
@@ -69,6 +69,7 @@ function ORForm({ unit, onSent }) {
   const [nurseOut, setNurseOut] = useState(() => getDeviceNurse()) // אחות מוסרת – נשמרת במכשיר
   const [nurseIn, setNurseIn] = useState('') // אחות מקבלת
   const [err, setErr] = useState(false)
+  const [signedRec, setSignedRec] = useState(null) // נחתם ונשמר – רק אז ניתן לשלוח לוואטסאפ
 
   const now = new Date()
   const dateHe = now.toLocaleDateString('he-IL')
@@ -88,15 +89,18 @@ function ORForm({ unit, onSent }) {
     return { ...s, [id]: { ...s[id], rows: rows.length ? rows : s[id].rows } }
   })
 
-  function send() {
+  function sign() {
     if (!nurseOut.trim()) { setErr(true); return }
     rememberDeviceNurse(nurseOut)
     const record = { kind: 'or', unitId: unit.id, unitName: unit.name, date: todayStr(), shift, savedAt: new Date().toISOString(), nurse: nurseOut.trim(), nurseIn: nurseIn.trim(), sections }
     saveHandover(record)
-    try { shareHandoverImage(buildORHandoverImage(record)).catch(() => {}) } catch (e) { /* נשמר */ }
+    setSignedRec(record)
     onSent()
   }
-  function reset() { setSections(emptyORHandover(unit.id, unit.name, shift).sections); setNurseIn(''); setErr(false) }
+  function shareWa() {
+    if (signedRec) { try { shareHandoverImage(buildORHandoverImage(signedRec)).catch(() => {}) } catch (e) { /* noop */ } }
+  }
+  function reset() { setSections(emptyORHandover(unit.id, unit.name, shift).sections); setNurseIn(''); setSignedRec(null); setErr(false) }
 
   return (
     <div className="glass plan-card ho-form">
@@ -185,8 +189,15 @@ function ORForm({ unit, onSent }) {
       </div>
 
       <div className="ho-actions">
-        <button className="wa-btn" onClick={send}><WhatsAppIcon /> שמירה ושליחה לקבוצה</button>
-        <button className="reset-btn" onClick={reset}>איפוס</button>
+        {!signedRec ? (
+          <button className="btn cysto-sign-btn" style={{ width: 'auto' }} onClick={sign}>חתימה ושמירה</button>
+        ) : (
+          <>
+            <span className="ho-signed-ok">✓ נחתם ונשמר</span>
+            <button className="wa-btn" onClick={shareWa}><WhatsAppIcon /> שליחה לוואטסאפ</button>
+            <button className="reset-btn" onClick={reset}>דו״ח חדש</button>
+          </>
+        )}
       </div>
       <div className="ho-footer">הרצליה מדיקל סנטר</div>
     </div>
@@ -255,12 +266,12 @@ export default function ORHandover({ unit, onBack, onGoHome, onBackToCategory, c
   baseTrail.push({ label: unit.name, onClick: onBack })
 
   const goForm = () => { setMode('form'); setOpenRec(null) }
-  const title = 'העברת משמרת - ' + unit.name
+  const title = 'דו״ח אחראית משמרת - ' + unit.name
 
   if (mode === 'list') {
     return (
       <div>
-        <ScreenHeader title={title} onBack={goForm} trail={[...baseTrail, { label: 'העברת משמרת', onClick: goForm }, { label: 'העברות שמורות' }]} />
+        <ScreenHeader title={title} onBack={goForm} trail={[...baseTrail, { label: 'דו״ח אחראית משמרת', onClick: goForm }, { label: 'דו״חות שמורים' }]} />
         <HandoverArchive records={records} savedFlash={false} onNew={goForm} onOpen={(r) => { setOpenRec(r); setMode('view') }} />
       </div>
     )
@@ -269,7 +280,7 @@ export default function ORHandover({ unit, onBack, onGoHome, onBackToCategory, c
   if (mode === 'view' && openRec) {
     return (
       <div>
-        <ScreenHeader title={title} onBack={() => setMode('list')} trail={[...baseTrail, { label: 'העברת משמרת', onClick: goForm }, { label: openRec.dateLabel }]} />
+        <ScreenHeader title={title} onBack={() => setMode('list')} trail={[...baseTrail, { label: 'דו״ח אחראית משמרת', onClick: goForm }, { label: openRec.dateLabel }]} />
         <ORView record={openRec.record} />
       </div>
     )
@@ -277,11 +288,11 @@ export default function ORHandover({ unit, onBack, onGoHome, onBackToCategory, c
 
   return (
     <div>
-      <ScreenHeader title={title} onBack={onBack} trail={[...baseTrail, { label: 'העברת משמרת' }]} />
-      <ORForm key={refresh} unit={unit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true) }} />
+      <ScreenHeader title={title} onBack={onBack} trail={[...baseTrail, { label: 'דו״ח אחראית משמרת' }]} />
+      <ORForm unit={unit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true) }} />
       {records.length > 0 && (
         <button className="ho-archive-link" onClick={() => { setSavedFlash(false); setMode('list') }}>
-          צפייה בהעברות שמורות ({records.length})
+          צפייה בדו״חות שמורים ({records.length})
         </button>
       )}
       {savedFlash && <div className="save-flash save-flash-bottom">העברת המשמרת נשמרה ונשלחה ✓</div>}

@@ -44,7 +44,7 @@ export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, 
           <div
             key={w.id}
             className={
-              'window-card' + (w.enabled ? ' clickable' : ' disabled') +
+              'window-card win-' + w.id + (w.enabled ? ' clickable' : ' disabled') +
               (w.id === 'meds' && medsLevel ? ' alert-' + medsLevel : '')
             }
             role={w.enabled ? 'button' : undefined}

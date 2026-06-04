@@ -169,7 +169,7 @@ function header(b, title, record) {
 // ===== טופס גסטרו =====
 export function buildHandoverImage(record) {
   const b = makeBuilder()
-  header(b, 'העברת משמרת גסטרו', record)
+  header(b, 'דו״ח אחראית משמרת גסטרו', record)
 
   b.band('דיווח ובקרה')
   for (const it of GASTRO_REPORT_ITEMS) {
@@ -192,7 +192,7 @@ export function buildHandoverImage(record) {
 // ===== טופס כללי (מחלקות / יחידות) =====
 export function buildGeneralHandoverImage(record) {
   const b = makeBuilder()
-  header(b, `העברת משמרת - ${record.unitName || ''}`, record)
+  header(b, `דו״ח אחראית משמרת - ${record.unitName || ''}`, record)
 
   b.band('נתוני תפוסה וצוות')
   for (const it of GEN_OCC_NAMES) {
@@ -227,7 +227,7 @@ export function buildGeneralHandoverImage(record) {
 // ===== טופס חדרי ניתוח =====
 export function buildORHandoverImage(record) {
   const b = makeBuilder()
-  header(b, 'העברת משמרת – חדרי ניתוח', record)
+  header(b, 'דו״ח אחראית משמרת – חדרי ניתוח', record)
   if (record.nurseIn && record.nurseIn.trim()) {
     b.para('אחות מקבלת: ' + record.nurseIn.trim(), { s: 32, b: true, color: '#0a4d8c' })
     b.line()

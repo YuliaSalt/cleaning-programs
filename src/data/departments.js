@@ -139,7 +139,7 @@ export const unitWindows = [
   },
   {
     id: 'handover',
-    title: 'העברת משמרת',
+    title: 'דו״ח אחראית משמרת',
     description: 'דיווח והעברת מידע בין משמרות',
     enabled: true,
   },
