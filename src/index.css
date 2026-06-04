@@ -2697,7 +2697,8 @@ textarea.input {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px 12px;
+  flex-wrap: wrap;
 }
 .or-label {
   flex: 1;
@@ -2739,18 +2740,20 @@ textarea.input {
 .or-label {
   min-width: 0;
 }
+/* פריסת בלוק מלאה-רוחב (כמו בטפסים הקיימים) – ללא רשת, כדי שלא תהיה גלישה */
 .or-detail {
   margin-top: 12px;
   padding-top: 10px;
   border-top: 1px dashed rgba(168, 220, 232, 0.8);
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   min-width: 0;
 }
 .or-rowfields {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   padding: 10px 12px;
   border-radius: 12px;
   background: rgba(214, 238, 245, 0.4);
@@ -2779,6 +2782,23 @@ textarea.input {
   font-size: 16px;
   line-height: 1.5;
   min-height: 76px;
+}
+
+/* בורר שעה מספרי (שעה : דקה) */
+.time-sel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.time-sel select.input {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+.time-sel .ts-colon {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--brand-soft);
 }
 .or-rm {
   align-self: end;

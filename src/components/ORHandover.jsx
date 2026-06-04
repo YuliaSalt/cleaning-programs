@@ -24,14 +24,37 @@ function WhatsAppIcon() {
   )
 }
 
+// בורר שעה מבוסס מספרים (שעה + דקה) – ללא שעון אנלוגי
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
+const MINS = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'))
+function TimeSelect({ value, onChange }) {
+  const [h, m] = value && value.includes(':') ? value.split(':') : ['', '']
+  const set = (nh, nm) => onChange(nh === '' && nm === '' ? '' : `${nh || '00'}:${nm || '00'}`)
+  return (
+    <div className="time-sel">
+      <select className="input" value={h} onChange={(e) => set(e.target.value, m)}>
+        <option value="">שעה</option>
+        {HOURS.map((x) => <option key={x} value={x}>{x}</option>)}
+      </select>
+      <span className="ts-colon">:</span>
+      <select className="input" value={m} onChange={(e) => set(h, e.target.value)}>
+        <option value="">דקה</option>
+        {MINS.map((x) => <option key={x} value={x}>{x}</option>)}
+      </select>
+    </div>
+  )
+}
+
 function Field({ field, value, onChange }) {
   return (
     <div className="field">
       <label>{field.label}</label>
       {field.type === 'textarea' ? (
         <textarea className="input or-textarea" rows={3} value={value} onChange={(e) => onChange(e.target.value)} />
+      ) : field.type === 'time' ? (
+        <TimeSelect value={value} onChange={onChange} />
       ) : (
-        <input className="input" type={field.type === 'time' ? 'time' : 'text'} value={value} onChange={(e) => onChange(e.target.value)} />
+        <input className="input" type="text" value={value} onChange={(e) => onChange(e.target.value)} />
       )}
     </div>
   )
