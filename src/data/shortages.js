@@ -18,11 +18,13 @@ const WAREHOUSE_ITEMS = {
 // הגדרת שלוש הקטגוריות עבור מחלקה נתונה.
 // waTitle = כותרת קבועה להודעת הוואטסאפ של אותה קטגוריה.
 export function getShortageCategories(unitId) {
+  const isGastro = unitId === 'gastro'
   return [
     {
       id: 'endoscopic',
-      label: 'ציוד אנדוסקופי (רכש)',
-      waTitle: 'בקשה לרכש ציוד אנדוסקופי',
+      // בגסטרו: "ציוד אנדוסקופי (רכש)". בשאר המחלקות ללא המילה "אנדוסקופי".
+      label: isGastro ? 'ציוד אנדוסקופי (רכש)' : 'ציוד (רכש)',
+      waTitle: isGastro ? 'בקשה לרכש ציוד אנדוסקופי' : 'בקשה לרכש ציוד',
       items: ENDOSCOPIC_ITEMS[unitId] || [],
     },
     {

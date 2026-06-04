@@ -3737,3 +3737,30 @@ input.expiry-soon {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== תחושת שקיעה בלחיצה (4D / תלת-מימד) – חל על כל הכפתורים בכל העמודים ===== */
+button:active,
+[role="button"]:active,
+.unit-card:active,
+.window-card:active,
+.drill-card:active,
+.report-card:active,
+.chip:active,
+.guide-toggle:active,
+.med-stbtn:active,
+.med-act:active,
+.sh-urg-btn:active,
+.sign-toggle:active,
+.st-toggle:active,
+.ho-archive-link:active,
+.reset-btn:active {
+  transform: translateY(3px) scale(0.985);
+  filter: brightness(0.95);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 2px 5px rgba(0, 0, 0, 0.16);
+}
+
+button:disabled:active,
+[role="button"][aria-disabled="true"]:active {
+  transform: none;
+  filter: none;
+}
