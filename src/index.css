@@ -804,6 +804,18 @@ h1, h2, h3, h4 {
 }
 .window-card.win-special h3 { color: #a8497d; }
 
+/* גוונים עדינים ושונים לכרטיסי דף ראשי וכרטיסי מחלקות (מתחלפים לפי סדר) */
+.tint-0 { border-inline-start: 5px solid #2aa9c9; background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(207, 234, 243, 0.6)); }
+.tint-1 { border-inline-start: 5px solid #5b8def; background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(216, 226, 250, 0.6)); }
+.tint-2 { border-inline-start: 5px solid #9b7fd0; background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(231, 224, 247, 0.6)); }
+.tint-3 { border-inline-start: 5px solid #e0a23c; background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(255, 240, 214, 0.62)); }
+.tint-4 { border-inline-start: 5px solid #58b78b; background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(214, 243, 228, 0.6)); }
+.tint-0 .cc-name, .tint-0 .uc-name { color: #1782a6; }
+.tint-1 .cc-name, .tint-1 .uc-name { color: #3a63b8; }
+.tint-2 .cc-name, .tint-2 .uc-name { color: #6f4fb0; }
+.tint-3 .cc-name, .tint-3 .uc-name { color: #9a6b00; }
+.tint-4 .cc-name, .tint-4 .uc-name { color: #2e8a63; }
+
 .window-card.disabled {
   opacity: 0.6;
 }

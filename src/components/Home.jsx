@@ -15,10 +15,10 @@ export default function Home({ onOpenCategory, onOpenDashboard }) {
 
       {/* רשת קטגוריות + דשבורד כקובייה חמישית רחבה */}
       <div className="cat-grid">
-        {categories.map((c) => {
+        {categories.map((c, i) => {
           const count = getCategoryUnits(c.id).length
           return (
-            <button key={c.id} className="cat-card" onClick={() => onOpenCategory(c.id)}>
+            <button key={c.id} className={'cat-card tint-' + (i % 5)} onClick={() => onOpenCategory(c.id)}>
               <span className="cc-name">{c.name}</span>
               <span className="cc-sub">{c.subtitle}</span>
               <span className="cc-count">{count} יחידות</span>
@@ -26,7 +26,7 @@ export default function Home({ onOpenCategory, onOpenDashboard }) {
           )
         })}
         {/* דשבורד ביצועים – קובייה חמישית, לרוחב מלא */}
-        <button className="cat-card cat-dash" onClick={onOpenDashboard}>
+        <button className={'cat-card cat-dash tint-' + (categories.length % 5)} onClick={onOpenDashboard}>
           <span className="cc-name">דשבורד ביצועים</span>
           <span className="cc-sub">מעקב אחוזי ביצוע יומי · שבועי · חודשי לכל מחלקה</span>
         </button>

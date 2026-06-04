@@ -15,8 +15,8 @@ export default function CategoryView({ categoryId, onSelectUnit, onGoHome }) {
       />
 
       <div className={'card-grid' + (units.length % 2 ? ' single-col' : '')}>
-        {units.map((u) => (
-          <button key={u.id} className="unit-card" onClick={() => onSelectUnit(u.id)}>
+        {units.map((u, i) => (
+          <button key={u.id} className={'unit-card tint-' + (i % 5)} onClick={() => onSelectUnit(u.id)}>
             <span className="uc-name">{u.name}</span>
           </button>
         ))}
