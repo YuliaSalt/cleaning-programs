@@ -152,7 +152,7 @@ export const unitWindows = [
   {
     id: 'shortages',
     title: 'דיווח על חסרים',
-    description: 'דיווח חוסרים בציוד אנדוסקופי, ציוד מהמחסן ותרופות · שליחה לוואטסאפ',
+    description: 'דיווח חוסרים בציוד אנדוסקופי, ציוד מהמחסן ותרופות',
     enabled: true,
   },
 ]

@@ -13,21 +13,45 @@ function WhatsAppIcon() {
 
 const norm = (s) => (s || '').toString().toLowerCase()
 
-/* שורת פריט: ברירת מחדל ✓ ירוק (תקין); לחיצה על "חסר" צובעת אדום בהיר. מק״ט מוסתר. */
+// רמות דחיפות לבחירה (משפיעות על שורת "דחיפות" בהודעת הוואטסאפ)
+export const URGENCY_LEVELS = ['רגילה', 'דחופה', 'דחופה מאוד']
+const urgClass = { 'רגילה': 'lvl1', 'דחופה': 'lvl2', 'דחופה מאוד': 'lvl3' }
+
+/* בורר דחיפות – מופיע על העמוד וגם בתוך כל קטגוריה */
+function UrgencyPicker({ value, onChange }) {
+  return (
+    <div className="sh-urgency">
+      <span className="sh-urgency-label">דחיפות:</span>
+      <div className="sh-urg-btns">
+        {URGENCY_LEVELS.map((u) => (
+          <button
+            key={u}
+            type="button"
+            className={'sh-urg-btn' + (value === u ? ' on ' + urgClass[u] : '')}
+            onClick={() => onChange(u)}
+          >
+            {u}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* שורת פריט: לחיצה על "חסר" מסמנת חוסר וצובעת את השורה אדום בהיר. מק״ט מוסתר. */
 function ItemRow({ item, missing, onToggle }) {
   return (
     <div className={'sh-row' + (missing ? ' missing' : '')}>
-      <span className="sh-mark">{missing ? '✗' : '✓'}</span>
       <span className="sh-name">{item.name}</span>
       <button type="button" className={'sh-toggle' + (missing ? ' on' : '')} onClick={onToggle}>
-        ✗ חסר
+        {missing ? '✓ חסר' : 'סמן חסר'}
       </button>
     </div>
   )
 }
 
 /* רשימת פריטים של קטגוריה (עם כותרות-קבוצה אם קיימות) + כפתור שליחה לוואטסאפ */
-function CategoryList({ category, items, isMissing, onToggle }) {
+function CategoryList({ category, items, isMissing, onToggle, urgency }) {
   const missingItems = category.items.filter((it) => isMissing(category.id, it))
   return (
     <div className="sh-list">
@@ -49,12 +73,12 @@ function CategoryList({ category, items, isMissing, onToggle }) {
         <button
           className="wa-btn"
           disabled={missingItems.length === 0}
-          onClick={() => sendWhatsApp(category, missingItems)}
+          onClick={() => sendWhatsApp(category, missingItems, urgency)}
         >
-          <WhatsAppIcon /> שליחת חוסרים לקבוצת «חסרים» ({missingItems.length})
+          <WhatsAppIcon /> לשלוח לקבוצת חסרים ({missingItems.length})
         </button>
         {missingItems.length > 0 && (
-          <p className="sh-hint">בלחיצה ייפתח וואטסאפ עם ההודעה מוכנה — בחר/י את קבוצת «חסרים» מרשימת הצ׳אטים ושלח/י.</p>
+          <p className="sh-hint">בלחיצה ייפתח וואטסאפ עם ההודעה מוכנה — בחר/י את קבוצת חסרים מרשימת הצ׳אטים ושלח/י.</p>
         )}
       </div>
     </div>
@@ -66,6 +90,7 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
   const [query, setQuery] = useState('')
   const [catId, setCatId] = useState(null) // קטגוריה נבחרת
   const [missing, setMissing] = useState({}) // { [key]: true }
+  const [urgency, setUrgency] = useState(URGENCY_LEVELS[0]) // דחיפות משותפת לדוח
 
   const isMissing = (cid, item) => !!missing[itemKey(cid, item)]
   const toggle = (cid, item) => {
@@ -104,6 +129,13 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
         />
       </div>
 
+      {/* בורר דחיפות ברמת העמוד */}
+      {!activeCat && (
+        <div className="glass plan-card controls-card">
+          <UrgencyPicker value={urgency} onChange={setUrgency} />
+        </div>
+      )}
+
       {/* תצוגת חיפוש גלובלי: תוצאות מכל הקטגוריות במקביל */}
       {q ? (
         (() => {
@@ -116,14 +148,15 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
           return groups.map(({ cat, items }) => (
             <div className="glass plan-card" key={cat.id} style={{ marginTop: 14 }}>
               <div className="sh-cat-head">{cat.label}</div>
-              <CategoryList category={cat} items={items} isMissing={isMissing} onToggle={toggle} />
+              <CategoryList category={cat} items={items} isMissing={isMissing} onToggle={toggle} urgency={urgency} />
             </div>
           ))
         })()
       ) : activeCat ? (
         /* תצוגת קטגוריה נבחרת */
         <div className="glass plan-card" style={{ marginTop: 14 }}>
-          <CategoryList category={activeCat} items={activeCat.items} isMissing={isMissing} onToggle={toggle} />
+          <UrgencyPicker value={urgency} onChange={setUrgency} />
+          <CategoryList category={activeCat} items={activeCat.items} isMissing={isMissing} onToggle={toggle} urgency={urgency} />
         </div>
       ) : (
         /* הַאב: שלושת כפתורי הקטגוריות */

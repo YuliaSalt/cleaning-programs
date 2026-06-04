@@ -45,20 +45,20 @@ export function itemKey(catId, item) {
   return catId + '::' + (item.sku || item.name)
 }
 
-// בניית טקסט הודעת הוואטסאפ: כותרת קבועה, רשימה נקייה (שם + מק״ט בלבד,
-// ללא המילה "חסר" וללא סוגריים), וכותרת תחתית קבועה.
-export function buildWhatsAppText(category, items) {
-  const lines = [category.waTitle, '']
+// בניית טקסט הודעת הוואטסאפ: כותרת קבועה, שורת דחיפות, ורשימה נקייה
+// (שם + מק״ט בלבד, ללא המילה "חסר" וללא סוגריים). ללא כותרת תחתית.
+export function buildWhatsAppText(category, items, urgency) {
+  const lines = [category.waTitle]
+  if (urgency) lines.push('דחיפות: ' + urgency)
+  lines.push('')
   items.forEach((it) => {
     lines.push('* ' + it.name + (it.sku ? ' ' + it.sku : ''))
   })
-  lines.push('')
-  lines.push('הופק אוטומטית דרך מערכת הדיווח הדיגיטלית')
   return lines.join('\n')
 }
 
 // פתיחת וואטסאפ עם הטקסט המוכן (בורר צ׳אט/קבוצה במכשיר).
-export function sendWhatsApp(category, items) {
-  const url = 'https://wa.me/?text=' + encodeURIComponent(buildWhatsAppText(category, items))
+export function sendWhatsApp(category, items, urgency) {
+  const url = 'https://wa.me/?text=' + encodeURIComponent(buildWhatsAppText(category, items, urgency))
   window.open(url, '_blank', 'noopener')
 }
