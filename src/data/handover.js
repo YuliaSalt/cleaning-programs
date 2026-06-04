@@ -144,15 +144,24 @@ export const OR_SECTIONS = [
       { id: 'service', label: 'מספר קריאת שירות (אם נפתחה)', type: 'text' },
     ],
   },
+  { part: 'חלק ג׳: כוח אדם ואירועים חריגים' },
+  {
+    id: 'staffing', label: 'התאמת כוח אדם לתוכנית', good: 'מותאם', bad: 'לא מותאם',
+    fields: [{ id: 'detail', label: 'פירוט חוסרים / היערכות נדרשת', type: 'textarea' }],
+  },
+  {
+    id: 'eventClinical', label: 'אירועים חריגים – מטופלים', good: 'אין', bad: 'יש',
+    fields: [{ id: 'detail', label: 'תיאור האירוע הקליני וההתערבות', type: 'textarea' }],
+  },
+  {
+    id: 'eventMgmt', label: 'אירועים חריגים – ניהול / צוות', good: 'אין', bad: 'יש',
+    fields: [{ id: 'detail', label: 'תיאור האירוע הניהולי', type: 'textarea' }],
+  },
   { part: 'הערות' },
   {
     id: 'notes', label: 'הערות כלליות', good: 'אין', bad: 'יש',
     fields: [{ id: 'note', label: 'הערות', type: 'textarea' }],
   },
-  { part: 'חלק ג׳: בקרת בטיחות' },
-  { id: 'isbar', label: 'העברת מידע על פי דוח ISBAR', good: 'תקין', bad: 'הערות', fields: [{ id: 'note', label: 'הערות', type: 'textarea' }] },
-  { id: 'narcotics', label: 'ספירת נרקוטיקה', good: 'תקין', bad: 'הערות', fields: [{ id: 'note', label: 'הערות', type: 'textarea' }] },
-  { id: 'crash', label: 'בדיקת עגלת החייאה', good: 'תקין', bad: 'הערות', fields: [{ id: 'note', label: 'הערות', type: 'textarea' }] },
 ]
 
 const emptyFields = (s) => Object.fromEntries(s.fields.map((f) => [f.id, '']))
