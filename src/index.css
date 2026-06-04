@@ -804,17 +804,17 @@ h1, h2, h3, h4 {
 }
 .window-card.win-special h3 { color: #a8497d; }
 
-/* גוונים עדינים ושונים לכרטיסי דף ראשי וכרטיסי מחלקות (מתחלפים לפי סדר) */
-.tint-0 { border-inline-start: 5px solid #2aa9c9; background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(207, 234, 243, 0.6)); }
-.tint-1 { border-inline-start: 5px solid #5b8def; background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(216, 226, 250, 0.6)); }
-.tint-2 { border-inline-start: 5px solid #9b7fd0; background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(231, 224, 247, 0.6)); }
-.tint-3 { border-inline-start: 5px solid #e0a23c; background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(255, 240, 214, 0.62)); }
-.tint-4 { border-inline-start: 5px solid #58b78b; background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(214, 243, 228, 0.6)); }
-.tint-0 .cc-name, .tint-0 .uc-name { color: #1782a6; }
-.tint-1 .cc-name, .tint-1 .uc-name { color: #3a63b8; }
-.tint-2 .cc-name, .tint-2 .uc-name { color: #6f4fb0; }
-.tint-3 .cc-name, .tint-3 .uc-name { color: #9a6b00; }
-.tint-4 .cc-name, .tint-4 .uc-name { color: #2e8a63; }
+/* גוונים בהרמוניה (טורקיז→כחול→אינדיגו) – שונים אך מאותה משפחת צבע קרירה */
+.tint-0 { border-inline-start: 5px solid #1f9fc2; background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(206, 235, 243, 0.62)); }
+.tint-1 { border-inline-start: 5px solid #2f8ed0; background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(210, 231, 248, 0.62)); }
+.tint-2 { border-inline-start: 5px solid #4a82dd; background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(214, 226, 250, 0.62)); }
+.tint-3 { border-inline-start: 5px solid #6a78e0; background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(223, 224, 250, 0.62)); }
+.tint-4 { border-inline-start: 5px solid #8a76d8; background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(231, 224, 248, 0.62)); }
+.tint-0 .cc-name, .tint-0 .uc-name { color: #157e9c; }
+.tint-1 .cc-name, .tint-1 .uc-name { color: #2369ad; }
+.tint-2 .cc-name, .tint-2 .uc-name { color: #3a5fb8; }
+.tint-3 .cc-name, .tint-3 .uc-name { color: #4f54b8; }
+.tint-4 .cc-name, .tint-4 .uc-name { color: #6a4fb0; }
 
 .window-card.disabled {
   opacity: 0.6;
@@ -1446,10 +1446,24 @@ h1, h2, h3, h4 {
 }
 
 .home-logo {
-  width: 92px;
+  width: 108px;
   height: auto;
-  margin-bottom: 6px;
-  filter: drop-shadow(0 10px 22px rgba(45, 115, 150, 0.3));
+  margin-bottom: 8px;
+  /* אפקט 3D ללוגו – שכבות צל מדורגות + הרמה קלה */
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.9))
+    drop-shadow(0 6px 10px rgba(45, 115, 150, 0.28))
+    drop-shadow(0 16px 28px rgba(45, 115, 150, 0.32));
+  transform: perspective(600px) rotateX(8deg) translateZ(0);
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.home-logo:hover {
+  transform: perspective(600px) rotateX(0deg) translateY(-3px);
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.95))
+    drop-shadow(0 8px 14px rgba(45, 115, 150, 0.32))
+    drop-shadow(0 22px 36px rgba(45, 115, 150, 0.38));
 }
 
 .home-title {
@@ -1539,13 +1553,22 @@ h1, h2, h3, h4 {
   backdrop-filter: blur(24px) saturate(130%);
   -webkit-backdrop-filter: blur(24px) saturate(130%);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--halo);
+  /* עומק 3D + זוהר בולט לכל כפתורי הדף הראשי */
+  box-shadow:
+    0 10px 26px rgba(40, 92, 132, 0.22),
+    0 2px 6px rgba(40, 92, 132, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -3px 9px rgba(118, 152, 178, 0.18);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .cat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--halo-lg);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow:
+    0 18px 38px rgba(40, 92, 132, 0.3),
+    0 4px 10px rgba(40, 92, 132, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -3px 9px rgba(118, 152, 178, 0.2);
 }
 
 .cat-card .cc-name {

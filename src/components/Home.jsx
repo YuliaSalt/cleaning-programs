@@ -38,8 +38,8 @@ export default function Home({ onOpenCategory, onOpenDashboard }) {
             <span className="ai-soon">בקרוב</span>
           </span>
           <span className="cc-sub">
-            💬 תמיד ער, תמיד איתך. התייעצות חכמה, מתן תשובות מיידיות ושליפה מהירה של פרוטוקולים,
-            נהלים ובקרות משרד הבריאות בכל שעה.
+            💬 תמיד ער, תמיד איתך. התייעצות חכמה, מתן תשובות מיידיות ושליפה מהירה של פרוטוקולים
+            ונהלים של משרד הבריאות בכל שעה.
           </span>
         </button>
       </div>
