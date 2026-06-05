@@ -43,6 +43,7 @@ function GeneralForm({ unit, onSent, onReset }) {
   const [reports, setReports] = useState(blank.reports)
   const [checks, setChecks] = useState(blank.checks)
   const [err, setErr] = useState(false)
+  const [checksErr, setChecksErr] = useState(false) // נדלק כשמנסים לחתום לפני שכל העיגולים סומנו
   const [signedRec, setSignedRec] = useState(null) // נחתם ונשמר – רק אז שולחים לוואטסאפ
 
   const dateHe = new Date().toLocaleDateString('he-IL')
@@ -57,7 +58,10 @@ function GeneralForm({ unit, onSent, onReset }) {
   const setNum = (id, v) => setNumbers((o) => ({ ...o, [id]: v }))
   const setHas = (id, has) => setReports((r) => ({ ...r, [id]: { ...r[id], has, text: has ? r[id].text : '' } }))
   const setText = (id, v) => setReports((r) => ({ ...r, [id]: { ...r[id], text: v } }))
-  const setChk = (i, field, v) => setChecks((c) => ({ ...c, [i]: { ...c[i], [field]: v } }))
+  const setChk = (i, field, v) => {
+    setChecks((c) => ({ ...c, [i]: { ...c[i], [field]: v } }))
+    if (field === 'on' && v) setChecksErr(false)
+  }
 
   function reset() {
     const e = emptyGeneralHandover(unit.id, unit.name, shift)
@@ -67,16 +71,23 @@ function GeneralForm({ unit, onSent, onReset }) {
     setReports(e.reports)
     setChecks(e.checks)
     setErr(false)
+    setChecksErr(false)
     setSignedRec(null)
     if (onReset) onReset()
   }
 
+  // כל סעיפי "משימות ובטיחות המחלקה" חייבים להיות מסומנים (✓) לפני חתימה ושמירה
+  const allChecked = GEN_CHECK_ITEMS.every((_, i) => checks[i] && checks[i].on)
+
   function sign() {
-    if (!names.nurseOut.first.trim()) {
-      setErr(true)
+    const nameOk = names.nurseOut.first.trim()
+    if (!nameOk || !allChecked) {
+      setErr(!nameOk)
+      setChecksErr(!allChecked)
       return
     }
     setErr(false)
+    setChecksErr(false)
     rememberDeviceNurse(names.nurseOut.first) // שמירת שם האחות המוסרת קבוע במכשיר
     const record = {
       kind: 'general',
@@ -117,7 +128,9 @@ function GeneralForm({ unit, onSent, onReset }) {
                 onClick={() => setShift(s)}
               >
                 <span className="ho-shift-name">{s}</span>
-                {s === suggested && <span className="ho-shift-tag">מומלץ לפי השעה</span>}
+                <span className={'ho-shift-status ' + (doneShifts.has(s) ? 'done' : 'todo')}>
+                  {doneShifts.has(s) ? '✓ בוצעה' : 'טרם בוצעה'}
+                </span>
               </button>
             )
           })}
@@ -200,12 +213,12 @@ function GeneralForm({ unit, onSent, onReset }) {
         ))}
       </div>
 
-      {/* בלוק 3 – משימות ובטיחות המחלקה */}
+      {/* בלוק 3 – משימות ובטיחות המחלקה (חובה לסמן את כל הסעיפים) */}
       <div className="ho-block">
         <div className="ho-block-title">משימות ובטיחות המחלקה</div>
         {GEN_CHECK_ITEMS.map((label, i) => (
           <div className="ho-2col check-2col" key={i}>
-            <button className={'ho-check' + (checks[i].on ? ' on' : '')} onClick={() => setChk(i, 'on', !checks[i].on)}>
+            <button className={'ho-check' + (checks[i].on ? ' on' : '') + (checksErr && !checks[i].on ? ' missing' : '')} onClick={() => setChk(i, 'on', !checks[i].on)}>
               <span className="ho-circle">{checks[i].on ? '✓' : ''}</span>
               <span className="ho-check-label">{label}</span>
             </button>
@@ -221,6 +234,7 @@ function GeneralForm({ unit, onSent, onReset }) {
             </div>
           </div>
         ))}
+        {checksErr && <div className="err">יש לסמן (✓) את כל הסעיפים לפני חתימה ושמירה.</div>}
       </div>
 
       {/* בלוק 4 – אישור וחתימה (אחות מוסרת – אותו שם מבלוק 1) */}
@@ -231,6 +245,7 @@ function GeneralForm({ unit, onSent, onReset }) {
           <span className="sc-name">{outName || 'יש למלא שם אחות מוסרת בבלוק "נתוני תפוסה וצוות"'}</span>
         </div>
         {err && <div className="err">חובה למלא את שם האחות המוסרת לפני שמירה ושליחה.</div>}
+        <div className="ho-consent">חתימה על טופס זה מהווה אישור רשמי לביצוע.</div>
       </div>
 
       <div className="ho-actions">

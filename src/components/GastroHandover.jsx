@@ -36,6 +36,7 @@ function HandoverForm({ unit, onSent, onReset }) {
   const [checks, setChecks] = useState(() => emptyHandover(unit.id, unit.name, shift).checks)
   const [nurse, setNurse] = useState(() => getDeviceNurse()) // שם מלא בשדה אחד; נשמר במכשיר
   const [err, setErr] = useState(false)
+  const [checksErr, setChecksErr] = useState(false) // נדלק כשמנסים לחתום לפני שכל העיגולים סומנו
   const [signedRec, setSignedRec] = useState(null) // נחתם ונשמר – רק אז שולחים לוואטסאפ
 
   const dateHe = now.toLocaleDateString('he-IL')
@@ -49,7 +50,10 @@ function HandoverForm({ unit, onSent, onReset }) {
   const setHas = (id, has) =>
     setReports((r) => ({ ...r, [id]: { has, text: has ? r[id].text : '' } }))
   const setText = (id, text) => setReports((r) => ({ ...r, [id]: { ...r[id], text } }))
-  const toggle = (blk, i) => setChecks((c) => ({ ...c, [blk]: { ...c[blk], [i]: !c[blk][i] } }))
+  const toggle = (blk, i) => {
+    setChecks((c) => ({ ...c, [blk]: { ...c[blk], [i]: !c[blk][i] } }))
+    setChecksErr(false)
+  }
 
   function reset() {
     const e = emptyHandover(unit.id, unit.name, shift)
@@ -57,16 +61,23 @@ function HandoverForm({ unit, onSent, onReset }) {
     setChecks(e.checks)
     setNurse(getDeviceNurse()) // שומר על שם האחות המוסרת השמור במכשיר
     setErr(false)
+    setChecksErr(false)
     setSignedRec(null)
     if (onReset) onReset()
   }
 
+  // כל סעיפי הצ׳קליסטים (כל הבלוקים) חייבים להיות מסומנים (✓) לפני חתימה ושמירה
+  const allChecked = GASTRO_CHECK_BLOCKS.every((b) => b.items.every((_, i) => checks[b.id] && checks[b.id][i]))
+
   function sign() {
-    if (!nurse.trim()) {
-      setErr(true)
+    const nameOk = nurse.trim()
+    if (!nameOk || !allChecked) {
+      setErr(!nameOk)
+      setChecksErr(!allChecked)
       return
     }
     setErr(false)
+    setChecksErr(false)
     rememberDeviceNurse(nurse)
     const record = {
       unitId: unit.id,
@@ -102,7 +113,9 @@ function HandoverForm({ unit, onSent, onReset }) {
                 onClick={() => setShift(s)}
               >
                 <span className="ho-shift-name">{s}</span>
-                {s === suggested && <span className="ho-shift-tag">מומלץ לפי השעה</span>}
+                <span className={'ho-shift-status ' + (doneShifts.has(s) ? 'done' : 'todo')}>
+                  {doneShifts.has(s) ? '✓ בוצעה' : 'טרם בוצעה'}
+                </span>
               </button>
             )
           })}
@@ -145,7 +158,7 @@ function HandoverForm({ unit, onSent, onReset }) {
           {blk.items.map((label, i) => {
             const on = !!checks[blk.id][i]
             return (
-              <button key={i} className={'ho-check' + (on ? ' on' : '')} onClick={() => toggle(blk.id, i)}>
+              <button key={i} className={'ho-check' + (on ? ' on' : '') + (checksErr && !on ? ' missing' : '')} onClick={() => toggle(blk.id, i)}>
                 <span className="ho-circle">{on ? '✓' : ''}</span>
                 <span className="ho-check-label">{label}</span>
               </button>
@@ -153,6 +166,8 @@ function HandoverForm({ unit, onSent, onReset }) {
           })}
         </div>
       ))}
+
+      {checksErr && <div className="err">יש לסמן (✓) את כל הסעיפים בכל הבלוקים לפני חתימה ושמירה.</div>}
 
       {/* חתימת אחות מוסרת – חובה (שם מלא בשדה אחד, נשמר במכשיר) */}
       <div className="ho-block">
@@ -169,6 +184,7 @@ function HandoverForm({ unit, onSent, onReset }) {
           <span className="ho-auto-hint">נשמר במכשיר ויופיע מראש בפעם הבאה</span>
         </div>
         {err && <div className="err">חובה למלא את שם האחות המוסרת לפני שמירה ושליחה.</div>}
+        <div className="ho-consent">חתימה על טופס זה מהווה אישור רשמי לביצוע.</div>
       </div>
 
       <div className="ho-actions">

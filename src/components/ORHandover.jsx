@@ -117,6 +117,9 @@ function ORForm({ unit, onSent }) {
                 onClick={() => setShift(s)}
               >
                 <span className="ho-shift-name">{s}</span>
+                <span className={'ho-shift-status ' + (doneShifts.has(s) ? 'done' : 'todo')}>
+                  {doneShifts.has(s) ? '✓ בוצעה' : 'טרם בוצעה'}
+                </span>
               </button>
             )
           })}
@@ -186,6 +189,7 @@ function ORForm({ unit, onSent }) {
           />
         </div>
         {err && <div className="err">חובה לרשום שם אחות מוסרת לפני שמירה ושליחה.</div>}
+        <div className="ho-consent">חתימה על טופס זה מהווה אישור רשמי לביצוע.</div>
       </div>
 
       <div className="ho-actions">

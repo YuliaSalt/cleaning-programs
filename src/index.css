@@ -2251,6 +2251,14 @@ h1, h2, h3, h4 {
 .ho-shift-btn.shift-red:not(.active) .ho-shift-name {
   color: #c0392b;
 }
+/* סטטוס ביצוע על כפתור המשמרת: "בוצעה" אחרי מילוי, "טרם בוצעה" לפני. ללא שינוי צבעים – יורש מהכפתור */
+.ho-shift-status {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
 .ho-shift-locked {
   margin: 14px 0 4px;
   padding: 14px;
@@ -2516,6 +2524,29 @@ h1, h2, h3, h4 {
 
 .ho-check.on .ho-check-label {
   color: #15795a;
+}
+
+/* סימון סעיף חסר – כשמנסים לחתום לפני שכל העיגולים סומנו */
+.ho-check.missing {
+  border-color: #e06a6a;
+  background: rgba(224, 106, 106, 0.08);
+}
+.ho-check.missing .ho-circle {
+  border-color: #e06a6a;
+}
+
+/* הערת אישור רשמי בתחתית טופס העברת משמרת */
+.ho-consent {
+  margin-top: 12px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: rgba(168, 220, 232, 0.2);
+  border: 1px dashed rgba(42, 169, 201, 0.55);
+  color: var(--ink-strong);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.5;
 }
 
 /* צ'ק-ליסט ציסטוסקופיה – ברירת מחדל X אדום, בלחיצה V ירוק */
