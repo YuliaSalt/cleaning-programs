@@ -167,7 +167,7 @@ export const specialProcedures = [
   { id: 'conization', en: 'Conization', he: 'קוניזציה' },
   { id: 'overstitch', en: 'OverStitch', he: 'אוברסטיץ׳' },
   { id: 'poem', en: 'POEM', he: 'מיוטומיה אנדוסקופית פומית' },
-  'TIF',
+  { id: 'tif', en: 'TIF', he: 'פונדופליקציה' },
 ]
 
 // החלונות של יחידה ספציפית (כולל תוספות ייחודיות).
