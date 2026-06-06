@@ -104,6 +104,49 @@ export const PROCEDURE_CHECKLISTS = {
     ],
   },
 
+  // OverStitch – מערכת תפירה אנדוסקופית. פריטים עם מק"ט: המק"ט מוסתר במסך ונשלח רק בהודעת החוסרים בוואטסאפ.
+  overstitch: {
+    title: "צ'ק-ליסט הכנת ציוד · OverStitch",
+    waTitle: 'OverStitch - ציוד חסר',
+    blocks: [
+      {
+        id: 'systems',
+        title: 'מערכת תפירה אנדוסקופית · OverStitch',
+        note: RECOMMENDATION,
+        items: [
+          { name: `OVERSTITCH ENDOSCOPIC SX SUTURE (סינגל): 1 לכל פעולה`, sku: '11300188' },
+          { name: `OVERSTITCH ENDOSCOPIC SUTURING (דאבל): 1 לכל פעולה`, sku: '11300152' },
+        ],
+      },
+      {
+        id: 'consumables',
+        title: 'ציוד מתכלה לפעולה',
+        items: [
+          { name: `חוט תפירה: 6 יחידות לכל פעולה`, sku: '11300146' },
+          { name: `CLINCH: 6 יחידות לכל פעולה`, sku: '11300147' },
+          { name: `HELIX: 1 לכל פעולה (1 למטופל)`, sku: '11300148' },
+          { name: `כבל דיאטרמיה ERBE (מגיע בחבילה של 10): 1 לכל פעולה`, sku: '11300145' },
+        ],
+      },
+      {
+        id: 'tubes',
+        title: 'אוברטיוב והגנה',
+        items: [
+          { name: `OVERTUBE: 1 לכל פעולה (1 למטופל)`, sku: '11300149' },
+          { name: `OVERTUBE ארוך: 1 לכל פעולה`, sku: '11300190' },
+          { name: `מגן שיניים גדול: 1 לכל פעולה`, sku: '11300044' },
+        ],
+      },
+      {
+        id: 'pose',
+        title: 'קיט POSE',
+        items: [
+          { name: `קיט ל-POSE: 1 לכל פעולה`, sku: '11300198' },
+        ],
+      },
+    ],
+  },
+
   // מרפאת כאב – פריטים עם מק"ט. המק"ט מוסתר במסך ונשלח רק בהודעת החוסרים בוואטסאפ.
   pain: {
     title: "צ'ק-ליסט הכנת ציוד · מרפאת כאב",

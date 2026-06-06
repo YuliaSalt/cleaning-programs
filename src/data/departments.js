@@ -165,6 +165,7 @@ export const specialProcedures = [
   { id: 'cystoscopy', en: 'Cystoscopy', he: 'ציסטוסקופיה' },
   { id: 'pain', he: 'מרפאת כאב' },
   { id: 'conization', en: 'Conization', he: 'קוניזציה' },
+  { id: 'overstitch', en: 'OverStitch', he: 'אוברסטיץ׳' },
   'POEM',
   'TIF',
 ]
@@ -176,7 +177,7 @@ export function getUnitWindows(unitId) {
     windows.push({
       id: 'special',
       title: 'פעולות מיוחדות',
-      description: 'Bronchoscopy · Pleural Puncture · Cystoscopy · Pain Clinic · Conization · POEM · TIF',
+      description: 'Bronchoscopy · Pleural Puncture · Cystoscopy · Pain Clinic · Conization · OverStitch · POEM · TIF',
       enabled: true,
     })
   }
