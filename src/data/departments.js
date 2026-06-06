@@ -166,7 +166,7 @@ export const specialProcedures = [
   { id: 'pain', he: 'מרפאת כאב' },
   { id: 'conization', en: 'Conization', he: 'קוניזציה' },
   { id: 'overstitch', en: 'OverStitch', he: 'אוברסטיץ׳' },
-  'POEM',
+  { id: 'poem', en: 'POEM', he: 'מיוטומיה אנדוסקופית פומית' },
   'TIF',
 ]
 
