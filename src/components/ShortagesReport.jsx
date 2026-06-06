@@ -55,6 +55,7 @@ function CategoryList({ category, items, isMissing, onToggle, urgency }) {
   const missingItems = category.items.filter((it) => isMissing(category.id, it))
   return (
     <div className="sh-list">
+      {category.note && <div className="cysto-note sh-note">{category.note}</div>}
       {items.length === 0 ? (
         <p className="empty-hint" style={{ marginTop: 8 }}>אין פריטים להצגה.</p>
       ) : (
@@ -104,6 +105,11 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
 
   const activeCat = catId ? categories.find((c) => c.id === catId) : null
 
+  // כל הפריטים שסומנו כחסר – מכל הקטגוריות יחד, כדי לראות תמיד מה סומן (גם בין קבוצות).
+  const markedAll = categories.flatMap((cat) =>
+    cat.items.filter((it) => isMissing(cat.id, it)).map((it) => ({ cat, it }))
+  )
+
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBackToCategory })
   trail.push({ label: unit.name, onClick: onBack })
@@ -133,6 +139,24 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
       {!activeCat && (
         <div className="glass plan-card controls-card">
           <UrgencyPicker value={urgency} onChange={setUrgency} />
+        </div>
+      )}
+
+      {/* סיכום קבוע: כל הפריטים שסומנו כחסר – נשאר גלוי בכל המסכים, גם בין קבוצות שונות */}
+      {markedAll.length > 0 && (
+        <div className="glass plan-card sh-marked">
+          <div className="sh-cat-head">פריטים שסומנו כחסר ({markedAll.length})</div>
+          {markedAll.map(({ cat, it }) => (
+            <div className="sh-row missing" key={itemKey(cat.id, it)}>
+              <span className="sh-name">
+                {it.name}
+                <span className="sh-marked-cat"> · {cat.label}</span>
+              </span>
+              <button type="button" className="sh-toggle on" onClick={() => toggle(cat.id, it)}>
+                ✓ חסר
+              </button>
+            </div>
+          ))}
         </div>
       )}
 
