@@ -93,10 +93,19 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
   const [missing, setMissing] = useState({}) // { [key]: true }
   const [urgency, setUrgency] = useState(URGENCY_LEVELS[0]) // דחיפות משותפת לדוח
 
+  // missing[key] = מספר סידורי עולה (seq) של הסימון; ככל שגבוה יותר – סומן מאוחר יותר.
   const isMissing = (cid, item) => !!missing[itemKey(cid, item)]
+  const markSeq = (cid, item) => missing[itemKey(cid, item)] || 0
   const toggle = (cid, item) => {
     const k = itemKey(cid, item)
-    setMissing((m) => ({ ...m, [k]: !m[k] }))
+    setMissing((m) => {
+      if (m[k]) {
+        const { [k]: _drop, ...rest } = m // ביטול סימון – הסרה
+        return rest
+      }
+      const next = Math.max(0, ...Object.values(m)) + 1 // סימון חדש – seq הבא
+      return { ...m, [k]: next }
+    })
   }
   const totalMissing = (cat) => cat.items.filter((it) => isMissing(cat.id, it)).length
 
@@ -105,10 +114,10 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
 
   const activeCat = catId ? categories.find((c) => c.id === catId) : null
 
-  // כל הפריטים שסומנו כחסר – מכל הקטגוריות יחד, כדי לראות תמיד מה סומן (גם בין קבוצות).
-  const markedAll = categories.flatMap((cat) =>
-    cat.items.filter((it) => isMissing(cat.id, it)).map((it) => ({ cat, it }))
-  )
+  // כל הפריטים שסומנו כחסר – מכל הקטגוריות יחד, ממוין כך שהפריט שסומן אחרון מופיע ראשון.
+  const markedAll = categories
+    .flatMap((cat) => cat.items.filter((it) => isMissing(cat.id, it)).map((it) => ({ cat, it })))
+    .sort((a, b) => markSeq(b.cat.id, b.it) - markSeq(a.cat.id, a.it))
 
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBackToCategory })
@@ -148,10 +157,7 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
           <div className="sh-cat-head">פריטים שסומנו כחסר ({markedAll.length})</div>
           {markedAll.map(({ cat, it }) => (
             <div className="sh-row missing" key={itemKey(cat.id, it)}>
-              <span className="sh-name">
-                {it.name}
-                <span className="sh-marked-cat"> · {cat.label}</span>
-              </span>
+              <span className="sh-name">{it.name}</span>
               <button type="button" className="sh-toggle on" onClick={() => toggle(cat.id, it)}>
                 ✓ חסר
               </button>
