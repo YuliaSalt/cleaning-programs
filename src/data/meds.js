@@ -69,6 +69,9 @@ const GASTRO_MEDS = [
   { name: 'SP.LIDOCAINE 10% 80g XYLOCAINE', sku: '33000009', group: G_OTHER },
   { name: 'SP.NITROLINGUAL 0.4mg /dose', sku: '32000734', group: G_OTHER },
   { name: 'SYR.LUBRICANT JELLY 8ml STERILE', sku: '33000085', group: G_OTHER },
+  { name: 'CARPULE LIDOCAINE ADRENALINE', sku: '32000020', group: G_OTHER },
+  { name: "ג'ל עזרקאין סטרילי במזרקים (10 בחבילה)", sku: '33000092', group: G_OTHER },
+  { name: 'LUGOL 25ml תמיסת יוד למריחה', sku: '34300001', group: G_OTHER },
 ]
 
 export const MED_LISTS = {
