@@ -281,7 +281,7 @@ export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategor
     return (
       <div>
         <ScreenHeader
-          title="דו״ח אחראית משמרת גסטרו"
+          title={'דו״ח אחראית משמרת - ' + unit.name}
           onBack={goForm}
           trail={[...baseTrail, { label: 'דו״ח אחראית משמרת', onClick: goForm }, { label: 'דו״חות שמורים' }]}
         />
@@ -299,7 +299,7 @@ export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategor
     return (
       <div>
         <ScreenHeader
-          title="דו״ח אחראית משמרת גסטרו"
+          title={'דו״ח אחראית משמרת - ' + unit.name}
           onBack={() => setMode('list')}
           trail={[...baseTrail, { label: 'דו״ח אחראית משמרת', onClick: goForm }, { label: openRec.dateLabel }]}
         />
@@ -312,7 +312,7 @@ export default function GastroHandover({ unit, onBack, onGoHome, onBackToCategor
   return (
     <div>
       <ScreenHeader
-        title="דו״ח אחראית משמרת גסטרו"
+        title={'דו״ח אחראית משמרת - ' + unit.name}
         onBack={onBack}
         trail={[...baseTrail, { label: 'דו״ח אחראית משמרת' }]}
       />

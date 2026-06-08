@@ -25,7 +25,7 @@ export default function SpecialProcedures({ unit, onBack, onGoHome, onBackToCate
   if (proc) {
     return (
       <div>
-        <ScreenHeader title={procLabel} onBack={() => setProc(null)} trail={trail} />
+        <ScreenHeader title={procLabel + ' · ' + unit.name} onBack={() => setProc(null)} trail={trail} />
         {checklist ? (
           <ProcedureChecklist
             key={proc.id}
