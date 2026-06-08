@@ -1622,19 +1622,22 @@ h1, h2, h3, h4 {
   box-shadow: 0 3px 10px rgba(10, 77, 140, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
-/* שורת הקלדת כמות שנפתחת לאחר בחירת "בוצע" בספירת טלמטריות */
-.ci-qty-row {
-  display: flex;
+/* שדה כמות שנפתח לצד כפתור "בוצע" בספירת טלמטריות */
+.ci-qty-inline {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  margin-top: 10px;
+  gap: 6px;
 }
 
-.ci-qty-row label {
+.ci-qty-inline label {
   font-size: 14px;
   font-weight: 600;
   color: var(--ink);
+}
+
+.special-item .ci-qty {
+  width: 84px;
+  text-align: center;
 }
 
 .sign-toggle.on .st-box {

@@ -214,37 +214,37 @@ function SignedSection({ skey, section, flat }) {
                       <div className="ci-controls">
                         <button
                           type="button"
-                          className={'sign-toggle sm' + (v && v.status === 'done' ? ' on' : '')}
-                          disabled={locked}
-                          onClick={() => setChecked((c) => { const cur = c[i] || {}; return { ...c, [i]: { status: cur.status === 'done' ? undefined : 'done', qty: cur.qty || '' } } })}
-                        >
-                          בוצע
-                        </button>
-                        <button
-                          type="button"
                           className={'sign-toggle sm na' + (v && v.status === 'na' ? ' on' : '')}
                           disabled={locked}
                           onClick={() => setChecked((c) => ({ ...c, [i]: { status: (c[i] && c[i].status === 'na') ? undefined : 'na', qty: '' } }))}
                         >
                           לא רלוונטי
                         </button>
+                        <button
+                          type="button"
+                          className={'sign-toggle sm' + (v && v.status === 'done' ? ' on' : '')}
+                          disabled={locked}
+                          onClick={() => setChecked((c) => { const cur = c[i] || {}; return { ...c, [i]: { status: cur.status === 'done' ? undefined : 'done', qty: cur.qty || '' } } })}
+                        >
+                          בוצע
+                        </button>
+                        {v && v.status === 'done' && (
+                          <span className="ci-qty-inline">
+                            <label htmlFor={skey + '-qty' + i}>כמות</label>
+                            <input
+                              id={skey + '-qty' + i}
+                              type="number"
+                              min="0"
+                              inputMode="numeric"
+                              className="input ci-qty"
+                              placeholder="כמות"
+                              value={v.qty || ''}
+                              disabled={locked}
+                              onChange={(e) => setChecked((c) => ({ ...c, [i]: { status: 'done', qty: e.target.value } }))}
+                            />
+                          </span>
+                        )}
                       </div>
-                      {v && v.status === 'done' && (
-                        <div className="ci-qty-row">
-                          <label htmlFor={skey + '-qty' + i}>כמות</label>
-                          <input
-                            id={skey + '-qty' + i}
-                            type="number"
-                            min="0"
-                            inputMode="numeric"
-                            className="input ci-qty"
-                            placeholder="הקלדת כמות טלמטריות"
-                            value={v.qty || ''}
-                            disabled={locked}
-                            onChange={(e) => setChecked((c) => ({ ...c, [i]: { status: 'done', qty: e.target.value } }))}
-                          />
-                        </div>
-                      )}
                     </div>
                   ) : t.kind === 'doneNA' ? (
                     <div className={'check-item special-item' + (resolved ? ' done' : '') + (showErr && !resolved ? ' missing' : '')}>
