@@ -110,7 +110,8 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
   const totalMissing = (cat) => cat.items.filter((it) => isMissing(cat.id, it)).length
 
   const q = norm(query.trim())
-  const matchItems = (cat) => (q ? cat.items.filter((it) => norm(it.name).includes(q)) : cat.items)
+  const openCat = (id) => { setQuery(''); setCatId(id) }
+  const closeCat = () => { setQuery(''); setCatId(null) }
 
   const activeCat = catId ? categories.find((c) => c.id === catId) : null
 
@@ -122,27 +123,16 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBackToCategory })
   trail.push({ label: unit.name, onClick: onBack })
-  trail.push({ label: 'דיווח על חסרים', onClick: activeCat ? () => setCatId(null) : undefined })
+  trail.push({ label: 'דיווח על חסרים', onClick: activeCat ? closeCat : undefined })
   if (activeCat) trail.push({ label: activeCat.label })
 
   return (
     <div>
       <ScreenHeader
         title="דיווח על חסרים"
-        onBack={activeCat ? () => setCatId(null) : onBack}
+        onBack={activeCat ? closeCat : onBack}
         trail={trail}
       />
-
-      {/* שורת חיפוש גלובלית – מסננת פריטים בכל הקטגוריות במקביל */}
-      <div className="glass plan-card controls-card">
-        <input
-          className="input sh-search"
-          type="search"
-          placeholder="חיפוש פריט בכל הקטגוריות…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-      </div>
 
       {/* בורר דחיפות ברמת העמוד */}
       {!activeCat && (
@@ -166,27 +156,26 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
         </div>
       )}
 
-      {/* תצוגת חיפוש גלובלי: תוצאות מכל הקטגוריות במקביל */}
-      {q ? (
-        (() => {
-          const groups = categories
-            .map((cat) => ({ cat, items: matchItems(cat) }))
-            .filter((g) => g.items.length > 0)
-          if (groups.length === 0) {
-            return <p className="empty-hint" style={{ marginTop: 16 }}>לא נמצאו פריטים תואמים.</p>
-          }
-          return groups.map(({ cat, items }) => (
-            <div className="glass plan-card" key={cat.id} style={{ marginTop: 14 }}>
-              <div className="sh-cat-head">{cat.label}</div>
-              <CategoryList category={cat} items={items} isMissing={isMissing} onToggle={toggle} urgency={urgency} />
-            </div>
-          ))
-        })()
-      ) : activeCat ? (
+      {activeCat ? (
         /* תצוגת קטגוריה נבחרת */
         <div className="glass plan-card" style={{ marginTop: 14 }}>
           <UrgencyPicker value={urgency} onChange={setUrgency} />
-          <CategoryList category={activeCat} items={activeCat.items} isMissing={isMissing} onToggle={toggle} urgency={urgency} />
+          {/* חיפוש פנימי בתוך הקטגוריה (גם ציוד מתכלים וגם תרופות) */}
+          <input
+            className="input sh-search"
+            type="search"
+            placeholder={activeCat.id === 'meds' ? 'חיפוש תרופה…' : 'חיפוש פריט בקטגוריה…'}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            style={{ marginTop: 12 }}
+          />
+          <CategoryList
+            category={activeCat}
+            items={q ? activeCat.items.filter((it) => norm(it.name).includes(q)) : activeCat.items}
+            isMissing={isMissing}
+            onToggle={toggle}
+            urgency={urgency}
+          />
         </div>
       ) : (
         /* הַאב: שלושת כפתורי הקטגוריות */
@@ -195,7 +184,7 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
             const miss = totalMissing(cat)
             const empty = cat.items.length === 0
             return (
-              <button key={cat.id} className="unit-card drill-card" onClick={() => setCatId(cat.id)}>
+              <button key={cat.id} className="unit-card drill-card" onClick={() => openCat(cat.id)}>
                 <span className="uc-name">{cat.label}</span>
                 <span className="uc-meta">
                   {empty ? 'טרם הוגדרה רשימה' : miss > 0 ? `${miss} חסרים מסומנים` : `${cat.items.length} פריטים`}

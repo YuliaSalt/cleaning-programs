@@ -1106,7 +1106,7 @@ h1, h2, h3, h4 {
   margin-bottom: 16px;
 }
 
-/* כפתור סימון סגירת יחידה – בולט ותלת-ממדי */
+/* כפתור סימון סגירת יחידה – תלת-ממדי מטאלי בגווני התכלת/מנטה של העמוד */
 .closure-mark-btn {
   display: inline-flex;
   align-items: center;
@@ -1116,10 +1116,13 @@ h1, h2, h3, h4 {
   border-radius: 16px;
   font-size: 16px;
   font-weight: 800;
-  color: #fff;
-  background: linear-gradient(180deg, #ff8a7a 0%, #e2554e 100%);
-  border: none;
-  box-shadow: 0 6px 16px rgba(226, 85, 78, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  color: var(--brand);
+  background: linear-gradient(180deg, #f6fcfd 0%, #d6eef5 48%, #a9e2dc 100%);
+  border: 1px solid rgba(168, 220, 232, 0.95);
+  box-shadow:
+    0 6px 16px rgba(10, 77, 140, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -3px 7px rgba(120, 180, 200, 0.3);
   cursor: pointer;
   transition: transform 0.14s ease, box-shadow 0.14s ease;
 }
@@ -1131,12 +1134,18 @@ h1, h2, h3, h4 {
 
 .closure-mark-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 9px 22px rgba(226, 85, 78, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: linear-gradient(180deg, #ffffff 0%, #dcf1f6 48%, #b3e6e0 100%);
+  box-shadow:
+    0 10px 24px rgba(10, 77, 140, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -3px 7px rgba(120, 180, 200, 0.3);
 }
 
 .closure-mark-btn:active {
   transform: translateY(0);
-  box-shadow: 0 3px 9px rgba(226, 85, 78, 0.4);
+  box-shadow:
+    0 3px 9px rgba(10, 77, 140, 0.22),
+    inset 0 2px 5px rgba(120, 180, 200, 0.4);
 }
 
 .closure-banner {
@@ -1605,12 +1614,12 @@ h1, h2, h3, h4 {
   transform: translateY(-1px);
 }
 
-/* כפתור "לא רלוונטי" – צבע נבדל (ענבר) להבחנה מ"בוצע" */
+/* כפתור "לא רלוונטי" – פסטל תכלת-כחול מהפלטה (נבדל מ"בוצע" המנטה-ירוק) */
 .sign-toggle.na.on {
-  background: linear-gradient(180deg, #fde9c8 0%, #f6d79e 100%);
-  border-color: #e0a94e;
-  color: #8a5a10;
-  box-shadow: 0 3px 10px rgba(200, 140, 40, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  background: linear-gradient(180deg, #eaf7fb 0%, #c5e6f1 100%);
+  border-color: var(--ice-2);
+  color: var(--brand-soft);
+  box-shadow: 0 3px 10px rgba(10, 77, 140, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
 /* שורת הקלדת כמות שנפתחת לאחר בחירת "בוצע" בספירת טלמטריות */
