@@ -5,7 +5,7 @@ import {
   GEN_OCC_NAMES,
   GEN_OCC_NUMBERS,
   GEN_REPORT_ITEMS,
-  GEN_CHECK_ITEMS,
+  genCheckItemsFor,
   emptyGeneralHandover,
   saveHandover,
   listHandovers,
@@ -16,6 +16,7 @@ import {
 import { buildGeneralHandoverImage, shareHandoverImage } from './handoverImage.js'
 import HandoverArchive from './HandoverArchive.jsx'
 import { shiftAlertLevel } from '../data/shiftAlert.js'
+import { isUnitClosed } from '../data/closures.js'
 
 function WhatsAppIcon() {
   return (
@@ -47,6 +48,7 @@ function GeneralForm({ unit, onSent, onReset }) {
   const [signedRec, setSignedRec] = useState(null) // נחתם ונשמר – רק אז שולחים לוואטסאפ
 
   const dateHe = new Date().toLocaleDateString('he-IL')
+  const closed = isUnitClosed(unit.id) // יחידה סגורה היום – משתיק התראות משמרת
   const outName = fullName(names.nurseOut)
   // משמרות שכבר מולא להן טופס היום – לצביעת כפתורי המשמרת לפי שעה
   const doneShifts = useMemo(() => {
@@ -76,8 +78,10 @@ function GeneralForm({ unit, onSent, onReset }) {
     if (onReset) onReset()
   }
 
+  // סעיפי הצ׳קליסט הרלוונטיים ליחידה (עגלת החייאה מוצגת רק ביחידות מתאימות)
+  const checkItems = genCheckItemsFor(unit.id)
   // כל סעיפי "משימות ובטיחות המחלקה" חייבים להיות מסומנים (✓) לפני חתימה ושמירה
-  const allChecked = GEN_CHECK_ITEMS.every((_, i) => checks[i] && checks[i].on)
+  const allChecked = checkItems.every(({ i }) => checks[i] && checks[i].on)
 
   function sign() {
     const nameOk = names.nurseOut.first.trim()
@@ -120,7 +124,7 @@ function GeneralForm({ unit, onSent, onReset }) {
         <div className="ho-shift-sub">נבחרה אוטומטית לפי השעה — ניתן לשנות</div>
         <div className="ho-shift-btns">
           {shifts.map((s) => {
-            const lvl = shiftAlertLevel(s, doneShifts.has(s))
+            const lvl = closed ? null : shiftAlertLevel(s, doneShifts.has(s))
             return (
               <button
                 key={s}
@@ -216,7 +220,7 @@ function GeneralForm({ unit, onSent, onReset }) {
       {/* בלוק 3 – משימות ובטיחות המחלקה (חובה לסמן את כל הסעיפים) */}
       <div className="ho-block">
         <div className="ho-block-title">משימות ובטיחות המחלקה</div>
-        {GEN_CHECK_ITEMS.map((label, i) => (
+        {checkItems.map(({ i, label }) => (
           <div className="ho-2col check-2col" key={i}>
             <button className={'ho-check' + (checks[i].on ? ' on' : '') + (checksErr && !checks[i].on ? ' missing' : '')} onClick={() => setChk(i, 'on', !checks[i].on)}>
               <span className="ho-circle">{checks[i].on ? '✓' : ''}</span>
@@ -316,7 +320,7 @@ function GeneralView({ unit, record }) {
 
       <div className="ho-block">
         <div className="ho-block-title">משימות ובטיחות המחלקה</div>
-        {GEN_CHECK_ITEMS.map((label, i) => {
+        {genCheckItemsFor(unit.id).map(({ i, label }) => {
           const c = record.checks[i] || {}
           return (
             <div className="ho-view-row" key={i}>

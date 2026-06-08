@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
 import { getCurrentShift, findUnit } from '../data/departments.js'
-import { getCleaningPlan, signoffKind, DISINFECTANT_GUIDE, getMergedDailySection } from '../data/cleaningTemplates.js'
+import { getCleaningPlan, signoffKind, DISINFECTANT_GUIDE, getMergedDailySection, normTask, specialTaskText, taskResolved } from '../data/cleaningTemplates.js'
 import { dateStr, periodKey, planKey } from '../data/progress.js'
 import { shiftAlertLevel, freqAlertLevel } from '../data/shiftAlert.js'
+import { isUnitClosed } from '../data/closures.js'
 import { storage } from '../data/storage.js'
 import { pushReport } from '../data/cloudSync.js'
 import { TYPE_LABELS } from '../data/reports.js'
@@ -22,7 +23,9 @@ function buildReadable(skey, section, tasks, signoff, rec) {
   const columns = []
   tasks.forEach((t, i) => {
     const header = t.group ? `${t.group} – ${t.label}` : t.label
-    columns.push([header, rec.checked[i] ? '✓' : '✗'])
+    const v = rec.checked ? rec.checked[i] : undefined
+    const cell = t.kind ? (specialTaskText(t.kind, v) || '✗') : (v ? '✓' : '✗')
+    columns.push([header, cell])
   })
   signoff.forEach((s, i) => {
     if (s.type === 'name') columns.push([s.label, (rec.names[i] || '').trim()])
@@ -57,11 +60,11 @@ function DrillGrid({ items }) {
 
 // שיטוח משימות הסקשן (תומך בקבוצות עם כותרות משנה) לאינדקס רץ אחיד
 function flattenTasks(section) {
-  if (section.items) return section.items.map((label) => ({ label }))
+  if (section.items) return section.items.map((it) => normTask(it))
   const out = []
   ;(section.groups || []).forEach((g, gi) => {
-    g.items.forEach((label, ii) =>
-      out.push({ label, group: g.subtitle, firstInGroup: ii === 0, gi })
+    g.items.forEach((it, ii) =>
+      out.push({ ...normTask(it), group: g.subtitle, firstInGroup: ii === 0, gi })
     )
   })
   return out
@@ -134,7 +137,7 @@ function SignedSection({ skey, section, flat }) {
   const [signs, setSigns] = useState(() => (rec && rec.signs) || {})
   const [showErr, setShowErr] = useState(false)
 
-  const doneCount = tasks.filter((_, i) => checked[i]).length
+  const doneCount = tasks.filter((t, i) => taskResolved(t.kind, checked[i])).length
   const pct = tasks.length ? Math.round((doneCount / tasks.length) * 100) : 100
 
   const nameIdx = signoff.map((s, i) => (s.type === 'name' ? i : -1)).filter((i) => i >= 0)
@@ -188,21 +191,73 @@ function SignedSection({ skey, section, flat }) {
             <span style={{ width: pct + '%' }} />
           </div>
           <div className="checklist">
-            {tasks.map((t, i) => (
-              <div key={i}>
-                {t.firstInGroup && t.group && <div className="group-sub">{t.group}</div>}
-                <div className={'check-item' + (checked[i] ? ' done' : '')}>
-                  <input
-                    type="checkbox"
-                    id={skey + '-c' + i}
-                    checked={!!checked[i]}
-                    disabled={locked}
-                    onChange={() => setChecked((c) => ({ ...c, [i]: !c[i] }))}
-                  />
-                  <label htmlFor={skey + '-c' + i}>{t.label}</label>
+            {tasks.map((t, i) => {
+              const v = checked[i]
+              const resolved = taskResolved(t.kind, v)
+              return (
+                <div key={i}>
+                  {t.firstInGroup && t.group && <div className="group-sub">{t.group}</div>}
+                  {t.kind === 'count' ? (
+                    <div className={'check-item special-item' + (resolved ? ' done' : '')}>
+                      <span className="ci-label">{t.label}</span>
+                      <div className="ci-controls">
+                        <input
+                          type="number"
+                          min="0"
+                          inputMode="numeric"
+                          className="input ci-qty"
+                          placeholder="כמות"
+                          value={(v && v.qty) || ''}
+                          disabled={locked || (v && v.na)}
+                          onChange={(e) => setChecked((c) => ({ ...c, [i]: { qty: e.target.value, na: false } }))}
+                        />
+                        <button
+                          type="button"
+                          className={'sign-toggle sm' + (v && v.na ? ' on' : '')}
+                          disabled={locked}
+                          onClick={() => setChecked((c) => ({ ...c, [i]: { qty: '', na: !(c[i] && c[i].na) } }))}
+                        >
+                          לא רלוונטי
+                        </button>
+                      </div>
+                    </div>
+                  ) : t.kind === 'doneNA' ? (
+                    <div className={'check-item special-item' + (resolved ? ' done' : '')}>
+                      <span className="ci-label">{t.label}</span>
+                      <div className="ci-controls">
+                        <button
+                          type="button"
+                          className={'sign-toggle sm' + (v === 'done' ? ' on' : '')}
+                          disabled={locked}
+                          onClick={() => setChecked((c) => ({ ...c, [i]: c[i] === 'done' ? undefined : 'done' }))}
+                        >
+                          בוצע
+                        </button>
+                        <button
+                          type="button"
+                          className={'sign-toggle sm' + (v === 'na' ? ' on' : '')}
+                          disabled={locked}
+                          onClick={() => setChecked((c) => ({ ...c, [i]: c[i] === 'na' ? undefined : 'na' }))}
+                        >
+                          לא רלוונטי
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={'check-item' + (v ? ' done' : '')}>
+                      <input
+                        type="checkbox"
+                        id={skey + '-c' + i}
+                        checked={!!v}
+                        disabled={locked}
+                        onChange={() => setChecked((c) => ({ ...c, [i]: !c[i] }))}
+                      />
+                      <label htmlFor={skey + '-c' + i}>{t.label}</label>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </>
       )}
@@ -256,6 +311,7 @@ function SignedSection({ skey, section, flat }) {
 /* ===== המסך הראשי – דריל-דאון + דוחות ביצוע ===== */
 export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory, categoryName }) {
   const plan = getCleaningPlan(unit.id)
+  const closed = isUnitClosed(unit.id) // יחידה סגורה היום – משתיק התראות "טרם נחתם"
 
   const [showReports, setShowReports] = useState(false)
   const [freq, setFreq] = useState(null) // tabId נבחר
@@ -441,7 +497,7 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
           <DrillGrid
             items={[
               ...plan.tabs.map((t) => {
-                const lvl = freqAlertLevel(t.id, freqSigned(t.id))
+                const lvl = closed ? null : freqAlertLevel(t.id, freqSigned(t.id))
                 return {
                   key: t.id,
                   label: t.label,
@@ -466,7 +522,7 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
       {view === 'shift' && (
         <DrillGrid
           items={shifts.map((s) => {
-            const level = shiftAlertLevel(s, dailyShiftSigned(s))
+            const level = closed ? null : shiftAlertLevel(s, dailyShiftSigned(s))
             const current = s === getCurrentShift() ? 'משמרת נוכחית' : ''
             return {
               key: s,

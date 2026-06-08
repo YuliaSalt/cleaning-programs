@@ -1048,6 +1048,103 @@ h1, h2, h3, h4 {
   font-weight: 600;
 }
 
+/* פריטי צ׳קליסט מיוחדים: ספירת כמות (count) ומתג בוצע/לא רלוונטי (doneNA) */
+.check-item.special-item {
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.special-item .ci-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.5;
+  flex: 1 1 auto;
+}
+
+.check-item.special-item.done .ci-label {
+  color: var(--brand-soft);
+  font-weight: 600;
+}
+
+.special-item .ci-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.special-item .ci-qty {
+  width: 92px;
+  text-align: center;
+}
+
+.sign-toggle.sm {
+  width: auto;
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+/* פאנל סגירת יחידה (מחלקה / מכון / חדר ניתוח) */
+.closure-panel {
+  margin-bottom: 16px;
+}
+
+.closure-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(226, 85, 78, 0.1);
+  border: 1px solid rgba(226, 85, 78, 0.35);
+}
+
+.closure-banner .cb-icon {
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.closure-banner .cb-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.closure-banner .cb-range {
+  font-weight: 700;
+  color: #b23b35;
+}
+
+.closure-banner .cb-reason,
+.closure-banner .cb-by {
+  font-size: 13px;
+  color: var(--ink-soft, #5b7493);
+}
+
+.closure-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+  border-top: 1px solid rgba(168, 220, 232, 0.4);
+}
+
+.closure-row .cr-range {
+  font-weight: 600;
+}
+
+.closure-row .cr-reason {
+  color: var(--ink-soft, #5b7493);
+  font-size: 14px;
+  flex: 1 1 auto;
+}
+
+.closure-row .cr-del {
+  flex: none;
+}
+
 .progress {
   height: 8px;
   border-radius: var(--radius-pill);

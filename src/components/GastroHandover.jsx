@@ -13,6 +13,7 @@ import {
 import { buildHandoverImage, shareHandoverImage } from './handoverImage.js'
 import HandoverArchive from './HandoverArchive.jsx'
 import { shiftAlertLevel } from '../data/shiftAlert.js'
+import { isUnitClosed } from '../data/closures.js'
 
 function WhatsAppIcon() {
   return (
@@ -45,6 +46,7 @@ function HandoverForm({ unit, onSent, onReset }) {
     const today = todayStr()
     return new Set(listHandovers(unit.id).filter((r) => r.record.date === today).map((r) => r.record.shift))
   }, [unit.id])
+  const closed = isUnitClosed(unit.id) // יחידה סגורה היום – משתיק התראות משמרת
   const timeHe = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })
 
   const setHas = (id, has) =>
@@ -105,7 +107,7 @@ function HandoverForm({ unit, onSent, onReset }) {
         <div className="ho-shift-sub">נבחרה אוטומטית לפי השעה — ניתן לשנות</div>
         <div className="ho-shift-btns">
           {SHIFTS.map((s) => {
-            const lvl = shiftAlertLevel(s, doneShifts.has(s))
+            const lvl = closed ? null : shiftAlertLevel(s, doneShifts.has(s))
             return (
               <button
                 key={s}

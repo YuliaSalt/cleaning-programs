@@ -1,14 +1,18 @@
 import { getUnitWindows } from '../data/departments.js'
 import { listMedReports, hasMedList } from '../data/meds.js'
 import { medsAlertLevel } from '../data/shiftAlert.js'
+import { isUnitClosed } from '../data/closures.js'
 import ScreenHeader from './ScreenHeader.jsx'
+import ClosurePanel from './ClosurePanel.jsx'
 
 const monthKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
 
 export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, onBack, categoryName }) {
+  // כשהיחידה סגורה היום – להשתיק התראות "טרם נחתם / באיחור"
+  const closed = isUnitClosed(unit.id)
   // בקרת תרופות נחתמה החודש? (לצביעת כפתור "בקרת תרופות חודשית") – רק למחלקה עם רשימה
   const medsDone = listMedReports(unit.id).some((r) => r.record.month === monthKey())
-  const medsLevel = hasMedList(unit.id) ? medsAlertLevel(medsDone) : null
+  const medsLevel = !closed && hasMedList(unit.id) ? medsAlertLevel(medsDone) : null
 
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBack })
@@ -38,6 +42,8 @@ export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, 
   return (
     <div>
       <ScreenHeader title={unit.name} onBack={onBack} trail={trail} />
+
+      <ClosurePanel unit={unit} />
 
       <div className={'card-grid' + (windows.length % 2 ? ' single-col' : '')}>
         {windows.map((w) => (

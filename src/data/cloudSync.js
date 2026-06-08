@@ -14,10 +14,15 @@ import { SHEETS_API_URL, cloudEnabled } from './cloudConfig.js'
 const QUEUE_KEY = 'hmc:syncqueue'
 const REPORT_PREFIX = 'hmc:plan:'
 const HANDOVER_PREFIX = 'hmc:handover:'
+const CLOSURE_PREFIX = 'hmc:closure:'
 
-// מפתח שמסונכרן לענן (דוח ביצוע או העברת משמרת).
+// מפתח שמסונכרן לענן (דוח ביצוע / העברת משמרת / סגירת יחידה).
 function isSyncableKey(key) {
-  return key.indexOf(REPORT_PREFIX) === 0 || key.indexOf(HANDOVER_PREFIX) === 0
+  return (
+    key.indexOf(REPORT_PREFIX) === 0 ||
+    key.indexOf(HANDOVER_PREFIX) === 0 ||
+    key.indexOf(CLOSURE_PREFIX) === 0
+  )
 }
 
 /* ===================== תור ניסיונות חוזרים (לאופליין) ===================== */

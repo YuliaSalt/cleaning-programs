@@ -12,6 +12,7 @@ import {
 import { buildORHandoverImage, shareHandoverImage } from './handoverImage.js'
 import HandoverArchive from './HandoverArchive.jsx'
 import { shiftAlertLevel } from '../data/shiftAlert.js'
+import { isUnitClosed } from '../data/closures.js'
 
 const todayStr = () => new Date().toLocaleDateString('en-CA')
 
@@ -79,6 +80,7 @@ function ORForm({ unit, onSent }) {
     const t = todayStr()
     return new Set(listHandovers(unit.id).filter((r) => r.record.date === t).map((r) => r.record.shift))
   }, [unit.id])
+  const closed = isUnitClosed(unit.id) // יחידה סגורה היום – משתיק התראות משמרת
 
   const setFlag = (id, flag) => setSections((s) => ({ ...s, [id]: { ...s[id], flag } }))
   const setField = (id, fid, v) => setSections((s) => ({ ...s, [id]: { ...s[id], fields: { ...s[id].fields, [fid]: v } } }))
@@ -109,7 +111,7 @@ function ORForm({ unit, onSent }) {
         <div className="ho-shift-sub">נבחרה אוטומטית לפי השעה — ניתן לשנות</div>
         <div className="ho-shift-btns">
           {shifts.map((s) => {
-            const lvl = shiftAlertLevel(s, doneShifts.has(s))
+            const lvl = closed ? null : shiftAlertLevel(s, doneShifts.has(s))
             return (
               <button
                 key={s}

@@ -1,6 +1,6 @@
 // קריאת דוחות הביצוע השמורים (סקשני חתימה נעולים) של יחידה, מתוך ה-StorageAdapter.
 
-import { getCleaningPlan, getMergedDailySection } from './cleaningTemplates.js'
+import { getCleaningPlan, getMergedDailySection, normTask } from './cleaningTemplates.js'
 import { storage } from './storage.js'
 
 const PREFIX = 'hmc:plan:'
@@ -28,11 +28,11 @@ function findSection(plan, tabId, sectionId) {
 // שיטוח משימות הסקשן לאינדקס רץ אחיד (תואם ל-CleaningPlan)
 export function flattenSectionTasks(section) {
   if (!section) return []
-  if (section.items) return section.items.map((label) => ({ label }))
+  if (section.items) return section.items.map((it) => normTask(it))
   const out = []
   ;(section.groups || []).forEach((g) => {
-    g.items.forEach((label, ii) =>
-      out.push({ label, group: g.subtitle, firstInGroup: ii === 0 })
+    g.items.forEach((it, ii) =>
+      out.push({ ...normTask(it), group: g.subtitle, firstInGroup: ii === 0 })
     )
   })
   return out
@@ -86,6 +86,39 @@ export function listReports(unitId) {
       by: rec.by || '',
     })
   }
+
+  // סגירות יחידה (hmc:closure:) – מוצגות כסוג נפרד "סגירות" באותו ארכיון
+  const closPrefix = 'hmc:closure:' + unitId + ':'
+  const fmtHe = (iso) => (iso ? new Date(iso + 'T00:00:00').toLocaleDateString('he-IL') : '')
+  for (const key of storage.keys()) {
+    if (!key.startsWith(closPrefix)) continue
+    const rec = storage.getJSON(key)
+    if (!rec || !rec.savedAt) continue
+    const saved = new Date(rec.savedAt)
+    out.push({
+      key,
+      room: null,
+      tabId: 'closure',
+      sectionId: null,
+      period: '',
+      section: null,
+      closure: rec,
+      title: `סגירת יחידה · ${fmtHe(rec.from)} – ${fmtHe(rec.to)}`,
+      record: rec,
+      savedAt: rec.savedAt,
+      sortTs: saved.getTime(),
+      year: saved.getFullYear(),
+      month: saved.getMonth(),
+      day: saved.getDate(),
+      dateLabel: saved.toLocaleDateString('he-IL'),
+      timeLabel: saved.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
+      dateISO: saved.toLocaleDateString('en-CA'),
+      shift: '',
+      performers: rec.by ? [rec.by] : [],
+      by: rec.by || '',
+    })
+  }
+
   out.sort((a, b) => b.sortTs - a.sortTs)
   return out
 }
@@ -95,6 +128,7 @@ export const TYPE_LABELS = {
   weekly: 'שבועי',
   monthly: 'חודשי',
   isolation: 'חולה בבידוד',
+  closure: 'סגירות',
 }
 
 export const HE_MONTHS = [

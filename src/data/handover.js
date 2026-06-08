@@ -78,6 +78,20 @@ export const GEN_CHECK_ITEMS = [
   'ליקויים בציוד ריהוט ותשתיות',
 ]
 
+// סעיף "ביצוע בדיקת עגלת החייאה" מוצג רק ביחידות שבהן קיימת עגלת החייאה:
+// התאוששות ואשפוז ג. (גסטרו משתמשת בטופס נפרד שבו עגלת החייאה כבר נכללת.)
+// בכל שאר היחידות הסעיף אינו מופיע בטופס דו״ח אחראית משמרת.
+const CRASH_CART_UNITS = new Set(['recovery', 'recovery-1', 'recovery-2', 'inpatient-c'])
+const CRASH_CART_LABEL = 'ביצוע בדיקת עגלת החייאה'
+
+// רשימת סעיפי הצ׳קליסט הרלוונטיים ליחידה, תוך שמירה על האינדקס המקורי
+// (כדי שדו״חות שמורים ישנים לא יוסטו). מחזיר מערך של { i, label }.
+export function genCheckItemsFor(unitId) {
+  return GEN_CHECK_ITEMS
+    .map((label, i) => ({ i, label }))
+    .filter(({ label }) => label !== CRASH_CART_LABEL || CRASH_CART_UNITS.has(unitId))
+}
+
 export function emptyGeneralHandover(unitId, unitName, shift) {
   return {
     kind: 'general',
@@ -199,7 +213,7 @@ export function buildHandoverReadable(rec) {
     GEN_OCC_NUMBERS.forEach((it) => columns.push([it.label, rec.numbers ? rec.numbers[it.id] ?? '' : '']))
     if (rec.occNote) columns.push(['הערת תפוסה', rec.occNote])
     GEN_REPORT_ITEMS.forEach((it) => columns.push([it.label, fmtReport(rec.reports && rec.reports[it.id])]))
-    GEN_CHECK_ITEMS.forEach((label, i) => {
+    genCheckItemsFor(rec.unitId).forEach(({ i, label }) => {
       const c = (rec.checks && rec.checks[i]) || {}
       columns.push([label, (c.on ? '✓' : '✗') + (c.note ? ' · ' + c.note : '')])
     })

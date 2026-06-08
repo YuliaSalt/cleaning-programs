@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import ScreenHeader from './ScreenHeader.jsx'
-import { signoffKind } from '../data/cleaningTemplates.js'
+import { signoffKind, specialTaskText, taskResolved } from '../data/cleaningTemplates.js'
 import { listReports, flattenSectionTasks, TYPE_LABELS, HE_MONTHS } from '../data/reports.js'
 import { getCleaningPlan } from '../data/cleaningTemplates.js'
 import DatePicker from './DatePicker.jsx'
@@ -8,6 +8,46 @@ import DatePicker from './DatePicker.jsx'
 /* ===== תצוגת דוח בודד (קריאה בלבד) + הדפסה ===== */
 function ReportDetail({ unit, report, onBack }) {
   const { section, record } = report
+
+  // סגירת יחידה – תצוגה ייעודית (אין משימות/חתימות)
+  if (report.tabId === 'closure') {
+    const c = report.closure || record || {}
+    const fmt = (iso) => (iso ? new Date(iso + 'T00:00:00').toLocaleDateString('he-IL') : '—')
+    return (
+      <div>
+        <div className="no-print rd-toolbar">
+          <button className="back-link" onClick={onBack}>
+            <span className="bl-arrow">→</span> חזרה לרשימת הדוחות
+          </button>
+          <button className="btn rd-print" onClick={() => window.print()}>הדפסה</button>
+        </div>
+        <div className="report-print">
+          <div className="rp-head">
+            <img className="rp-logo" src={import.meta.env.BASE_URL + 'logo.png'} alt="הרצליה מדיקל סנטר" />
+            <div className="rp-brand">הרצליה מדיקל סנטר · כוחות עזר</div>
+            <h2 className="rp-title">{report.title}</h2>
+            <div className="rp-meta">
+              <span><b>יחידה:</b> {unit.name}</span>
+              <span><b>סוג:</b> {TYPE_LABELS.closure}</span>
+              <span><b>תועד בתאריך:</b> {report.dateLabel}</span>
+              <span><b>שעה:</b> {report.timeLabel}</span>
+            </div>
+          </div>
+          <div className="rp-section">
+            <h3>פרטי הסגירה</h3>
+            <ul className="rp-signs">
+              <li><span className="rp-sign-label">מתאריך:</span> <b>{fmt(c.from)}</b></li>
+              <li><span className="rp-sign-label">עד תאריך:</span> <b>{fmt(c.to)}</b></li>
+              <li><span className="rp-sign-label">סיבה:</span> <b>{c.reason || '—'}</b></li>
+              <li><span className="rp-sign-label">דווח ע״י:</span> <b>{c.by || '—'}</b></li>
+            </ul>
+          </div>
+          <div className="rp-foot">נשמר ב-{new Date(report.savedAt).toLocaleString('he-IL')}</div>
+        </div>
+      </div>
+    )
+  }
+
   const tasks = flattenSectionTasks(section)
   const signoff = (section ? section.signoff : []) || []
 
@@ -39,15 +79,18 @@ function ReportDetail({ unit, report, onBack }) {
           <div className="rp-section">
             <h3>משימות שבוצעו</h3>
             <ul className="rp-tasks">
-              {tasks.map((t, i) => (
-                <li key={i}>
-                  {t.firstInGroup && t.group && <div className="rp-group">{t.group}</div>}
-                  <span className={'rp-mark' + (record.checked && record.checked[i] ? ' on' : '')}>
-                    {record.checked && record.checked[i] ? '✓' : '—'}
-                  </span>
-                  <span className="rp-task-label">{t.label}</span>
-                </li>
-              ))}
+              {tasks.map((t, i) => {
+                const v = record.checked && record.checked[i]
+                const resolved = taskResolved(t.kind, v)
+                const special = t.kind ? specialTaskText(t.kind, v) : ''
+                return (
+                  <li key={i}>
+                    {t.firstInGroup && t.group && <div className="rp-group">{t.group}</div>}
+                    <span className={'rp-mark' + (resolved ? ' on' : '')}>{resolved ? '✓' : '—'}</span>
+                    <span className="rp-task-label">{t.label}{special ? ' — ' + special : ''}</span>
+                  </li>
+                )
+              })}
             </ul>
           </div>
         )}
@@ -94,6 +137,10 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
   const folderOf = (r) => TYPE_LABELS[r.tabId] || r.tabId
   const plan = getCleaningPlan(unit.id)
   const folders = plan ? [...new Set(plan.tabs.map((t) => TYPE_LABELS[t.id] || t.id))] : []
+  // הוספת תיקיית "סגירות" אם תועדו סגירות ליחידה
+  if (reports.some((r) => r.tabId === 'closure') && !folders.includes(TYPE_LABELS.closure)) {
+    folders.push(TYPE_LABELS.closure)
+  }
 
   const trail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) trail.push({ label: categoryName, onClick: onBackToCategory })
@@ -118,7 +165,7 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
     )
   }
 
-  const TYPE_ORDER = { daily: 0, weekly: 1, monthly: 2, isolation: 3 }
+  const TYPE_ORDER = { daily: 0, weekly: 1, monthly: 2, isolation: 3, closure: 4 }
 
   const filtered = reports.filter((r) => {
     if (folder !== 'all' && folderOf(r) !== folder) return false

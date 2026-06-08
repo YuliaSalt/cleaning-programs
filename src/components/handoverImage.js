@@ -7,7 +7,7 @@ import {
   GEN_OCC_NAMES,
   GEN_OCC_NUMBERS,
   GEN_REPORT_ITEMS,
-  GEN_CHECK_ITEMS,
+  genCheckItemsFor,
   OR_SECTIONS,
   fullName,
 } from '../data/handover.js'
@@ -214,7 +214,7 @@ export function buildGeneralHandoverImage(record) {
   }
 
   b.band('משימות ובטיחות המחלקה')
-  GEN_CHECK_ITEMS.forEach((label, i) => {
+  genCheckItemsFor(record.unitId).forEach(({ i, label }) => {
     const c = (record.checks && record.checks[i]) || {}
     b.statusRow(label, c.on ? '✓ בוצע' : '— לא סומן', c.on ? '#15a34a' : '#a0adb8')
     if (c.note && c.note.trim()) b.para('הערה: ' + c.note.trim(), { s: 30, color: '#5b7493', indent: 30, gap: 0.3 })
