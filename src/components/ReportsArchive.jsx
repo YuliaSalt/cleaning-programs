@@ -165,7 +165,8 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
     )
   }
 
-  const TYPE_ORDER = { daily: 0, weekly: 1, monthly: 2, isolation: 3, closure: 4 }
+  // סגירות מוצגות ראשונות בכל חודש (גם בתצוגת "הכל"), כדי שיהיו בולטות
+  const TYPE_ORDER = { closure: -1, daily: 0, weekly: 1, monthly: 2, isolation: 3 }
 
   const filtered = reports.filter((r) => {
     if (folder !== 'all' && folderOf(r) !== folder) return false
@@ -262,10 +263,11 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
                 if (g.kind === 'type') return folder === 'all' ? <div key={i} className="grp-type">{g.label}</div> : null
                 if (g.kind === 'day') return <div key={i} className="grp-day">{g.label}</div>
                 const r = g.report
+                const isClosure = r.tabId === 'closure'
                 return (
-                  <button key={i} className="report-card" onClick={() => setOpen(r)}>
+                  <button key={i} className={'report-card' + (isClosure ? ' closure-card' : '')} onClick={() => setOpen(r)}>
                     <div className="rc-main">
-                      <span className="rc-title">{r.title}</span>
+                      <span className="rc-title">{isClosure ? '🔒 ' : ''}{r.title}</span>
                       <span className="rc-sub">
                         {r.timeLabel}
                         {r.shift && <> · משמרת {r.shift}</>}

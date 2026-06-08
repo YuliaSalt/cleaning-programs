@@ -45,7 +45,7 @@ export default function ClosurePanel({ unit }) {
   // קומפקטי: כברירת מחדל רק כפתור קטן; בלחיצה נפתח טופס הסימון
   if (!open) {
     return (
-      <button className="btn ghost sm closure-mark-btn" onClick={() => setOpen(true)}>
+      <button className="closure-mark-btn" onClick={() => setOpen(true)}>
         סימון סגירת יחידה
       </button>
     )

@@ -132,7 +132,16 @@ function SignedSection({ skey, section, flat }) {
 
   const [rec, setRec] = useState(() => storage.getJSON(skey))
   const locked = !!rec
-  const [checked, setChecked] = useState(() => (rec && rec.checked) || {})
+  // ברירת מחדל: פריטים מיוחדים (count / doneNA) מתחילים כ"לא רלוונטי"; משימות רגילות לא מסומנות
+  const [checked, setChecked] = useState(() => {
+    if (rec && rec.checked) return rec.checked
+    const init = {}
+    tasks.forEach((t, i) => {
+      if (t.kind === 'count') init[i] = { status: 'na', qty: '' }
+      else if (t.kind === 'doneNA') init[i] = 'na'
+    })
+    return init
+  })
   const [names, setNames] = useState(() => (rec && rec.names) || initNames(signoff))
   const [signs, setSigns] = useState(() => (rec && rec.signs) || {})
   const [showErr, setShowErr] = useState(false)
@@ -144,7 +153,9 @@ function SignedSection({ skey, section, flat }) {
   const toggleIdx = signoff.map((s, i) => (s.type !== 'name' ? i : -1)).filter((i) => i >= 0)
   const namesOk = nameIdx.every((i) => (names[i] || '').trim())
   const signsOk = toggleIdx.every((i) => signs[i])
-  const canSave = namesOk && signsOk
+  // לא ייסגר בלי התייחסות לכל המשימות: כל סעיף חייב להיות מסומן (בוצע) או "לא רלוונטי"
+  const allTasksDone = tasks.every((t, i) => taskResolved(t.kind, checked[i]))
+  const canSave = namesOk && signsOk && allTasksDone
 
   function handleSave() {
     if (!canSave) {
@@ -198,31 +209,45 @@ function SignedSection({ skey, section, flat }) {
                 <div key={i}>
                   {t.firstInGroup && t.group && <div className="group-sub">{t.group}</div>}
                   {t.kind === 'count' ? (
-                    <div className={'check-item special-item' + (resolved ? ' done' : '')}>
+                    <div className={'check-item special-item' + (resolved ? ' done' : '') + (showErr && !resolved ? ' missing' : '')}>
                       <span className="ci-label">{t.label}</span>
                       <div className="ci-controls">
-                        <input
-                          type="number"
-                          min="0"
-                          inputMode="numeric"
-                          className="input ci-qty"
-                          placeholder="כמות"
-                          value={(v && v.qty) || ''}
-                          disabled={locked || (v && v.na)}
-                          onChange={(e) => setChecked((c) => ({ ...c, [i]: { qty: e.target.value, na: false } }))}
-                        />
                         <button
                           type="button"
-                          className={'sign-toggle sm' + (v && v.na ? ' on' : '')}
+                          className={'sign-toggle sm' + (v && v.status === 'done' ? ' on' : '')}
                           disabled={locked}
-                          onClick={() => setChecked((c) => ({ ...c, [i]: { qty: '', na: !(c[i] && c[i].na) } }))}
+                          onClick={() => setChecked((c) => { const cur = c[i] || {}; return { ...c, [i]: { status: cur.status === 'done' ? undefined : 'done', qty: cur.qty || '' } } })}
+                        >
+                          בוצע
+                        </button>
+                        <button
+                          type="button"
+                          className={'sign-toggle sm na' + (v && v.status === 'na' ? ' on' : '')}
+                          disabled={locked}
+                          onClick={() => setChecked((c) => ({ ...c, [i]: { status: (c[i] && c[i].status === 'na') ? undefined : 'na', qty: '' } }))}
                         >
                           לא רלוונטי
                         </button>
                       </div>
+                      {v && v.status === 'done' && (
+                        <div className="ci-qty-row">
+                          <label htmlFor={skey + '-qty' + i}>כמות</label>
+                          <input
+                            id={skey + '-qty' + i}
+                            type="number"
+                            min="0"
+                            inputMode="numeric"
+                            className="input ci-qty"
+                            placeholder="הקלדת כמות טלמטריות"
+                            value={v.qty || ''}
+                            disabled={locked}
+                            onChange={(e) => setChecked((c) => ({ ...c, [i]: { status: 'done', qty: e.target.value } }))}
+                          />
+                        </div>
+                      )}
                     </div>
                   ) : t.kind === 'doneNA' ? (
-                    <div className={'check-item special-item' + (resolved ? ' done' : '')}>
+                    <div className={'check-item special-item' + (resolved ? ' done' : '') + (showErr && !resolved ? ' missing' : '')}>
                       <span className="ci-label">{t.label}</span>
                       <div className="ci-controls">
                         <button
@@ -235,7 +260,7 @@ function SignedSection({ skey, section, flat }) {
                         </button>
                         <button
                           type="button"
-                          className={'sign-toggle sm' + (v === 'na' ? ' on' : '')}
+                          className={'sign-toggle sm na' + (v === 'na' ? ' on' : '')}
                           disabled={locked}
                           onClick={() => setChecked((c) => ({ ...c, [i]: c[i] === 'na' ? undefined : 'na' }))}
                         >
@@ -244,7 +269,7 @@ function SignedSection({ skey, section, flat }) {
                       </div>
                     </div>
                   ) : (
-                    <div className={'check-item' + (v ? ' done' : '')}>
+                    <div className={'check-item' + (v ? ' done' : '') + (showErr && !resolved ? ' missing' : '')}>
                       <input
                         type="checkbox"
                         id={skey + '-c' + i}
@@ -298,7 +323,11 @@ function SignedSection({ skey, section, flat }) {
       </div>
 
       {showErr && !canSave && (
-        <div className="err">חובה למלא את כל שמות המבצעים ולסמן את כל החתימות לפני שמירה ונעילה.</div>
+        <div className="err">
+          {!allTasksDone
+            ? 'יש להתייחס לכל המשימות (לסמן בוצע או "לא רלוונטי"), למלא שמות ולחתום לפני שמירה ונעילה.'
+            : 'חובה למלא את כל שמות המבצעים ולסמן את כל החתימות לפני שמירה ונעילה.'}
+        </div>
       )}
 
       <div className="plan-foot">

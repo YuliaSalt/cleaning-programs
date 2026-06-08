@@ -24,10 +24,13 @@ export function normTask(it) {
 }
 
 // תיאור טקסטואלי של ערך משימה מיוחדת (לדוחות/גיליון). מחרוזת ריקה => אין מה להציג.
+// count: { status: 'done'|'na', qty } (תומך לאחור גם ב-{ qty, na }).
 export function specialTaskText(kind, value) {
   if (kind === 'count') {
-    if (value && value.na) return 'לא רלוונטי'
-    if (value && value.qty != null && String(value.qty).trim()) return 'כמות: ' + String(value.qty).trim()
+    if (value && (value.na === true || value.status === 'na')) return 'לא רלוונטי'
+    const qty = value && value.qty
+    const hasQty = qty != null && String(qty).trim()
+    if (value && (value.status === 'done' || hasQty)) return hasQty ? 'כמות: ' + String(qty).trim() : 'בוצע'
     return ''
   }
   if (kind === 'doneNA') {
@@ -38,9 +41,12 @@ export function specialTaskText(kind, value) {
   return ''
 }
 
-// האם המשימה "טופלה" (לצורך מד התקדמות): רגילה => סומנה; מיוחדת => הוזן ערך או לא רלוונטי.
+// האם המשימה "טופלה" (לצורך מד התקדמות וגם לתנאי הסגירה): רגילה => סומנה; מיוחדת => בוצע/לא רלוונטי.
 export function taskResolved(kind, value) {
-  if (kind === 'count') return !!(value && (value.na || (value.qty != null && String(value.qty).trim())))
+  if (kind === 'count') {
+    if (!value) return false
+    return value.na === true || value.status === 'na' || value.status === 'done' || (value.qty != null && String(value.qty).trim() !== '')
+  }
   if (kind === 'doneNA') return value === 'done' || value === 'na'
   return !!value
 }

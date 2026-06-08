@@ -1000,8 +1000,10 @@ h1, h2, h3, h4 {
 }
 
 .check-item.done {
-  background: rgba(214, 238, 245, 0.5);
-  border-color: rgba(168, 220, 232, 0.8);
+  background: linear-gradient(180deg, rgba(214, 238, 245, 0.75) 0%, rgba(190, 232, 222, 0.6) 100%);
+  border-color: var(--brand);
+  box-shadow: 0 3px 11px rgba(31, 175, 143, 0.2);
+  transform: translateY(-1px);
 }
 
 .check-item input {
@@ -1019,16 +1021,24 @@ h1, h2, h3, h4 {
   cursor: pointer;
 }
 
+.check-item input {
+  width: 26px;
+  height: 26px;
+}
+
 .check-item input:checked {
-  background: var(--fill-ice-active);
-  border-color: var(--ice-2);
+  background: linear-gradient(180deg, #2fc2a6 0%, var(--brand) 100%);
+  border-color: var(--brand);
+  box-shadow: 0 3px 8px rgba(31, 175, 143, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transform: scale(1.06);
 }
 
 .check-item input:checked::after {
   content: '✓';
-  color: var(--brand);
-  font-size: 15px;
-  font-weight: 800;
+  color: #fff;
+  font-size: 19px;
+  font-weight: 900;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
 }
 
 .check-item input:disabled {
@@ -1046,6 +1056,12 @@ h1, h2, h3, h4 {
 .check-item.done label {
   color: var(--brand-soft);
   font-weight: 600;
+}
+
+/* סימון משימה שלא טופלה כשמנסים לחתום ולנעול */
+.check-item.missing {
+  border-color: #e06a6a;
+  box-shadow: 0 0 0 3px rgba(224, 106, 106, 0.14);
 }
 
 /* פריטי צ׳קליסט מיוחדים: ספירת כמות (count) ומתג בוצע/לא רלוונטי (doneNA) */
@@ -1090,9 +1106,37 @@ h1, h2, h3, h4 {
   margin-bottom: 16px;
 }
 
-/* כפתור סימון קומפקטי (מצב ברירת מחדל) */
+/* כפתור סימון סגירת יחידה – בולט ותלת-ממדי */
 .closure-mark-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 16px;
+  padding: 13px 22px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(180deg, #ff8a7a 0%, #e2554e 100%);
+  border: none;
+  box-shadow: 0 6px 16px rgba(226, 85, 78, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.closure-mark-btn::before {
+  content: '🔒';
+  font-size: 17px;
+}
+
+.closure-mark-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 9px 22px rgba(226, 85, 78, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.closure-mark-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 9px rgba(226, 85, 78, 0.4);
 }
 
 .closure-banner {
@@ -1162,6 +1206,17 @@ h1, h2, h3, h4 {
 
 .closure-row .cr-del {
   flex: none;
+}
+
+/* כרטיס סגירה בארכיון הדוחות – בולט בגוון אדום */
+.report-card.closure-card {
+  background: linear-gradient(180deg, rgba(226, 85, 78, 0.12) 0%, rgba(226, 85, 78, 0.06) 100%);
+  border-color: rgba(226, 85, 78, 0.4);
+}
+
+.report-card.closure-card .rc-title {
+  color: #b23b35;
+  font-weight: 800;
 }
 
 .progress {
@@ -1542,8 +1597,35 @@ h1, h2, h3, h4 {
 }
 
 .sign-toggle.on {
-  background: rgba(214, 238, 245, 0.5);
-  border-color: rgba(168, 220, 232, 0.9);
+  background: linear-gradient(180deg, #d7f3ec 0%, #aee5d8 100%);
+  border-color: var(--brand);
+  color: #0d6b58;
+  font-weight: 800;
+  box-shadow: 0 3px 10px rgba(31, 175, 143, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+/* כפתור "לא רלוונטי" – צבע נבדל (ענבר) להבחנה מ"בוצע" */
+.sign-toggle.na.on {
+  background: linear-gradient(180deg, #fde9c8 0%, #f6d79e 100%);
+  border-color: #e0a94e;
+  color: #8a5a10;
+  box-shadow: 0 3px 10px rgba(200, 140, 40, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* שורת הקלדת כמות שנפתחת לאחר בחירת "בוצע" בספירת טלמטריות */
+.ci-qty-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.ci-qty-row label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
 }
 
 .sign-toggle.on .st-box {
