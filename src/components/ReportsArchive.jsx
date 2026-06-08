@@ -30,7 +30,7 @@ function ReportDetail({ unit, report, onBack }) {
               <span><b>יחידה:</b> {unit.name}</span>
               <span><b>סוג:</b> {TYPE_LABELS.closure}</span>
               <span><b>תועד בתאריך:</b> {report.dateLabel}</span>
-              <span><b>שעה:</b> {report.timeLabel}</span>
+              {report.timeLabel && <span><b>שעה:</b> {report.timeLabel}</span>}
             </div>
           </div>
           <div className="rp-section">

@@ -1,6 +1,7 @@
 // קריאת דוחות הביצוע השמורים (סקשני חתימה נעולים) של יחידה, מתוך ה-StorageAdapter.
 
 import { getCleaningPlan, getMergedDailySection, normTask } from './cleaningTemplates.js'
+import { listAutoClosures } from './closures.js'
 import { storage } from './storage.js'
 
 const PREFIX = 'hmc:plan:'
@@ -116,6 +117,34 @@ export function listReports(unitId) {
       shift: '',
       performers: rec.by ? [rec.by] : [],
       by: rec.by || '',
+    })
+  }
+
+  // סגירות שבת/חג אוטומטיות (גסטרו / חדרי ניתוח / צינתורים) – נגזרות, מוצגות כסוג "סגירות"
+  for (const ac of listAutoClosures(unitId)) {
+    const saved = new Date(ac.dateISO + 'T00:00:00')
+    const closRec = { unitId, from: ac.dateISO, to: ac.dateISO, reason: ac.kind, by: 'אוטומטי', auto: true }
+    out.push({
+      key: 'auto:closure:' + unitId + ':' + ac.dateISO,
+      room: null,
+      tabId: 'closure',
+      sectionId: null,
+      period: '',
+      section: null,
+      closure: closRec,
+      title: `סגירת יחידה · ${fmtHe(ac.dateISO)} · ${ac.kind}`,
+      record: closRec,
+      savedAt: saved.toISOString(),
+      sortTs: saved.getTime(),
+      year: saved.getFullYear(),
+      month: saved.getMonth(),
+      day: saved.getDate(),
+      dateLabel: saved.toLocaleDateString('he-IL'),
+      timeLabel: '',
+      dateISO: ac.dateISO,
+      shift: '',
+      performers: [],
+      by: 'אוטומטי',
     })
   }
 

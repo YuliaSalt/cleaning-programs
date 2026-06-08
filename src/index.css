@@ -1090,6 +1090,11 @@ h1, h2, h3, h4 {
   margin-bottom: 16px;
 }
 
+/* כפתור סימון קומפקטי (מצב ברירת מחדל) */
+.closure-mark-btn {
+  margin-bottom: 16px;
+}
+
 .closure-banner {
   display: flex;
   align-items: flex-start;
@@ -1098,6 +1103,20 @@ h1, h2, h3, h4 {
   border-radius: 14px;
   background: rgba(226, 85, 78, 0.1);
   border: 1px solid rgba(226, 85, 78, 0.35);
+}
+
+/* באנר קומפקטי – הודעת "היחידה סגורה" בלבד */
+.closure-banner.compact {
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+
+.closure-banner.compact .cb-body {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 10px;
 }
 
 .closure-banner .cb-icon {
