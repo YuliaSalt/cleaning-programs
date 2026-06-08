@@ -129,7 +129,7 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
   return (
     <div>
       <ScreenHeader
-        title="דיווח על חסרים"
+        title={'דיווח על חסרים · ' + unit.name}
         onBack={activeCat ? closeCat : onBack}
         trail={trail}
       />

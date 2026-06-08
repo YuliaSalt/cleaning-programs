@@ -150,7 +150,7 @@ export default function ReportsArchive({ unit, onBack, onGoHome, onBackToCategor
 
   const header = (
     <ScreenHeader
-      title="דוחות ביצוע"
+      title={'דוחות ביצוע · ' + unit.name}
       onBack={onBackToPlan || onBack}
       trail={trail}
     />

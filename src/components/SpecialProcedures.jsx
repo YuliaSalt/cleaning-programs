@@ -45,7 +45,7 @@ export default function SpecialProcedures({ unit, onBack, onGoHome, onBackToCate
 
   return (
     <div>
-      <ScreenHeader title="פעולות מיוחדות" onBack={onBack} trail={trail} />
+      <ScreenHeader title={'פעולות מיוחדות · ' + unit.name} onBack={onBack} trail={trail} />
       <div className="card-grid">
         {specialProcedures.map((p) => {
           const n = normalize(p)

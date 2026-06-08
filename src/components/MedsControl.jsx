@@ -223,7 +223,7 @@ export default function MedsControl({ unit, onBack, onGoHome, onBackToCategory, 
   if (mode === 'view' && openRec) {
     return (
       <div>
-        <ScreenHeader title="בקרת תרופות חודשית" onBack={() => setMode('list')} trail={[...trail, { label: openRec.dateLabel }]} />
+        <ScreenHeader title={'בקרת תרופות חודשית · ' + unit.name} onBack={() => setMode('list')} trail={[...trail, { label: openRec.dateLabel }]} />
         <MedView unit={unit} record={openRec.record} />
       </div>
     )
@@ -238,7 +238,7 @@ export default function MedsControl({ unit, onBack, onGoHome, onBackToCategory, 
     })
     return (
       <div>
-        <ScreenHeader title="בקרת תרופות – דוחות שמורים" onBack={() => setMode('form')} trail={[...trail, { label: 'דוחות שמורים' }]} />
+        <ScreenHeader title={'בקרת תרופות – דוחות שמורים · ' + unit.name} onBack={() => setMode('form')} trail={[...trail, { label: 'דוחות שמורים' }]} />
         <div className="glass plan-card controls-card">
           <div className="filters-row">
             <span className="filters-label">חיפוש לפי:</span>
@@ -272,7 +272,7 @@ export default function MedsControl({ unit, onBack, onGoHome, onBackToCategory, 
   // mode === 'form'
   return (
     <div>
-      <ScreenHeader title="בקרת תרופות חודשית" onBack={onBack} trail={trail} />
+      <ScreenHeader title={'בקרת תרופות חודשית · ' + unit.name} onBack={onBack} trail={trail} />
       <MedForm key={refresh} unit={unit} onSaved={() => { setRefresh((n) => n + 1); setSavedFlash(true) }} />
       <button className="ho-archive-link" onClick={() => { setSavedFlash(false); setMode('list') }}>
         דוחות בקרת תרופות שמורים ({reports.length})

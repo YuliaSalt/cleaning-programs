@@ -353,7 +353,7 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
   if (!plan) {
     return (
       <div className="plan-wrap">
-        <ScreenHeader title="תוכניות ניקיון מחלקתי" onBack={onBack} trail={[{ label: 'ראשי', onClick: onGoHome }, { label: unit.name, onClick: onBack }]} />
+        <ScreenHeader title={'תוכניות ניקיון · ' + unit.name} onBack={onBack} trail={[{ label: 'ראשי', onClick: onGoHome }, { label: unit.name, onClick: onBack }]} />
         <p className="empty-hint">לא נמצאה תוכנית ניקיון מוגדרת ליחידה זו.</p>
       </div>
     )
@@ -470,7 +470,7 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
   }
 
   const title =
-    view === 'freq' ? 'תוכניות ניקיון מחלקתי' : tab.label + (tab.id === 'daily' && shift ? ' · ' + shift : '')
+    (view === 'freq' ? 'תוכניות ניקיון' : tab.label + (tab.id === 'daily' && shift ? ' · ' + shift : '')) + ' · ' + unit.name
 
   return (
     <div className="plan-wrap wide">
