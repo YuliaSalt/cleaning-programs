@@ -76,20 +76,24 @@ export const GEN_CHECK_ITEMS = [
   'ביצוע ספירת נרקוטיקה',
   'ביצוע בדיקת עגלת החייאה',
   'ליקויים בציוד ריהוט ותשתיות',
+  'בדיקת מערכת ניטור טמפרטורה',
 ]
 
-// סעיף "ביצוע בדיקת עגלת החייאה" מוצג רק ביחידות שבהן קיימת עגלת החייאה:
-// התאוששות ואשפוז ג. (גסטרו משתמשת בטופס נפרד שבו עגלת החייאה כבר נכללת.)
-// בכל שאר היחידות הסעיף אינו מופיע בטופס דו״ח אחראית משמרת.
-const CRASH_CART_UNITS = new Set(['recovery', 'recovery-1', 'recovery-2', 'inpatient-c'])
-const CRASH_CART_LABEL = 'ביצוע בדיקת עגלת החייאה'
+// סעיפים שמופיעים רק ביחידות מסוימות; כל שאר הסעיפים מופיעים בכל היחידות.
+// "ביצוע בדיקת עגלת החייאה" – רק ביחידות עם עגלת החייאה (התאוששות ואשפוז ג;
+//   גסטרו משתמשת בטופס נפרד שבו עגלת החייאה כבר נכללת).
+// "בדיקת מערכת ניטור טמפרטורה" – רק בהתאוששות IVF.
+const UNIT_ONLY_ITEMS = {
+  'ביצוע בדיקת עגלת החייאה': new Set(['recovery', 'recovery-1', 'recovery-2', 'inpatient-c']),
+  'בדיקת מערכת ניטור טמפרטורה': new Set(['ivf-recovery']),
+}
 
 // רשימת סעיפי הצ׳קליסט הרלוונטיים ליחידה, תוך שמירה על האינדקס המקורי
 // (כדי שדו״חות שמורים ישנים לא יוסטו). מחזיר מערך של { i, label }.
 export function genCheckItemsFor(unitId) {
   return GEN_CHECK_ITEMS
     .map((label, i) => ({ i, label }))
-    .filter(({ label }) => label !== CRASH_CART_LABEL || CRASH_CART_UNITS.has(unitId))
+    .filter(({ label }) => !UNIT_ONLY_ITEMS[label] || UNIT_ONLY_ITEMS[label].has(unitId))
 }
 
 export function emptyGeneralHandover(unitId, unitName, shift) {

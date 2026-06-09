@@ -340,20 +340,51 @@ function GeneralView({ unit, record }) {
   )
 }
 
+// IVF – דו״ח אחראית משמרת מפוצל לשתי תת-יחידות עם ארכיון נפרד לכל אחת.
+const IVF_SUBUNITS = [
+  { id: 'ivf-recovery', name: 'התאוששות IVF' },
+  { id: 'ivf-clinic', name: 'מרפאה IVF', shifts: ['בוקר'] }, // מרפאה IVF – בוקר בלבד
+]
+
 /* ===== מסך ראשי ===== */
 export default function GeneralHandover({ unit, onBack, onGoHome, onBackToCategory, categoryName }) {
+  const needsSubUnit = unit.id === 'ivf'
+  const [subUnit, setSubUnit] = useState(null) // תת-יחידת IVF הנבחרת (התאוששות / מרפאה)
+  const effUnit = subUnit ? { ...unit, id: subUnit.id, name: subUnit.name, shifts: subUnit.shifts || unit.shifts } : unit
+
   const [mode, setMode] = useState('form') // ברירת מחדל: ישר לטופס, ללא מסך ביניים
   const [openRec, setOpenRec] = useState(null)
   const [refresh, setRefresh] = useState(0)
   const [savedFlash, setSavedFlash] = useState(false)
-  const records = useMemo(() => listHandovers(unit.id), [unit.id, refresh])
+  const records = useMemo(() => listHandovers(effUnit.id), [effUnit.id, refresh])
 
   const baseTrail = [{ label: 'ראשי', onClick: onGoHome }]
   if (categoryName) baseTrail.push({ label: categoryName, onClick: onBackToCategory })
   baseTrail.push({ label: unit.name, onClick: onBack })
 
+  // IVF: בחירת תת-יחידה (התאוששות / מרפאה) לפני טופס דו״ח אחראית משמרת
+  if (needsSubUnit && !subUnit) {
+    return (
+      <div>
+        <ScreenHeader title={'דו״ח אחראית משמרת - ' + unit.name} onBack={onBack} trail={[...baseTrail, { label: 'דו״ח אחראית משמרת' }]} />
+        <div className="section-head">
+          <h2>בחירת יחידה</h2>
+        </div>
+        <div className="card-grid">
+          {IVF_SUBUNITS.map((s, i) => (
+            <button key={s.id} className={'unit-card tint-' + (i % 5)} onClick={() => setSubUnit(s)}>
+              <span className="uc-name">{s.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // חזרה מהטופס: ב-IVF חוזרים למסך בחירת תת-היחידה, אחרת ללוח היחידה
+  const backFromForm = needsSubUnit ? () => { setSubUnit(null); setMode('form'); setOpenRec(null) } : onBack
   const goForm = () => { setMode('form'); setOpenRec(null) }
-  const title = 'דו״ח אחראית משמרת - ' + unit.name
+  const title = 'דו״ח אחראית משמרת - ' + effUnit.name
 
   if (mode === 'list') {
     return (
@@ -373,7 +404,7 @@ export default function GeneralHandover({ unit, onBack, onGoHome, onBackToCatego
     return (
       <div>
         <ScreenHeader title={title} onBack={() => setMode('list')} trail={[...baseTrail, { label: 'דו״ח אחראית משמרת', onClick: goForm }, { label: openRec.dateLabel }]} />
-        <GeneralView unit={unit} record={openRec.record} />
+        <GeneralView unit={effUnit} record={openRec.record} />
       </div>
     )
   }
@@ -381,8 +412,8 @@ export default function GeneralHandover({ unit, onBack, onGoHome, onBackToCatego
   // ברירת מחדל: טופס דו״ח אחראית משמרת ישירות
   return (
     <div>
-      <ScreenHeader title={title} onBack={onBack} trail={[...baseTrail, { label: 'דו״ח אחראית משמרת' }]} />
-      <GeneralForm unit={unit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true) }} />
+      <ScreenHeader title={title} onBack={backFromForm} trail={[...baseTrail, { label: 'דו״ח אחראית משמרת' }]} />
+      <GeneralForm unit={effUnit} onSent={() => { setRefresh((n) => n + 1); setSavedFlash(true) }} />
       {records.length > 0 && (
         <button className="ho-archive-link" onClick={() => { setSavedFlash(false); setMode('list') }}>
           צפייה בדו״חות שמורים ({records.length})
