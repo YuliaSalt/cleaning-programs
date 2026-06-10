@@ -1221,6 +1221,37 @@ const CATH_CARDIAC_MEDS = [
   { name: 'I.PROMETHAZINE 50mg/2ml PROTHIAZINE (נוגד אלרגיה/בחילות)', sku: '', group: 'שונות (Miscellaneous)' },
 ]
 
+// ===== רנטגן (X-ray) – רשימת תרופות לבקרה לפי קטגוריות (ללא מק״ט) =====
+const XRAY_MEDS = [
+  { name: 'BARIUM SULF SUSP E-Z-CAT 720 225ml', sku: '', group: 'חומרי ניגוד והכנה לדימות (Contrast Media & Radiology Prep) · נוזלים, תרחיפים ואבקות' },
+  { name: 'BARIUM SULF SUSP E-Z-HD 764', sku: '', group: 'חומרי ניגוד והכנה לדימות (Contrast Media & Radiology Prep) · נוזלים, תרחיפים ואבקות' },
+  { name: 'E-Z-GAS II 4g BAG 793', sku: '', group: 'חומרי ניגוד והכנה לדימות (Contrast Media & Radiology Prep) · נוזלים, תרחיפים ואבקות' },
+  { name: 'I.IOHEXOL 350 KOPAQ OMNIPAQUE 200ml', sku: '', group: 'חומרי ניגוד והכנה לדימות (Contrast Media & Radiology Prep) · נוזלים, תרחיפים ואבקות' },
+  { name: 'I.IOHEXOL 350 OMNIPAQUE 100ml', sku: '', group: 'חומרי ניגוד והכנה לדימות (Contrast Media & Radiology Prep) · נוזלים, תרחיפים ואבקות' },
+  { name: 'I.IOHEXOL 350 OMNIPAQUE 500ml', sku: '', group: 'חומרי ניגוד והכנה לדימות (Contrast Media & Radiology Prep) · נוזלים, תרחיפים ואבקות' },
+  { name: 'I.IOXITALAMATE SOD. UROLUX TELEBRIX 12 250ml', sku: '', group: 'חומרי ניגוד והכנה לדימות (Contrast Media & Radiology Prep) · נוזלים, תרחיפים ואבקות' },
+  { name: 'T.METOPROLOL 100mg NEOBLOC', sku: '', group: 'לב, לחץ דם וחירום קרדיאלי (Cardiovascular & Emergency) · כדורים' },
+  { name: 'T.PROPRANOLOL 40mg PROLOL', sku: '', group: 'לב, לחץ דם וחירום קרדיאלי (Cardiovascular & Emergency) · כדורים' },
+  { name: 'I.METOPROLOL 5mg/5ml LOPRESSOR', sku: '', group: 'לב, לחץ דם וחירום קרדיאלי (Cardiovascular & Emergency) · נוזלים, זריקות ותרסיסים' },
+  { name: 'SP.NITROLINGUAL 0.4mg /dose (תרסיס ללשון)', sku: '', group: 'לב, לחץ דם וחירום קרדיאלי (Cardiovascular & Emergency) · נוזלים, זריקות ותרסיסים' },
+  { name: 'T.DIPYRONE 500mg OPTALGIN', sku: '', group: 'שיכוך כאב, אלחוש והרגעה (Analgesics, Anesthetics & Sedation) · כדורים' },
+  { name: 'T.LORAZEPAM 1mg LORIVAN', sku: '', group: 'שיכוך כאב, אלחוש והרגעה (Analgesics, Anesthetics & Sedation) · כדורים' },
+  { name: 'T.PARACETAMOL 0.5g ACAMOL', sku: '', group: 'שיכוך כאב, אלחוש והרגעה (Analgesics, Anesthetics & Sedation) · כדורים' },
+  { name: 'I.LIDOCAINE 2% 200 mg/10ml', sku: '', group: 'שיכוך כאב, אלחוש והרגעה (Analgesics, Anesthetics & Sedation) · נוזלים וזריקות' },
+  { name: 'T.LORATADINE 10mg LORASTINE', sku: '', group: 'אלרגיה ונוגדי היסטמין (Allergy & Antihistamines) · כדורים בלבד' },
+  { name: 'T.PREDNISONE 5mg', sku: '', group: 'סטרואידים (Steroids) · כדורים' },
+  { name: 'I.HYDROCORTISONE 100mg SOLU-CORTEF', sku: '', group: 'סטרואידים (Steroids) · זריקות בלבד' },
+  { name: 'I.HYDROCORTISONE 500mg SOLU-CORTEF', sku: '', group: 'סטרואידים (Steroids) · זריקות בלבד' },
+  { name: 'S.ALCOHOL 45%+PROPANOL 18% SOFTA-MAN', sku: '', group: 'חומרי חיטוי חיצוני (Antiseptics)' },
+  { name: 'S.ALCOXIDINE ALCOSEPT 1L', sku: '', group: 'חומרי חיטוי חיצוני (Antiseptics)' },
+  { name: 'S.CHLORHEXIDINE GLUC. 4% SEPTAL SCRUB', sku: '', group: 'חומרי חיטוי חיצוני (Antiseptics)' },
+  { name: 'S.ETHANOL 70% ALCOHOL 1L', sku: '', group: 'חומרי חיטוי חיצוני (Antiseptics)' },
+  { name: 'S.POVIDONE 10% 300ml IODO-VIT', sku: '', group: 'חומרי חיטוי חיצוני (Antiseptics)' },
+  { name: 'S.SEPTOL SEPTADINE 0.5L', sku: '', group: 'חומרי חיטוי חיצוני (Antiseptics)' },
+  { name: 'I.SOD.BICARBONATE 8.4% 100ml', sku: '', group: 'נוזלי עירוי, אלקטרוליטים ומזרזים (IV Fluids & Electrolytes)' },
+  { name: 'I.SODIUM CHLORIDE 0.9% 10ml (סליין)', sku: '', group: 'נוזלי עירוי, אלקטרוליטים ומזרזים (IV Fluids & Electrolytes)' },
+]
+
 export const MED_LISTS = {
   gastro: GASTRO_MEDS,
   ivf: IVF_MEDS,
@@ -1235,6 +1266,7 @@ export const MED_LISTS = {
   mri: MRI_MEDS, // MRI – רשימה ייעודית (ללא מק״ט), אותן הגדרות
   'cath-cath': CATH_MEDS, // צנתורים (תת-יחידה בצינתורים) – רשימה ייעודית (ללא מק״ט), אותן הגדרות
   'cath-cardiac': CATH_CARDIAC_MEDS, // קרדיאלי (תת-יחידה בצינתורים) – רשימה ייעודית (ללא מק״ט), אותן הגדרות
+  xray: XRAY_MEDS, // רנטגן – רשימה ייעודית (ללא מק״ט), אותן הגדרות
 }
 
 export function getMedList(unitId) {
