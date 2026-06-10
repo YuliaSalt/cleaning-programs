@@ -46,7 +46,8 @@ function MedForm({ unit, onSaved }) {
   const list = useMemo(() => getMedList(unit.id), [unit.id])
   const [items, setItems] = useState(() => getLatestMedItems(unit.id, list))
   const [nurse, setNurse] = useState(() => getDeviceNurse())
-  const [err, setErr] = useState('') // '' | 'nurse' | 'expiry'
+  const [cabinetClean, setCabinetClean] = useState(false) // ניקיון וסדר כללי ארון תרופות – חובה לפני חתימה
+  const [err, setErr] = useState('') // '' | 'nurse' | 'expiry' | 'cabinet'
 
   const now = new Date()
   const dateHe = now.toLocaleDateString('he-IL')
@@ -79,8 +80,12 @@ function MedForm({ unit, onSaved }) {
       setErr('expiry')
       return
     }
+    if (!cabinetClean) {
+      setErr('cabinet')
+      return
+    }
     rememberDeviceNurse(nurse)
-    saveMedReport(unit.id, monthKey(), items, nurse.trim())
+    saveMedReport(unit.id, monthKey(), items, nurse.trim(), cabinetClean)
     onSaved()
   }
 
@@ -145,6 +150,19 @@ function MedForm({ unit, onSaved }) {
           )
         })}
       </div>
+
+      {/* משימת חובה לפני חתימה – ניקיון וסדר כללי ארון תרופות */}
+      <div className="med-cabinet">
+        <button
+          type="button"
+          className={'ho-check' + (cabinetClean ? ' on' : '') + (err === 'cabinet' ? ' missing' : '')}
+          onClick={() => { setCabinetClean((v) => !v); if (err === 'cabinet') setErr('') }}
+        >
+          <span className="ho-circle">{cabinetClean ? '✓' : ''}</span>
+          <span className="ho-check-label">בוצעה ניקיון וסדר כללי ארון תרופות</span>
+        </button>
+      </div>
+      {err === 'cabinet' && <div className="err">יש לסמן שבוצעו ניקיון וסדר כללי בארון התרופות לפני חתימה.</div>}
 
       {/* חתימת אחות – בלחיצה נחתם ונשמר */}
       <div className="med-sign">
@@ -222,6 +240,15 @@ function MedView({ unit, record }) {
                 </Fragment>
               )
             })}
+          </ul>
+        </div>
+
+        <div className="rp-section">
+          <ul className="rp-tasks">
+            <li>
+              <span className={'rp-mark' + (record.cabinetClean ? ' on' : '')}>{record.cabinetClean ? '✓' : '—'}</span>
+              <span className="rp-task-label">בוצעה ניקיון וסדר כללי ארון תרופות</span>
+            </li>
           </ul>
         </div>
 

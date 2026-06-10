@@ -335,6 +335,7 @@ export function buildMedReadable(rec) {
     if (it.order) parts.push('להזמין')
     return [def.name, parts.join(' · ')]
   })
+  columns.push(['ניקיון וסדר כללי ארון תרופות', rec.cabinetClean ? 'בוצע' : 'לא בוצע'])
   return {
     meta: {
       savedAt: rec.savedAt,
@@ -348,8 +349,8 @@ export function buildMedReadable(rec) {
   }
 }
 
-export function saveMedReport(unitId, month, items, by) {
-  const rec = { unitId, month, items, by: by || '', savedAt: new Date().toISOString() }
+export function saveMedReport(unitId, month, items, by, cabinetClean = false) {
+  const rec = { unitId, month, items, by: by || '', cabinetClean: !!cabinetClean, savedAt: new Date().toISOString() }
   const key = `${PREFIX}${unitId}:${month}:${Date.now()}`
   storage.setJSON(key, rec)
   pushReport(key, rec, 'save', buildMedReadable(rec)) // גיבוי/סנכרון ענן + שורה קריאה בגיליון (best-effort)
