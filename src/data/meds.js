@@ -76,8 +76,58 @@ const GASTRO_MEDS = [
   { name: 'LUGOL 25ml תמיסת יוד למריחה', sku: '34300001', group: G_OTHER },
 ]
 
+// ===== IVF – רשימת תרופות לפי קטגוריות =====
+const IVF_MEDS = [
+  { name: 'I.AUGMENTIN 1g CLAVENIR', sku: '30500040', group: 'אנטיביוטיקה (Antibiotics)' },
+  { name: 'I.CEFAZOLIN 1g', sku: '30500017', group: 'אנטיביוטיקה (Antibiotics)' },
+  { name: 'I.CLINDAMYCIN 600mg', sku: '30500053', group: 'אנטיביוטיקה (Antibiotics)' },
+  { name: 'I.BUPIVACAINE 0.5% 20ml MARCAINE', sku: '32000021', group: 'אלחושים מקומיים (Local Anesthetics)' },
+  { name: 'I.LIDOCAINE 1% 100 mg/10ml', sku: '32000109', group: 'אלחושים מקומיים (Local Anesthetics)' },
+  { name: 'I.LIDOCAINE 2% 200 mg/10ml', sku: '32000108', group: 'אלחושים מקומיים (Local Anesthetics)' },
+  { name: 'I.MIDAZOLAM 5mg/5ml DORMICUM', sku: '39000013', group: 'חומרי הרדמה, הרגעה ונוגדי חרדה (Anesthetics & Sedatives)' },
+  { name: 'I.PROPOFOL 1% 20ml', sku: '32000026', group: 'חומרי הרדמה, הרגעה ונוגדי חרדה (Anesthetics & Sedatives)' },
+  { name: 'I.NEOSTIGMINE 2.5mg/ml', sku: '32000287', group: 'משתקי שרירים ונוגדי היפוך (Neuromuscular Blockers & Reversal)' },
+  { name: 'I.SUCCINYLCHOLINE 100mg PWD for INJ', sku: '32000792', group: 'משתקי שרירים ונוגדי היפוך (Neuromuscular Blockers & Reversal)' },
+  { name: 'I.COMBODEX IBUPR 0.3g+PARACET 1g/100ml', sku: '32000654', group: 'משככי כאבים, מורידי חום ונוגדי דלקת (Analgesics, Antipyretics & NSAIDs)' },
+  { name: 'I.DICLOFENAC 75mg/3ml VOLTAREN', sku: '32000046', group: 'משככי כאבים, מורידי חום ונוגדי דלקת (Analgesics, Antipyretics & NSAIDs)' },
+  { name: 'I.DIPYRONE 1g/2ml OPTALGIN', sku: '32000680', group: 'משככי כאבים, מורידי חום ונוגדי דלקת (Analgesics, Antipyretics & NSAIDs)' },
+  { name: 'I.KETOROLAC 30mg', sku: '32000010', group: 'משככי כאבים, מורידי חום ונוגדי דלקת (Analgesics, Antipyretics & NSAIDs)' },
+  { name: 'I.PARACETAMOL 1g', sku: '32000681', group: 'משככי כאבים, מורידי חום ונוגדי דלקת (Analgesics, Antipyretics & NSAIDs)' },
+  { name: 'I.TRAMADOL 100mg TRAMAL', sku: '32000391', group: 'משככי כאבים, מורידי חום ונוגדי דלקת (Analgesics, Antipyretics & NSAIDs)' },
+  { name: 'SUPP.PARACETAMOL 0.5g SUPRAMOL', sku: '33000003', group: 'משככי כאבים, מורידי חום ונוגדי דלקת (Analgesics, Antipyretics & NSAIDs)' },
+  { name: 'SYR.DIPYRONE 1.25g/5ml 50ml V-DALGIN OPTALGIN', sku: '32500041', group: 'משככי כאבים, מורידי חום ונוגדי דלקת (Analgesics, Antipyretics & NSAIDs)' },
+  { name: 'T.DIPYRONE 500mg OPTALGIN', sku: '32000016', group: 'משככי כאבים, מורידי חום ונוגדי דלקת (Analgesics, Antipyretics & NSAIDs)' },
+  { name: 'T.PARACETAMOL 0.5g ACAMOL', sku: '32000013', group: 'משככי כאבים, מורידי חום ונוגדי דלקת (Analgesics, Antipyretics & NSAIDs)' },
+  { name: 'I.METOCLOPRAMIDE 10mg/2ml PRAMIN', sku: '32000267', group: 'מערכת העיכול ונוגדי בחילות/הקאות (Gastrointestinal & Antiemetics)' },
+  { name: 'I.ONDANSETRON 8mg/4ml ZOFRAN', sku: '32000389', group: 'מערכת העיכול ונוגדי בחילות/הקאות (Gastrointestinal & Antiemetics)' },
+  { name: 'I.PAPAVERINE 40mg/2ml', sku: '32000005', group: 'מערכת העיכול ונוגדי בחילות/הקאות (Gastrointestinal & Antiemetics)' },
+  { name: 'T.METOCLOPRAMIDE 10mg PRAMIN', sku: '32000262', group: 'מערכת העיכול ונוגדי בחילות/הקאות (Gastrointestinal & Antiemetics)' },
+  { name: 'I.DEXAMETHASONE 4mg/ml DEXACORT', sku: '32000056', group: 'סטרואידים (Corticosteroids)' },
+  { name: 'I.HYDROCORTISONE 100mg SOLU-CORTEF', sku: '32000065', group: 'סטרואידים (Corticosteroids)' },
+  { name: 'I.ATROPINE 1 mg/ml', sku: '32000244', group: 'מערכת לבבית וכלי דם / נוגדי לחץ דם (Cardiovascular & Antihypertensives)' },
+  { name: 'I.LABETALOL 100mg/20ml TRANDATE', sku: '32000135', group: 'מערכת לבבית וכלי דם / נוגדי לחץ דם (Cardiovascular & Antihypertensives)' },
+  { name: 'I.PROMETHAZINE 50mg/2ml PROTHIAZINE', sku: '32000290', group: 'נוגדי אלרגיה ואנטי-היסטמינים (Antihistamines)' },
+  { name: 'T.LORATADINE 10mg LORASTINE', sku: '32000041', group: 'נוגדי אלרגיה ואנטי-היסטמינים (Antihistamines)' },
+  { name: 'I.FLUMAZENIL 0.5 mg/5ml ANEXATE', sku: '32000009', group: 'נוגדי רעלים / חומרי היפוך (Antidotes)' },
+  { name: 'I.NALOXONE 0.4mg NARCAN', sku: '32000007', group: 'נוגדי רעלים / חומרי היפוך (Antidotes)' },
+  { name: 'I.TRANEXAMIC ACID 0.5g/5ml HEXAKAPRON', sku: '32000037', group: 'נוגדי דימום (Antifibrinolytics)' },
+  { name: 'I.GLUCOSE / DEXTROSE 50% 10g/20ml', sku: '32000236', group: 'נוזלים, תמיסות וסוכרים לעירוי (Fluids & Electrolytes)' },
+  { name: 'I.SODIUM CHLORIDE 0.9% 10ml', sku: '32000279', group: 'נוזלים, תמיסות וסוכרים לעירוי (Fluids & Electrolytes)' },
+  { name: 'I.WATER for INJECTION 10ml', sku: '32000277', group: 'נוזלים, תמיסות וסוכרים לעירוי (Fluids & Electrolytes)' },
+  { name: 'CR.DIMETHICONE 100g SILICONE', sku: '33500032', group: 'קרמים, משחות ותכשירים לעור (Topical & Skin Care)' },
+  { name: 'CR.VASELIN IN TUBE 25g', sku: '33500029', group: 'קרמים, משחות ותכשירים לעור (Topical & Skin Care)' },
+  { name: 'SILVER NITRATE APPLICATORS', sku: '33000031', group: 'קרמים, משחות ותכשירים לעור (Topical & Skin Care)' },
+  { name: 'S.ALCOHOL 45%+PROPANOL 18% SOFTA-MAN', sku: '36500029', group: 'חומרי חיטוי (Antiseptics & Disinfectants)' },
+  { name: 'S.ALCOXIDINE ALCOSEPT 1L', sku: '36500006', group: 'חומרי חיטוי (Antiseptics & Disinfectants)' },
+  { name: 'S.CHLORHEXIDINE 0.05% 10ml CEDIUM', sku: '36500035', group: 'חומרי חיטוי (Antiseptics & Disinfectants)' },
+  { name: 'S.CHLORHEXIDINE GLUC. 4% SEPTAL SCRUB', sku: '36500011', group: 'חומרי חיטוי (Antiseptics & Disinfectants)' },
+  { name: 'S.POVIDONE 10% 300ml IODO-VIT', sku: '36500024', group: 'חומרי חיטוי (Antiseptics & Disinfectants)' },
+  { name: 'S.SEPTOL SEPTADINE 0.5L', sku: '36500015', group: 'חומרי חיטוי (Antiseptics & Disinfectants)' },
+]
+
 export const MED_LISTS = {
   gastro: GASTRO_MEDS,
+  ivf: IVF_MEDS,
 }
 
 export function getMedList(unitId) {
