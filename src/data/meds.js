@@ -1152,6 +1152,75 @@ const CATH_MEDS = [
   { name: 'I.PROMETHAZINE 50mg/2ml PROTHIAZINE (נוגד אלרגיה/בחילות)', sku: '', group: 'שונות (Miscellaneous)' },
 ]
 
+// ===== קרדיאלי (תת-יחידה בצינתורים) – רשימת תרופות לבקרה לפי קטגוריות (ללא מק״ט) =====
+const CATH_CARDIAC_MEDS = [
+  { name: 'I.CEFAZOLIN 1g', sku: '', group: 'אנטיביוטיקה (Antibiotics) · נוזלים, זריקות וג׳ל' },
+  { name: 'I.CLINDAMYCIN 600mg', sku: '', group: 'אנטיביוטיקה (Antibiotics) · נוזלים, זריקות וג׳ל' },
+  { name: 'I.GENTAMICIN 80mg/2ml', sku: '', group: 'אנטיביוטיקה (Antibiotics) · נוזלים, זריקות וג׳ל' },
+  { name: 'T.AMIODARONE 200mg PROCOR', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.AMLODIPINE 5mg NORVASC', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.ATENOLOL 25mg NORMITEN', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.ATORVASTATIN 40mg LIPITOR', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.BISOPROLOL 2.5mg CARDILOC', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.CAPTOPRIL 12.5mg', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.CLOPIDOGREL 75mg PLAVIX (מדלל דם)', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.ENALAPRIL 5mg ENALADEX', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.FLECAINIDE 100mg TAMBOCOR', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.FUROSEMIDE 40mg FUSID (משתן)', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.PRASUGREL 10mg EFFIENT (מדלל דם)', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.PROPAFENONE 150mg RYTHMEX', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.PROPRANOLOL 10mg PROLOL', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.RIVAROXABAN 10mg XARELTO (מדלל דם)', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.SOTALOL 80mg', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'T.TICAGRELOR 90mg BRILINTA (מדלל דם)', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · כדורים וקפסולות' },
+  { name: 'I.ADENOSINE 6 mg ADENOCOR', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · נוזלים, זריקות ותרסיסים' },
+  { name: 'I.ADRENALINE 1 mg/ml', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · נוזלים, זריקות ותרסיסים' },
+  { name: 'I.AMIODARONE 150mg /3ml PROCOR', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · נוזלים, זריקות ותרסיסים' },
+  { name: 'I.ATROPINE 1 mg/ml', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · נוזלים, זריקות ותרסיסים' },
+  { name: 'I.FUROSEMIDE 20mg/ 2ml FUSID (משתן)', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · נוזלים, זריקות ותרסיסים' },
+  { name: 'I.HEPARIN 5000 units/ml 5ml (מדלל דם)', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · נוזלים, זריקות ותרסיסים' },
+  { name: 'SP.NITROLINGUAL 0.4mg /dose (תרסיס ללשון)', sku: '', group: 'לב, לחץ דם, כולסטרול וחירום לבבי (Cardiovascular & Emergency) · נוזלים, זריקות ותרסיסים' },
+  { name: 'T.DIPYRONE 500mg OPTALGIN', sku: '', group: 'שיכוך כאב ונוגדי דלקת (Analgesics & NSAIDs) · כדורים וקפסולות' },
+  { name: 'T.ETODOLAC 500mg ETOPAN', sku: '', group: 'שיכוך כאב ונוגדי דלקת (Analgesics & NSAIDs) · כדורים וקפסולות' },
+  { name: 'T.PARACETAMOL 0.5g ACAMOL', sku: '', group: 'שיכוך כאב ונוגדי דלקת (Analgesics & NSAIDs) · כדורים וקפסולות' },
+  { name: 'T.TRAMADOL 37.5mg PARACETAMOL 325mg ZALDIAR', sku: '', group: 'שיכוך כאב ונוגדי דלקת (Analgesics & NSAIDs) · כדורים וקפסולות' },
+  { name: 'I.DICLOFENAC 75mg/3ml VOLTAREN', sku: '', group: 'שיכוך כאב ונוגדי דלקת (Analgesics & NSAIDs) · נוזלים, זריקות, סירופים ונרות' },
+  { name: 'I.DIPYRONE 1g/2ml OPTALGIN', sku: '', group: 'שיכוך כאב ונוגדי דלקת (Analgesics & NSAIDs) · נוזלים, זריקות, סירופים ונרות' },
+  { name: 'I.PARACETAMOL 1g', sku: '', group: 'שיכוך כאב ונוגדי דלקת (Analgesics & NSAIDs) · נוזלים, זריקות, סירופים ונרות' },
+  { name: 'I.TRAMADOL 100mg TRAMAL', sku: '', group: 'שיכוך כאב ונוגדי דלקת (Analgesics & NSAIDs) · נוזלים, זריקות, סירופים ונרות' },
+  { name: 'SOL.DR.TRAMADOL 100mg/ml TRAMAL', sku: '', group: 'שיכוך כאב ונוגדי דלקת (Analgesics & NSAIDs) · נוזלים, זריקות, סירופים ונרות' },
+  { name: 'SYR.DIPYRONE 1.25g/5ml 50ml V-ALGIN OPTALGIN', sku: '', group: 'שיכוך כאב ונוגדי דלקת (Analgesics & NSAIDs) · נוזלים, זריקות, סירופים ונרות' },
+  { name: 'T.ESOMEPRAZOLE 20mg NEXIUM', sku: '', group: 'מערכת העיכול (Gastrointestinal) · כדורים בלבד' },
+  { name: 'T.METOCLOPRAMIDE 10mg PRAMIN', sku: '', group: 'מערכת העיכול (Gastrointestinal) · כדורים בלבד' },
+  { name: 'I.METOCLOPRAMIDE 10mg/2ml PRAMIN (לבחילות/הקאות)', sku: '', group: 'מערכת העיכול (Gastrointestinal) · נוזלים וזריקות' },
+  { name: 'I.ONDANSETRON 8mg/4ml ZOFRAN (לבחילות)', sku: '', group: 'מערכת העיכול (Gastrointestinal) · נוזלים וזריקות' },
+  { name: 'T.FEXOFENADINE 180mg TELFAST', sku: '', group: 'מערכת הנשימה ואלרגיה (Respiratory & Antihistamines) · כדורים בלבד' },
+  { name: 'T.LORATADINE 10mg LORASTIN', sku: '', group: 'מערכת הנשימה ואלרגיה (Respiratory & Antihistamines) · כדורים בלבד' },
+  { name: 'T.ACETYLCYSTEINE 200mg REOLIN SIRAN (ממיס ליחה)', sku: '', group: 'מערכת הנשימה ואלרגיה (Respiratory & Antihistamines) · נוזלים וזריקות' },
+  { name: 'T.LORAZEPAM 1mg LORIVAN', sku: '', group: 'נוירולוגיה, בריאות הנפש ואפילפסיה (CNS / Neurology & Psychiatry) · כדורים בלבד' },
+  { name: 'T.PREDNISONE 5mg', sku: '', group: 'סטרואידים (Steroids) · כדורים' },
+  { name: 'T.PREDNISONE 20mg', sku: '', group: 'סטרואידים (Steroids) · כדורים' },
+  { name: 'I.DEXAMETHASONE 4mg/ml DEXACORT', sku: '', group: 'סטרואידים (Steroids) · זריקות בלבד' },
+  { name: 'I.HYDROCORTISONE 100mg SOLU-CORTEF', sku: '', group: 'סטרואידים (Steroids) · זריקות בלבד' },
+  { name: 'I.HYDROCORTISONE 500mg SOLU-CORTEF', sku: '', group: 'סטרואידים (Steroids) · זריקות בלבד' },
+  { name: 'I.METHYLPREDNISOLONE 0.5g SOLU-MEDROL', sku: '', group: 'סטרואידים (Steroids) · זריקות בלבד' },
+  { name: 'T.TAMSULOSIN 0.4mg OMNIC', sku: '', group: 'אורולוגיה ומערכת השתן (Urology) · כדורים בלבד' },
+  { name: 'INSTILLAGel LIDOCAINE & CHLORHEXIDINE 11ml (ג׳ל אלחוש וחיטוי)', sku: '', group: 'קרמים, משחות וחיטוי חיצוני (Topicals & Antiseptics)' },
+  { name: 'S.ALCOHOL 45%+PROPANOL 18% SOFTA-MAN', sku: '', group: 'קרמים, משחות וחיטוי חיצוני (Topicals & Antiseptics)' },
+  { name: 'S.ALCOXIDINE ALCOSEPT 1L', sku: '', group: 'קרמים, משחות וחיטוי חיצוני (Topicals & Antiseptics)' },
+  { name: 'S.CHLORHEXIDINE GLUC. 4% SEPTAL SCRUB', sku: '', group: 'קרמים, משחות וחיטוי חיצוני (Topicals & Antiseptics)' },
+  { name: 'S.POVIDONE 10% 300ml IODO-VIT', sku: '', group: 'קרמים, משחות וחיטוי חיצוני (Topicals & Antiseptics)' },
+  { name: 'S.SEPTOL SEPTADINE 0.5L', sku: '', group: 'קרמים, משחות וחיטוי חיצוני (Topicals & Antiseptics)' },
+  { name: 'I.FLUMAZENIL 0.5mg/5ml ANEXATE (נוגד בנזודיאזפינים)', sku: '', group: 'נוזלי עירוי, מים סטריליים ונוגדים (IV Fluids, Sterile Water & Antidotes)' },
+  { name: 'I.RINGER LACTATE 0.5L (שקית עירוי רינגר)', sku: '', group: 'נוזלי עירוי, מים סטריליים ונוגדים (IV Fluids, Sterile Water & Antidotes)' },
+  { name: 'I.RINGER LACTATE 1L (שקית עירוי רינגר)', sku: '', group: 'נוזלי עירוי, מים סטריליים ונוגדים (IV Fluids, Sterile Water & Antidotes)' },
+  { name: 'I.SODIUM CHLORIDE 0.9% 10ml (סליין)', sku: '', group: 'נוזלי עירוי, מים סטריליים ונוגדים (IV Fluids, Sterile Water & Antidotes)' },
+  { name: 'I.SODIUM CHLORIDE 0.9% 100ml (סליין)', sku: '', group: 'נוזלי עירוי, מים סטריליים ונוגדים (IV Fluids, Sterile Water & Antidotes)' },
+  { name: 'I.SODIUM CHLORIDE 0.9% 250ml (סליין)', sku: '', group: 'נוזלי עירוי, מים סטריליים ונוגדים (IV Fluids, Sterile Water & Antidotes)' },
+  { name: 'I.SODIUM CHLORIDE 0.9% 0.5L (שקית עירוי סליין)', sku: '', group: 'נוזלי עירוי, מים סטריליים ונוגדים (IV Fluids, Sterile Water & Antidotes)' },
+  { name: 'I.PROMETHAZINE 50mg/2ml PROTHIAZINE (נוגד אלרגיה/בחילות)', sku: '', group: 'שונות (Miscellaneous)' },
+]
+
 export const MED_LISTS = {
   gastro: GASTRO_MEDS,
   ivf: IVF_MEDS,
@@ -1165,6 +1234,7 @@ export const MED_LISTS = {
   'inpatient-e': INPATIENT_E_MEDS, // אשפוז ה – רשימה ייעודית (ללא מק״ט), אותן הגדרות
   mri: MRI_MEDS, // MRI – רשימה ייעודית (ללא מק״ט), אותן הגדרות
   'cath-cath': CATH_MEDS, // צנתורים (תת-יחידה בצינתורים) – רשימה ייעודית (ללא מק״ט), אותן הגדרות
+  'cath-cardiac': CATH_CARDIAC_MEDS, // קרדיאלי (תת-יחידה בצינתורים) – רשימה ייעודית (ללא מק״ט), אותן הגדרות
 }
 
 export function getMedList(unitId) {
