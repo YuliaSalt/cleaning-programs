@@ -1035,6 +1035,53 @@ const INPATIENT_E_MEDS = [
   { name: 'T.BISACODYL 5mg LAXADIN (משלשל)', sku: '', group: 'שונות, נוזלי עירוי ומזרזים (Misc & IV Fluids)' },
 ]
 
+// ===== MRI – רשימת תרופות לבקרה לפי קטגוריות (ללא מק״ט) =====
+const MRI_MEDS = [
+  { name: 'I.ADRENALINE 1 mg/ml', sku: '', group: 'לב, לחץ דם וכולסטרול (Cardiovascular & Emergency) · נוזלים וזריקות' },
+  { name: 'I.ATROPINE 1 mg/ml', sku: '', group: 'לב, לחץ דם וכולסטרול (Cardiovascular & Emergency) · נוזלים וזריקות' },
+  { name: 'I.EPHEDRINE 50mg/ml', sku: '', group: 'לב, לחץ דם וכולסטרול (Cardiovascular & Emergency) · נוזלים וזריקות' },
+  { name: 'I.FUROSEMIDE 20mg/ 2ml FUSID (משתן)', sku: '', group: 'לב, לחץ דם וכולסטרול (Cardiovascular & Emergency) · נוזלים וזריקות' },
+  { name: 'I.HYDRALAZINE 20mg/ml', sku: '', group: 'לב, לחץ דם וכולסטרול (Cardiovascular & Emergency) · נוזלים וזריקות' },
+  { name: 'I.LABETALOL 100mg/20ml TRANDATE', sku: '', group: 'לב, לחץ דם וכולסטרול (Cardiovascular & Emergency) · נוזלים וזריקות' },
+  { name: 'I.GLUCAGON 1mg', sku: '', group: 'סוכרת (Diabetes / Antidiabetics) · אינסולין וזריקות חירום' },
+  { name: 'I.INSULIN ASPART NOVORAPID 100 units/ml 10ml', sku: '', group: 'סוכרת (Diabetes / Antidiabetics) · אינסולין וזריקות חירום' },
+  { name: 'CR.LIDOCAINE 2% JELLY 30g', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'CR.LIDOCAINE+PRILOCAINE EMLA 5% 30g', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'I.DEXMEDETOMIDINE 200mcg PRECEDEX', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'I.DIPYRONE 1g/2ml OPTALGIN', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'I.LIDOCAINE 1% 100 mg/10ml', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'I.MIDAZOLAM 5mg/1ml DORMICUM', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'I.MIDAZOLAM 5mg/5ml DORMICUM', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'I.PARACETAMOL 1g', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'I.PROPOFOL 1% 20ml', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'I.PROPOFOL 2% 50ml', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'I.SUCCINYLCHOLINE 100mg PWD for INJ (מרפה שרירים להרדמה)', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'LIQ.ISOFLURANE 250ml (גז הרדמה)', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'LIQ.SEVOFLURANE 250ml SEVORANE (גז הרדמה)', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'SOL.PARACETAMOL 100mg/ml NOVIMOL 15ml', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'SUPP.IBUPROFEN 125mg NUROFEN (נרות)', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'SUPP.PARACETAMOL 0.5g SUPRAMOL (נרות)', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'SYR.IBUPROFEN 100mg/5ml NUROFEN', sku: '', group: 'שיכוך כאב, הרדמה, אלחוש ונוגדי דלקת (Analgesics, Anesthetics & NSAIDs) · נוזלים, זריקות, נרות וקרמים' },
+  { name: 'I.METOCLOPRAMIDE 10mg/2ml PRAMIN (לבחילות/הקאות)', sku: '', group: 'מערכת העיכול (Gastrointestinal) · נוזלים, זריקות וסירופים' },
+  { name: 'I.ONDANSETRON 8mg/4ml ZOFRAN (לבחילות)', sku: '', group: 'מערכת העיכול (Gastrointestinal) · נוזלים, זריקות וסירופים' },
+  { name: 'SOL.LACTULOSE 670mg/ml DUPHALAC 500ml (לעצירות)', sku: '', group: 'מערכת העיכול (Gastrointestinal) · נוזלים, זריקות וסירופים' },
+  { name: 'I.AMINOPHYLLIN 240mg/10ml', sku: '', group: 'מערכת הנשימה (Respiratory) · זריקות בלבד' },
+  { name: 'I.DEXAMETHASONE 4mg/ml DEXACORT', sku: '', group: 'סטרואידים (Steroids) · זריקות בלבד' },
+  { name: 'I.DEXAMETHASONE 10mg/ml', sku: '', group: 'סטרואידים (Steroids) · זריקות בלבד' },
+  { name: 'I.HYDROCORTISONE 100mg SOLU-CORTEF', sku: '', group: 'סטרואידים (Steroids) · זריקות בלבד' },
+  { name: 'I.GADOBENIC AC. DIMEGLUMINE 334mg/ml MULTIHANCE', sku: '', group: 'חומרי ניגוד לדימות (Contrast Media / Radiology) · זריקות בלבד' },
+  { name: 'I.GADOTERIC AC. 279.3mg/ml 20ml DOTAREM', sku: '', group: 'חומרי ניגוד לדימות (Contrast Media / Radiology) · זריקות בלבד' },
+  { name: 'I.GADOTERIC AC. 279.3mg/ml 100ml CYCLOLUX CLARISCAN', sku: '', group: 'חומרי ניגוד לדימות (Contrast Media / Radiology) · זריקות בלבד' },
+  { name: 'S.ALCOHOL 45%+PROPANOL 18% SOFTA-MAN', sku: '', group: 'חומרי חיטוי חיצוני (Antiseptics)' },
+  { name: 'S.ALCOXIDINE ALCOSEPT 1L', sku: '', group: 'חומרי חיטוי חיצוני (Antiseptics)' },
+  { name: 'S.CHLORHEXIDINE GLUC. 4% SEPTAL SCRUB', sku: '', group: 'חומרי חיטוי חיצוני (Antiseptics)' },
+  { name: 'S.SEPTOL SEPTADINE 0.5L', sku: '', group: 'חומרי חיטוי חיצוני (Antiseptics)' },
+  { name: 'I.NALOXONE 0.4mg NARCAN (נוגד אופיאטים)', sku: '', group: 'נוזלי עירוי, מים סטריליים ונוגדים (IV Fluids, Sterile Water & Antidotes)' },
+  { name: 'I.SODIUM CHLORIDE 0.9% 10ml (סליין)', sku: '', group: 'נוזלי עירוי, מים סטריליים ונוגדים (IV Fluids, Sterile Water & Antidotes)' },
+  { name: 'I.SODIUM CHLORIDE 0.9% 1L (שקית עירוי סליין)', sku: '', group: 'נוזלי עירוי, מים סטריליים ונוגדים (IV Fluids, Sterile Water & Antidotes)' },
+  { name: 'I.WATER for INJECTION 10ml (מים להזרקה)', sku: '', group: 'נוזלי עירוי, מים סטריליים ונוגדים (IV Fluids, Sterile Water & Antidotes)' },
+]
+
 export const MED_LISTS = {
   gastro: GASTRO_MEDS,
   ivf: IVF_MEDS,
@@ -1046,6 +1093,7 @@ export const MED_LISTS = {
   'inpatient-c': INPATIENT_C_MEDS, // אשפוז ג – רשימה ייעודית (ללא מק״ט), אותן הגדרות
   'inpatient-d': INPATIENT_D_MEDS, // אשפוז ד – רשימה ייעודית (ללא מק״ט), אותן הגדרות
   'inpatient-e': INPATIENT_E_MEDS, // אשפוז ה – רשימה ייעודית (ללא מק״ט), אותן הגדרות
+  mri: MRI_MEDS, // MRI – רשימה ייעודית (ללא מק״ט), אותן הגדרות
 }
 
 export function getMedList(unitId) {
