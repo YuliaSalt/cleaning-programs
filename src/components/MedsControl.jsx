@@ -95,7 +95,7 @@ function MedForm({ unit, onSaved }) {
     lines.push('')
     lines.push('חוסרים להזמנה:')
     if (shortItems.length === 0) lines.push('אין חוסרים')
-    else shortItems.forEach((m) => lines.push(`${m.name}    מק"ט: ${m.sku}`))
+    else shortItems.forEach((m) => lines.push(m.sku ? `${m.name}    מק"ט: ${m.sku}` : m.name))
     lines.push('')
     lines.push('הרצליה מדיקל סנטר')
     const url = 'https://wa.me/?text=' + encodeURIComponent(lines.join('\n').trim())
