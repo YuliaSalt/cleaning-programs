@@ -173,31 +173,59 @@ function MedForm({ unit, onSaved }) {
   )
 }
 
-/* ===== תצוגת דוח שמור (קריאה בלבד) ===== */
+/* ===== תצוגת דוח שמור (קריאה בלבד) + הדפסה ===== */
+// צבע סימן הסטטוס בתצוגה (בהדפסה נכפה שחור דרך @media print)
+const MARK_COLOR = { ok: '#2f9e7e', missing: '#c98a00', expired: '#d2453d' }
+
 function MedView({ unit, record }) {
   const list = getMedList(unit.id)
+  const saved = record.savedAt ? new Date(record.savedAt) : null
+  const dateHe = saved ? saved.toLocaleDateString('he-IL') : ''
+  const timeHe = saved ? saved.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : ''
   return (
-    <div className="glass plan-card ho-form">
-      <div className="med-meta">בקרת תרופות · {monthLabel(record.month)}</div>
-      {record.by && <div className="ho-nurse">חתימת אחות: <b>{record.by}</b></div>}
-      <div className="med-list">
-        {list.map((med, i) => {
-          const it = (record.items && record.items[i]) || { status: 'ok', expiry: '' }
-          const st = STATUS[it.status] || STATUS.ok
-          const showGroup = med.group && (i === 0 || list[i - 1].group !== med.group)
-          return (
-            <Fragment key={i}>
-              {showGroup && <div className="med-group">{med.group}</div>}
-              <div className={'med-row ' + st.cls}>
-                <span className="med-status static"><span className="med-mark">{st.mark}</span></span>
-                <span className="med-name">{med.name}</span>
-                <span className={'med-view-meta' + expiryClass(it.expiry)}>
-                  {it.expiry ? 'תוקף: ' + it.expiry : ''}
-                </span>
-              </div>
-            </Fragment>
-          )
-        })}
+    <div>
+      <div className="no-print rd-toolbar">
+        <button className="btn rd-print" onClick={() => window.print()}>הדפסה</button>
+      </div>
+
+      <div className="report-print">
+        <div className="rp-head">
+          <img className="rp-logo" src={import.meta.env.BASE_URL + 'logo.png'} alt="הרצליה מדיקל סנטר" />
+          <div className="rp-brand">הרצליה מדיקל סנטר · כוחות עזר</div>
+          <h2 className="rp-title">בקרת תרופות חודשית</h2>
+          <div className="rp-meta">
+            <span><b>מחלקה:</b> {unit.name}</span>
+            <span><b>חודש:</b> {monthLabel(record.month)}</span>
+            {record.by && <span><b>אחות חותמת:</b> {record.by}</span>}
+            {dateHe && <span><b>תאריך:</b> {dateHe}</span>}
+            {timeHe && <span><b>שעה:</b> {timeHe}</span>}
+          </div>
+        </div>
+
+        <div className="rp-section">
+          <h3>רשימת תרופות ותוקפים</h3>
+          <ul className="rp-tasks">
+            {list.map((med, i) => {
+              const it = (record.items && record.items[i]) || { status: 'ok', expiry: '' }
+              const st = STATUS[it.status] || STATUS.ok
+              const showGroup = med.group && (i === 0 || list[i - 1].group !== med.group)
+              const meta = [st.label]
+              if (it.expiry) meta.push('תוקף: ' + it.expiry)
+              if (it.order) meta.push('יש להזמין')
+              return (
+                <Fragment key={i}>
+                  {showGroup && <div className="rp-group">{med.group}</div>}
+                  <li>
+                    <span className="rp-mark on" style={{ color: MARK_COLOR[it.status] }}>{st.mark}</span>
+                    <span className="rp-task-label">{med.name} — {meta.join(' · ')}</span>
+                  </li>
+                </Fragment>
+              )
+            })}
+          </ul>
+        </div>
+
+        <div className="rp-foot">{saved ? 'נשמר ב-' + saved.toLocaleString('he-IL') : ''}</div>
       </div>
     </div>
   )
@@ -223,7 +251,9 @@ export default function MedsControl({ unit, onBack, onGoHome, onBackToCategory, 
   if (mode === 'view' && openRec) {
     return (
       <div>
-        <ScreenHeader title={'בקרת תרופות חודשית · ' + unit.name} onBack={() => setMode('list')} trail={[...trail, { label: openRec.dateLabel }]} />
+        <div className="no-print">
+          <ScreenHeader title={'בקרת תרופות חודשית · ' + unit.name} onBack={() => setMode('list')} trail={[...trail, { label: openRec.dateLabel }]} />
+        </div>
         <MedView unit={unit} record={openRec.record} />
       </div>
     )

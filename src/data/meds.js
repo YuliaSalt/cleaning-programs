@@ -2,6 +2,8 @@
 // הרשימות כרגע דמה עד לקבלת הרשימות האמיתיות. להוספת מחלקה: הוסיפו מפתח unitId.
 
 import { storage } from './storage.js'
+import { pushReport } from './cloudSync.js'
+import { findUnit } from './departments.js'
 
 // כל פריט: { name, sku, group }. group משמש לכותרות ביניים בתצוגה.
 const G_IV = 'תרופות IV – מתן תוך-ורידי / זריקות ונוזלים'
@@ -94,10 +96,38 @@ export function emptyMedState(list) {
 
 const PREFIX = 'hmc:meds:'
 
+// תיאור סטטוס קריא לגיליון
+const MED_STATUS_LABEL = { ok: 'תקין', missing: 'חסר', expired: 'לא בתוקף' }
+
+// ייצוג קריא של דוח בקרת התרופות לגיליון (meta + עמודה לכל תרופה), בדומה לדוחות והעברות משמרת.
+export function buildMedReadable(rec) {
+  const list = getMedList(rec.unitId)
+  const unit = findUnit(rec.unitId)
+  const columns = list.map((def, i) => {
+    const it = (rec.items && rec.items[i]) || {}
+    const parts = [MED_STATUS_LABEL[it.status] || 'תקין']
+    if (it.expiry) parts.push('תוקף: ' + it.expiry)
+    if (it.order) parts.push('להזמין')
+    return [def.name, parts.join(' · ')]
+  })
+  return {
+    meta: {
+      savedAt: rec.savedAt,
+      unitName: unit ? unit.name : rec.unitId,
+      date: rec.month,
+      shift: '',
+      by: rec.by || '',
+      kind: 'בקרת תרופות',
+    },
+    columns,
+  }
+}
+
 export function saveMedReport(unitId, month, items, by) {
   const rec = { unitId, month, items, by: by || '', savedAt: new Date().toISOString() }
   const key = `${PREFIX}${unitId}:${month}:${Date.now()}`
   storage.setJSON(key, rec)
+  pushReport(key, rec, 'save', buildMedReadable(rec)) // גיבוי/סנכרון ענן + שורה קריאה בגיליון (best-effort)
   return key
 }
 

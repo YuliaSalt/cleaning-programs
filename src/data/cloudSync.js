@@ -2,11 +2,13 @@
 //
 // עיקרון: localStorage הוא האחסון המהיר/אופליין. כל שמירה ומחיקה נדחפת גם לענן,
 // ובעליית האפליקציה מושכים מהענן וממזגים חזרה – כך שאם הדפדפן התאפס, הנתונים משוחזרים.
-// מסונכרנים שני סוגי רשומות לפי קידומת המפתח:
+// מסונכרנים סוגי רשומות לפי קידומת המפתח:
 //   hmc:plan:...      – דוחות ביצוע (סקשני חתימה נעולים)
 //   hmc:handover:...  – העברות משמרת
+//   hmc:closure:...   – סגירות יחידה
+//   hmc:meds:...      – בקרת תרופות חודשית
 //
-// המבנה בגיליון (טאב טכני "ReportsRaw"): key | savedAt | payload(JSON) – משותף לשני הסוגים.
+// המבנה בגיליון (טאב טכני "ReportsRaw"): key | savedAt | payload(JSON) – משותף לכל הסוגים.
 
 import { storage } from './storage.js'
 import { SHEETS_API_URL, cloudEnabled } from './cloudConfig.js'
@@ -15,13 +17,15 @@ const QUEUE_KEY = 'hmc:syncqueue'
 const REPORT_PREFIX = 'hmc:plan:'
 const HANDOVER_PREFIX = 'hmc:handover:'
 const CLOSURE_PREFIX = 'hmc:closure:'
+const MEDS_PREFIX = 'hmc:meds:'
 
-// מפתח שמסונכרן לענן (דוח ביצוע / העברת משמרת / סגירת יחידה).
+// מפתח שמסונכרן לענן (דוח ביצוע / העברת משמרת / סגירת יחידה / בקרת תרופות).
 function isSyncableKey(key) {
   return (
     key.indexOf(REPORT_PREFIX) === 0 ||
     key.indexOf(HANDOVER_PREFIX) === 0 ||
-    key.indexOf(CLOSURE_PREFIX) === 0
+    key.indexOf(CLOSURE_PREFIX) === 0 ||
+    key.indexOf(MEDS_PREFIX) === 0
   )
 }
 
