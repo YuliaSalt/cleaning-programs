@@ -418,8 +418,8 @@ const INPATIENT_C_MEDS = [
   { name: 'WATER FOR INJECTION 10ml (מים להזרקה)', sku: '', group: 'סטרואידים, פטריות ואחרים (Steroids, Antifungals & Misc) · נוזלים, קרמים וטיפות' },
 ]
 
-// ===== אשפוז א – רשימת תרופות לפי קטגוריות ותת-חלוקה (ללא מק״ט) =====
-const INPATIENT_A_MEDS = [
+// ===== אשפוז א ו-ב – רשימת תרופות לפי קטגוריות ותת-חלוקה (ללא מק״ט), משותפת =====
+const INPATIENT_AB_MEDS = [
   { name: 'T. AMOXICILLIN 250mg CAPS', sku: '', group: 'אנטיביוטיקה (Antibiotics) · כדורים וקפסולות' },
   { name: 'T. AMOXICILLIN 500mg CAPS', sku: '', group: 'אנטיביוטיקה (Antibiotics) · כדורים וקפסולות' },
   { name: 'T. AZITHROMYCIN 250mg ZITHROMAX', sku: '', group: 'אנטיביוטיקה (Antibiotics) · כדורים וקפסולות' },
@@ -625,7 +625,8 @@ export const MED_LISTS = {
   'recovery-2': RECOVERY_MEDS, // התאוששות 2 – אותה רשימה
   icu: ICU_MEDS, // טיפול נמרץ – רשימה ייעודית, אותן הגדרות
   'inpatient-c': INPATIENT_C_MEDS, // אשפוז ג – רשימה ייעודית (ללא מק״ט), אותן הגדרות
-  'inpatient-a': INPATIENT_A_MEDS, // אשפוז א – רשימה ייעודית (ללא מק״ט), אותן הגדרות
+  'inpatient-a': INPATIENT_AB_MEDS, // אשפוז א – רשימה משותפת לאשפוז א/ב, אותן הגדרות
+  'inpatient-b': INPATIENT_AB_MEDS, // אשפוז ב – אותה רשימה
 }
 
 export function getMedList(unitId) {
