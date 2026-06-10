@@ -76,8 +76,8 @@ const GASTRO_MEDS = [
   { name: 'LUGOL 25ml תמיסת יוד למריחה', sku: '34300001', group: G_OTHER },
 ]
 
-// ===== IVF – רשימת תרופות לפי קטגוריות =====
-const IVF_MEDS = [
+// ===== רשימת תרופות לפי קטגוריות – משותפת ל-IVF ולהתאוששות 1 (אותן הגדרות) =====
+const PROC_MEDS = [
   { name: 'I.AUGMENTIN 1g CLAVENIR', sku: '30500040', group: 'אנטיביוטיקה (Antibiotics)' },
   { name: 'I.CEFAZOLIN 1g', sku: '30500017', group: 'אנטיביוטיקה (Antibiotics)' },
   { name: 'I.CLINDAMYCIN 600mg', sku: '30500053', group: 'אנטיביוטיקה (Antibiotics)' },
@@ -127,7 +127,8 @@ const IVF_MEDS = [
 
 export const MED_LISTS = {
   gastro: GASTRO_MEDS,
-  ivf: IVF_MEDS,
+  ivf: PROC_MEDS,
+  'recovery-1': PROC_MEDS, // התאוששות 1 – אותה רשימה והגדרות כמו IVF
 }
 
 export function getMedList(unitId) {
