@@ -2011,6 +2011,9 @@ const UNIT_TO_PLAN = {
   or: 'or',
   ivf: 'ivf',
   cath: 'cath',
+  'cath-cath': 'cath', // צנתורים – אותה תוכנית ניקיון
+  'cath-cardiac': 'cath', // קרדיאלי – אותה תוכנית ניקיון
+
   gastro: 'gastro',
   ct: 'ct',
   mri: 'mri',

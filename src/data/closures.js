@@ -12,7 +12,7 @@ const today = () => new Date().toLocaleDateString('en-CA')
 // ===== סגירה אוטומטית: גסטרו, חדרי ניתוח, צינתורים והתאוששות סגורים בשבתות ובחגי ישראל (יו״ט) =====
 // התאוששות מיוצגת בפועל דרך החדרים (recovery-1 / recovery-2) שאליהם נכנסים; הבסיס 'recovery'
 // הוא מסך בחירת החדר. כל המזהים נכללים כדי שהסגירה תחול בכל ייצוג.
-const AUTO_CLOSED_UNITS = new Set(['gastro', 'or', 'cath', 'recovery', 'recovery-1', 'recovery-2'])
+const AUTO_CLOSED_UNITS = new Set(['gastro', 'or', 'cath', 'cath-cath', 'cath-cardiac', 'recovery', 'recovery-1', 'recovery-2'])
 // תחילת התיעוד האוטומטי בארכיון (סגירות שבת/חג מחושבות מתאריך זה ואילך).
 const AUTO_ANCHOR = '2026-01-01'
 

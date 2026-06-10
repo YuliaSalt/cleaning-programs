@@ -50,7 +50,15 @@ export const standaloneUnits = [
   },
   { id: 'or', name: 'חדרי ניתוח', icon: 'department' },
   { id: 'ivf', name: 'IVF', icon: 'department' },
-  { id: 'cath', name: 'צינתורים', icon: 'department' },
+  {
+    id: 'cath',
+    name: 'צינתורים',
+    icon: 'department',
+    rooms: [
+      { id: 'cath-cath', name: 'צנתורים' },
+      { id: 'cath-cardiac', name: 'קרדיאלי' },
+    ],
+  },
   { id: 'gastro', name: 'גסטרו ופעולות', icon: 'department' },
 ].map((u) => ({ ...u, shifts: SHIFTS_2 }))
 
