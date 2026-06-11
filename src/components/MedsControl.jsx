@@ -1,5 +1,6 @@
-import { useState, useMemo, Fragment } from 'react'
+import { useState, useMemo, useRef, Fragment } from 'react'
 import ScreenHeader from './ScreenHeader.jsx'
+import ReportActions from './ReportActions.jsx'
 import { getMedList, saveMedReport, listMedReports, getLatestMedItems } from '../data/meds.js'
 import { getDeviceNurse, rememberDeviceNurse, HE_MONTHS } from '../data/handover.js'
 import DatePicker from './DatePicker.jsx'
@@ -200,13 +201,14 @@ function MedView({ unit, record }) {
   const saved = record.savedAt ? new Date(record.savedAt) : null
   const dateHe = saved ? saved.toLocaleDateString('he-IL') : ''
   const timeHe = saved ? saved.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : ''
+  const printRef = useRef(null)
   return (
     <div>
       <div className="no-print rd-toolbar">
-        <button className="btn rd-print" onClick={() => window.print()}>הדפסה</button>
+        <ReportActions targetRef={printRef} name={'בקרת תרופות · ' + unit.name + ' · ' + monthLabel(record.month)} />
       </div>
 
-      <div className="report-print">
+      <div className="report-print" ref={printRef}>
         <div className="rp-head">
           <img className="rp-logo" src={import.meta.env.BASE_URL + 'logo.png'} alt="הרצליה מדיקל סנטר" />
           <div className="rp-brand">הרצליה מדיקל סנטר · כוחות עזר</div>

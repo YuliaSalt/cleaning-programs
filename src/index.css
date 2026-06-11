@@ -1289,6 +1289,10 @@ h1, h2, h3, h4 {
 
 .controls-card {
   padding: 18px 22px;
+  /* מעלה את כרטיס הסינון (ובתוכו לוח השנה הנפתח) מעל רשימת הדוחות שמתחתיו,
+     כדי שלוח השנה לא יוסתר מאחורי כרטיסי הדוחות. */
+  position: relative;
+  z-index: 30;
 }
 
 .tab-note {
@@ -2083,6 +2087,22 @@ h1, h2, h3, h4 {
 .rd-print {
   grid-column: 2;
   justify-self: center;
+}
+
+/* קבוצת פעולות הדוח: הדפסה · שמור PDF · שלח למייל PDF */
+.rd-actions {
+  grid-column: 2;
+  justify-self: center;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.rd-actions .rd-print {
+  grid-column: auto;
+  justify-self: auto;
 }
 
 /* הודעת "נשמר" בתחתית עמוד העברת המשמרת */

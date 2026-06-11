@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef } from 'react'
 import ScreenHeader from './ScreenHeader.jsx'
+import ReportActions from './ReportActions.jsx'
 import { signoffKind, specialTaskText, taskResolved } from '../data/cleaningTemplates.js'
 import { listReports, flattenSectionTasks, TYPE_LABELS, HE_MONTHS } from '../data/reports.js'
 import { getCleaningPlan } from '../data/cleaningTemplates.js'
@@ -8,6 +9,7 @@ import DatePicker from './DatePicker.jsx'
 /* ===== תצוגת דוח בודד (קריאה בלבד) + הדפסה ===== */
 function ReportDetail({ unit, report, onBack }) {
   const { section, record } = report
+  const printRef = useRef(null)
 
   // סגירת יחידה – תצוגה ייעודית (אין משימות/חתימות)
   if (report.tabId === 'closure') {
@@ -19,9 +21,9 @@ function ReportDetail({ unit, report, onBack }) {
           <button className="back-link" onClick={onBack}>
             <span className="bl-arrow">→</span> חזרה לרשימת הדוחות
           </button>
-          <button className="btn rd-print" onClick={() => window.print()}>הדפסה</button>
+          <ReportActions targetRef={printRef} name={report.title + ' · ' + unit.name} />
         </div>
-        <div className="report-print">
+        <div className="report-print" ref={printRef}>
           <div className="rp-head">
             <img className="rp-logo" src={import.meta.env.BASE_URL + 'logo.png'} alt="הרצליה מדיקל סנטר" />
             <div className="rp-brand">הרצליה מדיקל סנטר · כוחות עזר</div>
@@ -57,10 +59,10 @@ function ReportDetail({ unit, report, onBack }) {
         <button className="back-link" onClick={onBack}>
           <span className="bl-arrow">→</span> חזרה לרשימת הדוחות
         </button>
-        <button className="btn rd-print" onClick={() => window.print()}>הדפסה</button>
+        <ReportActions targetRef={printRef} name={report.title + ' · ' + unit.name} />
       </div>
 
-      <div className="report-print">
+      <div className="report-print" ref={printRef}>
         <div className="rp-head">
           <img className="rp-logo" src={import.meta.env.BASE_URL + 'logo.png'} alt="הרצליה מדיקל סנטר" />
           <div className="rp-brand">הרצליה מדיקל סנטר · כוחות עזר</div>
