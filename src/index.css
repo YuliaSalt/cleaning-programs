@@ -2314,6 +2314,48 @@ h1, h2, h3, h4 {
   color: var(--muted);
 }
 
+/* ===== טבלת דוח (בקרת תרופות): תרופה · סטטוס · תוקף · להזמנה ===== */
+.rp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.rp-table th,
+.rp-table td {
+  text-align: right;
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(168, 220, 232, 0.5);
+  vertical-align: middle;
+}
+
+.rp-table thead th {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--brand-soft);
+  background: rgba(214, 238, 245, 0.45);
+  border-bottom: 2px solid rgba(168, 220, 232, 0.8);
+}
+
+/* רוחב עמודות – שם רחב, השאר צרות ומיושרות */
+.rp-th-status { width: 120px; }
+.rp-th-exp { width: 110px; }
+.rp-th-order { width: 78px; text-align: center; }
+
+.rp-td-name { font-weight: 600; }
+.rp-td-status { white-space: nowrap; }
+.rp-td-exp { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rp-td-order { text-align: center; color: #2f9e7e; font-weight: 800; }
+
+/* שורת כותרת-קבוצה הפורשת על כל רוחב הטבלה */
+.rp-trow-group td {
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--brand-soft);
+  background: rgba(214, 238, 245, 0.3);
+}
+
 /* ===== הדפסה: רק הדוח, רקע לבן, הכל בעברית ===== */
 @media print {
   .app-header,
@@ -2352,6 +2394,23 @@ h1, h2, h3, h4 {
   }
   .rp-mark.on {
     color: #000;
+  }
+  .rp-table th,
+  .rp-table td {
+    border-bottom: 1px solid #999 !important;
+    color: #000;
+  }
+  .rp-table thead th {
+    background: #eef6f9 !important;
+    border-bottom: 2px solid #555 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .rp-trow-group td {
+    background: #f2f8fb !important;
+    color: #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
 

@@ -11,6 +11,12 @@ const monthLabel = (mk) => {
   return (HE_MONTHS[Number(m) - 1] || m) + ' ' + y
 }
 
+// תאריך תוקף לתצוגה: יום/חודש/שנה (הקלט נשמר כ-ISO ‏YYYY-MM-DD).
+const fmtExpiry = (s) => {
+  const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : (s || '—')
+}
+
 const STATUS = {
   ok: { mark: '✓', label: 'תקין', cls: 'med-ok' },
   missing: { mark: '−', label: 'חסר', cls: 'med-missing' },
@@ -224,25 +230,38 @@ function MedView({ unit, record }) {
 
         <div className="rp-section">
           <h3>רשימת תרופות ותוקפים</h3>
-          <ul className="rp-tasks">
-            {list.map((med, i) => {
-              const it = (record.items && record.items[i]) || { status: 'ok', expiry: '' }
-              const st = STATUS[it.status] || STATUS.ok
-              const showGroup = med.group && (i === 0 || list[i - 1].group !== med.group)
-              const meta = [st.label]
-              if (it.expiry) meta.push('תוקף: ' + it.expiry)
-              if (it.order) meta.push('יש להזמין')
-              return (
-                <Fragment key={i}>
-                  {showGroup && <div className="rp-group">{med.group}</div>}
-                  <li>
-                    <span className="rp-mark on" style={{ color: MARK_COLOR[it.status] }}>{st.mark}</span>
-                    <span className="rp-task-label">{med.name} — {meta.join(' · ')}</span>
-                  </li>
-                </Fragment>
-              )
-            })}
-          </ul>
+          <table className="rp-table">
+            <thead>
+              <tr>
+                <th className="rp-th-name">תרופה</th>
+                <th className="rp-th-status">סטטוס</th>
+                <th className="rp-th-exp">תוקף</th>
+                <th className="rp-th-order">להזמנה</th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.map((med, i) => {
+                const it = (record.items && record.items[i]) || { status: 'ok', expiry: '' }
+                const st = STATUS[it.status] || STATUS.ok
+                const showGroup = med.group && (i === 0 || list[i - 1].group !== med.group)
+                return (
+                  <Fragment key={i}>
+                    {showGroup && (
+                      <tr className="rp-trow-group"><td colSpan={4}>{med.group}</td></tr>
+                    )}
+                    <tr>
+                      <td className="rp-td-name">{med.name}</td>
+                      <td className="rp-td-status">
+                        <span className="rp-mark on" style={{ color: MARK_COLOR[it.status] }}>{st.mark}</span> {st.label}
+                      </td>
+                      <td className="rp-td-exp">{it.expiry ? fmtExpiry(it.expiry) : '—'}</td>
+                      <td className="rp-td-order">{it.order ? '✓' : ''}</td>
+                    </tr>
+                  </Fragment>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
 
         <div className="rp-section">
