@@ -30,10 +30,21 @@ function options(filename) {
   }
 }
 
+// המתנה לטעינת תמונות בתוך האלמנט (לוגו) לפני הלכידה.
+function waitForImages(el) {
+  const imgs = [...el.querySelectorAll('img')].filter((i) => !i.complete)
+  return Promise.all(imgs.map((i) => new Promise((res) => { i.onload = i.onerror = res })))
+}
+
+// הערה: אלמנט המקור חייב להיות במיקום רגיל (static) ובגודל מלא – html2pdf משכפל
+// אותו, ומשכפול של אלמנט position:fixed/מחוץ-למסך מתקבל דף ריק. הסתרה ויזואלית
+// נעשית ע"י עוטף .pdf-host (height:0; overflow:hidden) ולא ע"י מיקום.
+
 // שמירת ה-PDF להורדה במכשיר.
 export async function savePdf(el, filename) {
   if (!el) throw new Error('no element')
   const html2pdf = await getHtml2pdf()
+  await waitForImages(el)
   return html2pdf().set(options(filename)).from(el).save()
 }
 
@@ -41,6 +52,7 @@ export async function savePdf(el, filename) {
 export async function pdfBlob(el, filename) {
   if (!el) throw new Error('no element')
   const html2pdf = await getHtml2pdf()
+  await waitForImages(el)
   return html2pdf().set(options(filename)).from(el).output('blob')
 }
 

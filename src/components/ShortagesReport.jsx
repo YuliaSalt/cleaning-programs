@@ -82,9 +82,12 @@ function CategoryList({ category, items, isMissing, onToggle }) {
   )
 }
 
-/* אלמנט מקור ל-PDF (מחוץ למסך) – נלכד ע"י html2pdf בשליחת המייל */
+/* אלמנט מקור ל-PDF – נלכד ע"י html2pdf בשליחת המייל. עוטף .pdf-host מסתיר
+   ויזואלית (height:0) בעוד האלמנט הפנימי נשאר במיקום רגיל ובגודל מלא, כדי
+   שהשכפול של html2pdf ייצור דוח עם תוכן (ולא דף ריק). */
 function ShortagePrintable({ printRef, unit, category, items, urgency, dateHe }) {
   return (
+    <div className="pdf-host" aria-hidden="true">
     <div className="report-print pdf-source" ref={printRef}>
       <div className="rp-head">
         <img className="rp-logo" src={import.meta.env.BASE_URL + 'logo.png'} alt="הרצליה מדיקל סנטר" />
@@ -116,6 +119,7 @@ function ShortagePrintable({ printRef, unit, category, items, urgency, dateHe })
         </table>
       </div>
       {category.note && <div className="rp-foot">{category.note}</div>}
+    </div>
     </div>
   )
 }
@@ -219,7 +223,6 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
                     <MailIcon /> {emailing ? 'מכין PDF…' : emailLabel} ({activeMissing.length})
                   </button>
                 </div>
-                {activeCat.note && <div className="sh-order-note">⏰ {activeCat.note}</div>}
                 <ShortagePrintable
                   printRef={printRef}
                   unit={unit}
@@ -260,6 +263,7 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
                 <span className="uc-meta">
                   {empty ? 'טרם הוגדרה רשימה' : miss > 0 ? `${miss} חסרים מסומנים` : `${cat.items.length} פריטים`}
                 </span>
+                {cat.note && <span className="uc-reminder">⏰ {cat.note}</span>}
               </button>
             )
           })}
