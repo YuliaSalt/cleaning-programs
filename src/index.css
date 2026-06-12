@@ -3786,8 +3786,19 @@ textarea.input {
 }
 
 /* ===== דיווח על חסרים (Shortages) ===== */
+/* תיבת חיפוש מודגשת – מסגרת וצבע מסביב */
 .sh-search {
   width: 100%;
+  border: 2px solid var(--ice-2);
+  background: rgba(214, 238, 245, 0.45);
+  box-shadow: 0 0 0 4px rgba(168, 220, 232, 0.25), inset 0 1px 2px rgba(45, 115, 150, 0.08);
+  font-weight: 600;
+}
+.sh-search:focus {
+  border-color: var(--brand-soft);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(111, 192, 214, 0.35);
+  outline: none;
 }
 
 .sh-cat-head {
@@ -3871,33 +3882,46 @@ textarea.input {
   flex: 1;
   flex-wrap: wrap;
 }
+/* כפתורי דחיפות מודגשים בתלת-מימד (רגיל / דחוף) */
 .sh-urg-btn {
   flex: 1;
-  min-width: 90px;
-  min-height: 40px;
-  padding: 8px 12px;
-  border-radius: 11px;
-  border: 1.5px solid rgba(168, 220, 232, 0.7);
-  background: #fff;
-  font-size: 13.5px;
+  min-width: 120px;
+  min-height: 54px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(180deg, #ffffff 0%, #eaf3f7 100%);
+  font-size: 16px;
   font-weight: 800;
-  color: var(--muted);
-  transition: all 0.14s ease;
+  color: var(--brand-soft);
+  box-shadow:
+    0 5px 0 #c4dbe4,
+    0 9px 16px rgba(45, 115, 150, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.16s ease;
+}
+.sh-urg-btn:hover {
+  transform: translateY(-1px);
+}
+.sh-urg-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #c4dbe4, inset 0 2px 6px rgba(0, 0, 0, 0.14);
 }
 .sh-urg-btn.on.lvl1 {
-  background: rgba(31, 175, 143, 0.16);
-  border-color: #1faf8f;
-  color: #15795a;
-}
-.sh-urg-btn.on.lvl2 {
-  background: rgba(230, 180, 0, 0.2);
-  border-color: #e6b400;
-  color: #9a7b00;
+  color: #fff;
+  background: linear-gradient(180deg, #34c98f 0%, #1faf8f 55%, #15835f 100%);
+  box-shadow:
+    0 6px 0 #0f5e45,
+    0 13px 22px rgba(31, 175, 143, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 .sh-urg-btn.on.lvl3 {
-  background: linear-gradient(180deg, #e2554e 0%, #c0392b 100%);
-  border-color: #c0392b;
   color: #fff;
+  background: linear-gradient(180deg, #ec6a63 0%, #d2453d 55%, #a82c22 100%);
+  box-shadow:
+    0 6px 0 #7c241a,
+    0 13px 22px rgba(192, 57, 43, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .sh-hint {
@@ -3916,6 +3940,17 @@ textarea.input {
   align-items: stretch;
   margin-top: 16px;
 }
+
+/* כפתורי השליחה בדיווח חסרים – קטנים יותר, אחד ליד השני */
+.sh-send-row .wa-btn,
+.sh-send-row .email-btn {
+  flex: 1;
+  min-width: 150px;
+  padding: 11px 16px;
+  font-size: 14px;
+}
+.sh-send-row .wa-btn { box-shadow: 0 4px 0 #0c7a3a, 0 7px 14px rgba(17, 164, 79, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5); }
+.sh-send-row .email-btn { box-shadow: 0 4px 0 #185a80, 0 7px 14px rgba(31, 111, 158, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5); }
 
 /* כפתור "שלח למייל" – באותה צורה כמו כפתור הוואטסאפ, בגוון מותג */
 .email-btn {
@@ -3957,19 +3992,6 @@ textarea.input {
   cursor: not-allowed;
   transform: none;
   box-shadow: 0 4px 0 #b9c3bd, 0 6px 14px rgba(0, 0, 0, 0.12);
-}
-
-/* תזכורת הזמנה (מתכלים בלבד) – על כפתור הקטגוריה בהאב */
-.uc-reminder {
-  display: inline-block;
-  margin-top: 8px;
-  padding: 6px 12px;
-  border-radius: var(--radius-pill);
-  background: rgba(255, 244, 200, 0.85);
-  border: 1px solid rgba(230, 180, 0, 0.6);
-  color: #9a7b00;
-  font-size: 13px;
-  font-weight: 800;
 }
 
 /* מקור ה-PDF: מוסתר ויזואלית ע"י קיצוץ הגובה, אך האלמנט הפנימי נשאר במיקום

@@ -15,8 +15,8 @@ function WhatsAppIcon() {
 const norm = (s) => (s || '').toString().toLowerCase()
 
 // רמות דחיפות לבחירה (משפיעות על שורת "דחיפות" בהודעת הוואטסאפ)
-export const URGENCY_LEVELS = ['רגילה', 'דחופה', 'דחופה מאוד']
-const urgClass = { 'רגילה': 'lvl1', 'דחופה': 'lvl2', 'דחופה מאוד': 'lvl3' }
+export const URGENCY_LEVELS = ['רגיל', 'דחוף']
+const urgClass = { 'רגיל': 'lvl1', 'דחוף': 'lvl3' }
 const urgKey = (u) => urgClass[u] || 'lvl1'
 
 /* בורר דחיפות – מופיע על העמוד וגם בתוך כל קטגוריה */
@@ -263,7 +263,6 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
                 <span className="uc-meta">
                   {empty ? 'טרם הוגדרה רשימה' : miss > 0 ? `${miss} חסרים מסומנים` : `${cat.items.length} פריטים`}
                 </span>
-                {cat.note && <span className="uc-reminder">⏰ {cat.note}</span>}
               </button>
             )
           })}
