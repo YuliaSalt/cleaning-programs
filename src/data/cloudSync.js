@@ -94,6 +94,22 @@ export async function flushQueue() {
   saveQueue(remaining)
 }
 
+/* ===================== שליחת דוח PDF במייל (דרך Apps Script) ===================== */
+// POST קריא (text/plain = simple request, ללא preflight) כדי לקרוא את תשובת השרת
+// ולאשר הצלחה. זורק שגיאה אם הענן לא מוגדר / השרת החזיר כשל.
+export async function sendPdfEmail({ to, subject, filename, pdfBase64, text }) {
+  if (!cloudEnabled()) throw new Error('cloud-disabled')
+  const res = await fetch(SHEETS_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'emailPdf', to, subject, filename, pdfBase64, text, ts: Date.now() }),
+  })
+  if (!res.ok) throw new Error('HTTP ' + res.status)
+  const data = await res.json().catch(() => null)
+  if (data && data.ok === false) throw new Error(data.error || 'server error')
+  return data || { ok: true }
+}
+
 /* ===================== משיכה מהענן + מיזוג ===================== */
 // מונה מודולרי – מבטיח שם callback ייחודי גם בקריאות באותה מילישנייה (StrictMode וכו').
 let jsonpSeq = 0

@@ -61,6 +61,11 @@ function doPost(e) {
     if (e.postData && e.postData.contents) {
       body = JSON.parse(e.postData.contents);
     }
+    // שליחת דוח PDF במייל (חסרים / הזמנת תרופות) – אינו דורש key.
+    if (body.action === 'emailPdf') {
+      return sendPdfEmail(body);
+    }
+
     var key = String(body.key || '').trim();
     if (!key) return respond({ ok: false, error: 'missing key' });
 
@@ -73,6 +78,26 @@ function doPost(e) {
   } catch (err) {
     return respond({ ok: false, error: String(err && err.message ? err.message : err) });
   }
+}
+
+/* ===================== שליחת דוח PDF במייל ===================== */
+// body: { to, subject, filename, pdfBase64, text }
+// שולח את ה-PDF (שנוצר באפליקציה) כקובץ מצורף, מחשבון הבעלים של הסקריפט.
+// הערה: בפריסה הראשונה לאחר הוספת פונקציה זו יש לאשר הרשאת שליחת מייל.
+function sendPdfEmail(body) {
+  var to = String(body.to || '').trim();
+  if (!to) return respond({ ok: false, error: 'missing to' });
+  if (!body.pdfBase64) return respond({ ok: false, error: 'missing pdf' });
+
+  var bytes = Utilities.base64Decode(body.pdfBase64);
+  var blob = Utilities.newBlob(bytes, 'application/pdf', body.filename || 'report.pdf');
+  MailApp.sendEmail({
+    to: to,
+    subject: body.subject || 'דוח חסרים',
+    body: body.text || body.subject || 'מצורף דוח.',
+    attachments: [blob],
+  });
+  return respond({ ok: true, action: 'emailPdf', to: to });
 }
 
 /* ===================== אחסון דוחות (Reports + ReportsRaw) ===================== */

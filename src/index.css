@@ -3908,13 +3908,26 @@ textarea.input {
   text-align: center;
 }
 
+/* שדה כתובת המייל ליעד – מעל כפתורי השליחה */
+.sh-email-to {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  color: var(--brand-soft);
+}
+.sh-email-to .input {
+  flex: 1;
+  min-width: 0;
+}
+
 /* שורת שליחה: וואטסאפ + מייל אחד ליד השני, מתחת לדחיפות */
 .sh-send-row {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
   align-items: stretch;
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 /* כפתור "שלח למייל" – באותה צורה כמו כפתור הוואטסאפ, בגוון מותג */

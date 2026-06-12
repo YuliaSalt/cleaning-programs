@@ -44,6 +44,16 @@ export async function pdfBlob(el, filename) {
   return html2pdf().set(options(filename)).from(el).output('blob')
 }
 
+// המרת Blob ל-base64 (ללא קידומת data:) – לשליחת ה-PDF לשרת.
+export function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader()
+    r.onload = () => resolve(String(r.result).split(',')[1] || '')
+    r.onerror = () => reject(new Error('read failed'))
+    r.readAsDataURL(blob)
+  })
+}
+
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
