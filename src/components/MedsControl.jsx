@@ -55,6 +55,8 @@ function MedForm({ unit, onSaved }) {
   const [nurse, setNurse] = useState(() => getDeviceNurse())
   const [cabinetClean, setCabinetClean] = useState(false) // ניקיון וסדר כללי ארון תרופות – חובה לפני חתימה
   const [err, setErr] = useState('') // '' | 'nurse' | 'expiry' | 'cabinet'
+  const [replaceFor, setReplaceFor] = useState(null) // אינדקס התרופה שעבורה נפתח חלון "הוחלף → תקין + תוקף"
+  const [replaceDate, setReplaceDate] = useState('')
 
   const now = new Date()
   const dateHe = now.toLocaleDateString('he-IL')
@@ -71,6 +73,15 @@ function MedForm({ unit, onSaved }) {
   }
 
   const update = (i, patch) => setItems((arr) => arr.map((it, idx) => (idx === i ? { ...it, ...patch } : it)))
+
+  // אישור החלון "הוחלף → תקין + תוקף": מסמן תקין עם התוקף החדש שנרשם.
+  function confirmReplace() {
+    if (replaceFor === null || !replaceDate) return
+    update(replaceFor, { status: 'ok', order: false, expiry: replaceDate })
+    if (err === 'expiry') setErr('')
+    setReplaceFor(null)
+    setReplaceDate('')
+  }
 
   // פריטים חסרים/לא בתוקף – לשליחה לוואטסאפ
   const shortItems = list.filter((_, i) => items[i].status === 'missing' || items[i].status === 'expired')
@@ -125,15 +136,17 @@ function MedForm({ unit, onSaved }) {
                   <button type="button" className={'med-stbtn missing' + (it.status === 'missing' ? ' on' : '')} onClick={() => update(i, { status: 'missing' })}>חסר</button>
                   <button type="button" className={'med-stbtn expired' + (it.status === 'expired' ? ' on' : '')} onClick={() => update(i, { status: 'expired' })}>לא בתוקף</button>
                 </div>
-                <div className="med-expiry">
-                  <label>תוקף</label>
-                  <input
-                    className={'input' + expiryClass(it.expiry) + (err === 'expiry' && it.status === 'ok' && !it.expiry ? ' invalid' : '')}
-                    type="date"
-                    value={it.expiry}
-                    onChange={(e) => { update(i, { expiry: e.target.value }); if (err === 'expiry') setErr('') }}
-                  />
-                </div>
+                {it.status !== 'expired' && (
+                  <div className="med-expiry">
+                    <label>תוקף</label>
+                    <input
+                      className={'input' + expiryClass(it.expiry) + (err === 'expiry' && it.status === 'ok' && !it.expiry ? ' invalid' : '')}
+                      type="date"
+                      value={it.expiry}
+                      onChange={(e) => { update(i, { expiry: e.target.value }); if (err === 'expiry') setErr('') }}
+                    />
+                  </div>
+                )}
                 {it.status === 'expired' && (
                   <div className="med-actions">
                     <button
@@ -146,9 +159,9 @@ function MedForm({ unit, onSaved }) {
                     <button
                       type="button"
                       className="med-act replace"
-                      onClick={() => update(i, { status: 'ok', order: false, expiry: '' })}
+                      onClick={() => { setReplaceFor(i); setReplaceDate('') }}
                     >
-                      הוחלף → תקין + תוקף חדש
+                      הוחלף → תקין + תוקף
                     </button>
                   </div>
                 )}
@@ -194,6 +207,28 @@ function MedForm({ unit, onSaved }) {
           <WhatsAppIcon /> שליחת חוסרים לקבוצה ({shortItems.length})
         </button>
       </div>
+
+      {/* חלון רישום תוקף חדש – נפתח בלחיצה על "הוחלף → תקין + תוקף" */}
+      {replaceFor !== null && (
+        <div className="med-modal-overlay" onClick={() => setReplaceFor(null)}>
+          <div className="med-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="med-modal-title">רישום תוקף חדש</h3>
+            <p className="med-modal-sub">{list[replaceFor].name}</p>
+            <label className="med-modal-label">תאריך תוקף</label>
+            <input
+              className="input"
+              type="date"
+              value={replaceDate}
+              onChange={(e) => setReplaceDate(e.target.value)}
+              autoFocus
+            />
+            <div className="med-modal-actions">
+              <button type="button" className="btn ghost" onClick={() => setReplaceFor(null)}>ביטול</button>
+              <button type="button" className="btn" onClick={confirmReplace} disabled={!replaceDate}>שמירה</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
