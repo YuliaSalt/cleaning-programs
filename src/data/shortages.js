@@ -299,7 +299,7 @@ export function buildWhatsAppText(category, items, urgency) {
   if (urgency) lines.push('🔴 *דחיפות: ' + urgency + '*')
   lines.push('')
   items.forEach((it) => {
-    lines.push('• ' + it.name + (it.sku ? ' ' + it.sku : ''))
+    lines.push('• ' + it.name + (it.sku ? ' ' + it.sku : '') + (it.qty ? '  כמות: ' + it.qty : ''))
   })
   return lines.join('\n')
 }
