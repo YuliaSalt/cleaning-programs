@@ -1,12 +1,7 @@
 import { useMemo, useState, useRef, Fragment } from 'react'
 import ScreenHeader from './ScreenHeader.jsx'
 import { getShortageCategories, itemKey, sendWhatsApp } from '../data/shortages.js'
-import { emailPdf, pdfBlob, blobToBase64, pdfFilename } from '../data/reportPdf.js'
-import { sendPdfEmail } from '../data/cloudSync.js'
-
-// כתובת מייל ליעד לכל קטגוריה – נזכרת במכשיר (localStorage), לא נשמרת בקוד.
-const emailKey = (catId) => 'hmc:shortemail:' + catId
-const getSavedEmail = (catId) => { try { return localStorage.getItem(emailKey(catId)) || '' } catch { return '' } }
+import { emailPdf, pdfFilename } from '../data/reportPdf.js'
 
 function WhatsAppIcon() {
   return (
@@ -132,7 +127,6 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
   const [missing, setMissing] = useState({}) // { [key]: true }
   const [urgency, setUrgency] = useState(URGENCY_LEVELS[0]) // דחיפות משותפת לדוח
   const [emailing, setEmailing] = useState(false)
-  const [emailTo, setEmailTo] = useState('')
   const printRef = useRef(null)
   const dateHe = new Date().toLocaleDateString('he-IL')
 
@@ -153,7 +147,7 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
   const totalMissing = (cat) => cat.items.filter((it) => isMissing(cat.id, it)).length
 
   const q = norm(query.trim())
-  const openCat = (id) => { setQuery(''); setCatId(id); setEmailTo(getSavedEmail(id)) }
+  const openCat = (id) => { setQuery(''); setCatId(id) }
   const closeCat = () => { setQuery(''); setCatId(null) }
 
   const activeCat = catId ? categories.find((c) => c.id === catId) : null
@@ -206,49 +200,23 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
             const filename = pdfFilename(subject)
             const onEmail = async () => {
               if (none || emailing) return
-              const to = emailTo.trim()
-              if (!to || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) {
-                alert('יש להזין כתובת מייל תקינה למשלוח.')
-                return
-              }
               setEmailing(true)
               try {
-                const blob = await pdfBlob(printRef.current, filename)
-                const pdfBase64 = await blobToBase64(blob)
-                await sendPdfEmail({ to, subject, filename, pdfBase64, text: 'מצורף הדוח: ' + subject + ' (דחיפות: ' + urgency + ')' })
-                try { localStorage.setItem(emailKey(activeCat.id), to) } catch { /* noop */ }
-                alert('✓ הדוח נשלח למייל: ' + to)
-              } catch (err) {
-                // נפילה לשיתוף/הורדה צד-לקוח אם השרת לא זמין
-                try {
-                  await emailPdf(printRef.current, filename, subject)
-                  alert('השליחה מהשרת לא זמינה — נפתח שיתוף/הורדה לצירוף ידני.')
-                } catch {
-                  alert('שליחת המייל נכשלה. בדוק/י חיבור לאינטרנט ושהגיבוי לענן מוגדר.')
-                }
+                await emailPdf(printRef.current, filename, subject)
+              } catch {
+                alert('שליחת ה-PDF נכשלה. נסה/י שוב.')
               } finally {
                 setEmailing(false)
               }
             }
             return (
               <>
-                <div className="sh-email-to">
-                  <MailIcon />
-                  <input
-                    className="input"
-                    type="email"
-                    inputMode="email"
-                    placeholder="כתובת מייל ליעד (נשמרת במכשיר)"
-                    value={emailTo}
-                    onChange={(e) => setEmailTo(e.target.value)}
-                  />
-                </div>
                 <div className="sh-send-row">
                   <button className="wa-btn" disabled={none} onClick={() => sendWhatsApp(activeCat, activeMissing, urgency)}>
                     <WhatsAppIcon /> שלח לוואטסאפ ({activeMissing.length})
                   </button>
                   <button className="email-btn" disabled={none || emailing} onClick={onEmail}>
-                    <MailIcon /> {emailing ? 'שולח…' : emailLabel} ({activeMissing.length})
+                    <MailIcon /> {emailing ? 'מכין PDF…' : emailLabel} ({activeMissing.length})
                   </button>
                 </div>
                 {activeCat.note && <div className="sh-order-note">⏰ {activeCat.note}</div>}
