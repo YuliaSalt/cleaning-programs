@@ -3834,18 +3834,15 @@ textarea.input {
   overflow-wrap: anywhere;
 }
 
-/* תווית כמות ליד שם הפריט – מוצגת רק כשנרשמה כמות */
-.sh-qty {
-  display: inline-block;
-  margin-inline-start: 8px;
-  padding: 2px 9px;
-  border-radius: 999px;
-  background: rgba(226, 85, 78, 0.12);
-  border: 1px solid rgba(226, 85, 78, 0.35);
-  color: #c0392b;
-  font-size: 12.5px;
+/* שדה כמות (לא חובה) – נפתח בשורה ליד כפתור "סמן חסר" כשהפריט מסומן */
+.sh-qty-input {
+  flex: none;
+  width: 76px;
+  min-height: 44px;
+  padding: 8px 10px;
+  text-align: center;
   font-weight: 800;
-  white-space: nowrap;
+  font-size: 14px;
 }
 
 /* כפתור "סמן חסר" – בולט ומורם (3D) כדי שיהיה ברור שצריך ללחוץ */

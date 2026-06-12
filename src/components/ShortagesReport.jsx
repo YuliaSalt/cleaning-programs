@@ -40,14 +40,21 @@ function UrgencyPicker({ value, onChange }) {
   )
 }
 
-/* שורת פריט: לחיצה על "חסר" פותחת חלון לרישום כמות (לא חובה) ומסמנת חוסר. מק״ט מוסתר. */
-function ItemRow({ item, missing, qty, onToggle }) {
+/* שורת פריט: לחיצה על "חסר" מסמנת חוסר. כשמסומן – נפתח שדה כמות (לא חובה) ליד הכפתור. מק״ט מוסתר. */
+function ItemRow({ item, missing, qty, onToggle, onQty }) {
   return (
     <div className={'sh-row' + (missing ? ' missing' : '')}>
-      <span className="sh-name">
-        {item.name}
-        {missing && qty ? <span className="sh-qty">כמות: {qty}</span> : null}
-      </span>
+      <span className="sh-name">{item.name}</span>
+      {missing && (
+        <input
+          className="input sh-qty-input"
+          type="text"
+          inputMode="numeric"
+          placeholder="כמות"
+          value={qty}
+          onChange={(e) => onQty(e.target.value)}
+        />
+      )}
       <button type="button" className={'sh-toggle' + (missing ? ' on' : '')} onClick={onToggle}>
         {missing ? '✓ חסר' : 'סמן חסר'}
       </button>
@@ -65,7 +72,7 @@ function MailIcon() {
 }
 
 /* רשימת פריטים של קטגוריה (עם כותרות-קבוצה אם קיימות) */
-function CategoryList({ category, items, isMissing, getQty, onToggle }) {
+function CategoryList({ category, items, isMissing, getQty, onToggle, onQty }) {
   return (
     <div className="sh-list">
       {items.length === 0 ? (
@@ -81,6 +88,7 @@ function CategoryList({ category, items, isMissing, getQty, onToggle }) {
                 missing={isMissing(category.id, it)}
                 qty={getQty(category.id, it)}
                 onToggle={() => onToggle(category.id, it)}
+                onQty={(v) => onQty(category.id, it, v)}
               />
             </Fragment>
           )
@@ -139,8 +147,6 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
   const [query, setQuery] = useState('')
   const [catId, setCatId] = useState(null) // קטגוריה נבחרת
   const [missing, setMissing] = useState({}) // { [key]: { seq, qty } }
-  const [pending, setPending] = useState(null) // { cid, item } – פריט שעבורו נפתח חלון רישום כמות
-  const [pendingQty, setPendingQty] = useState('') // הכמות שנרשמת בחלון (לא חובה)
   const [urgency, setUrgency] = useState(URGENCY_LEVELS[0]) // דחיפות משותפת לדוח
   const [emailing, setEmailing] = useState(false)
   const printRef = useRef(null)
@@ -151,35 +157,23 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
   const markSeq = (cid, item) => (missing[itemKey(cid, item)] || {}).seq || 0
   const getQty = (cid, item) => (missing[itemKey(cid, item)] || {}).qty || ''
 
-  // הסרת סימון "חסר"
-  const removeMark = (cid, item) => {
+  // לחיצה על "סמן חסר": מסמן/מבטל מיד. שדה הכמות נפתח בשורה ליד הכפתור כשמסומן.
+  const toggle = (cid, item) => {
     const k = itemKey(cid, item)
     setMissing((m) => {
-      const { [k]: _drop, ...rest } = m
-      return rest
-    })
-  }
-
-  // לחיצה על "סמן חסר": אם כבר מסומן – ביטול; אחרת פתיחת חלון לרישום כמות.
-  const toggle = (cid, item) => {
-    if (isMissing(cid, item)) {
-      removeMark(cid, item)
-    } else {
-      setPending({ cid, item })
-      setPendingQty('')
-    }
-  }
-
-  // אישור החלון – סימון הפריט כחסר עם הכמות שנרשמה (אם נרשמה).
-  const confirmPending = () => {
-    if (!pending) return
-    const k = itemKey(pending.cid, pending.item)
-    setMissing((m) => {
+      if (m[k]) {
+        const { [k]: _drop, ...rest } = m // ביטול סימון – הסרה
+        return rest
+      }
       const next = Math.max(0, ...Object.values(m).map((v) => v.seq || 0)) + 1
-      return { ...m, [k]: { seq: next, qty: pendingQty.trim() } }
+      return { ...m, [k]: { seq: next, qty: '' } }
     })
-    setPending(null)
-    setPendingQty('')
+  }
+
+  // עדכון כמות לפריט מסומן (לא חובה)
+  const setQty = (cid, item, qty) => {
+    const k = itemKey(cid, item)
+    setMissing((m) => (m[k] ? { ...m, [k]: { ...m[k], qty } } : m))
   }
   const totalMissing = (cat) => cat.items.filter((it) => isMissing(cat.id, it)).length
 
@@ -212,20 +206,22 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
       {markedAll.length > 0 && (
         <div className="glass plan-card sh-marked">
           <div className="sh-cat-head">פריטים שסומנו כחסר ({markedAll.length})</div>
-          {markedAll.map(({ cat, it }) => {
-            const qty = getQty(cat.id, it)
-            return (
-              <div className="sh-row missing" key={itemKey(cat.id, it)}>
-                <span className="sh-name">
-                  {it.name}
-                  {qty ? <span className="sh-qty">כמות: {qty}</span> : null}
-                </span>
-                <button type="button" className="sh-toggle on" onClick={() => toggle(cat.id, it)}>
-                  ✓ חסר
-                </button>
-              </div>
-            )
-          })}
+          {markedAll.map(({ cat, it }) => (
+            <div className="sh-row missing" key={itemKey(cat.id, it)}>
+              <span className="sh-name">{it.name}</span>
+              <input
+                className="input sh-qty-input"
+                type="text"
+                inputMode="numeric"
+                placeholder="כמות"
+                value={getQty(cat.id, it)}
+                onChange={(e) => setQty(cat.id, it, e.target.value)}
+              />
+              <button type="button" className="sh-toggle on" onClick={() => toggle(cat.id, it)}>
+                ✓ חסר
+              </button>
+            </div>
+          ))}
         </div>
       )}
 
@@ -291,6 +287,7 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
             isMissing={isMissing}
             getQty={getQty}
             onToggle={toggle}
+            onQty={setQty}
           />
         </div>
       ) : (
@@ -308,34 +305,6 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
               </button>
             )
           })}
-        </div>
-      )}
-
-      {/* חלון רישום כמות (לא חובה) – נפתח בלחיצה על "סמן חסר" */}
-      {pending && (
-        <div className="med-modal-overlay" onClick={() => setPending(null)}>
-          <form
-            className="med-modal"
-            onClick={(e) => e.stopPropagation()}
-            onSubmit={(e) => { e.preventDefault(); confirmPending() }}
-          >
-            <h3 className="med-modal-title">סימון חסר</h3>
-            <p className="med-modal-sub">{pending.item.name}</p>
-            <label className="med-modal-label">כמות (לא חובה)</label>
-            <input
-              className="input"
-              type="text"
-              inputMode="numeric"
-              placeholder="לדוגמה: 5"
-              value={pendingQty}
-              onChange={(e) => setPendingQty(e.target.value)}
-              autoFocus
-            />
-            <div className="med-modal-actions">
-              <button type="button" className="btn ghost" onClick={() => setPending(null)}>ביטול</button>
-              <button type="submit" className="btn">סמן חסר</button>
-            </div>
-          </form>
         </div>
       )}
     </div>
