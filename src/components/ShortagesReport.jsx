@@ -1,6 +1,7 @@
-import { useMemo, useState, Fragment } from 'react'
+import { useMemo, useState, useRef, Fragment } from 'react'
 import ScreenHeader from './ScreenHeader.jsx'
 import { getShortageCategories, itemKey, sendWhatsApp } from '../data/shortages.js'
+import { emailPdf, pdfFilename } from '../data/reportPdf.js'
 
 function WhatsAppIcon() {
   return (
@@ -50,12 +51,19 @@ function ItemRow({ item, missing, onToggle }) {
   )
 }
 
-/* רשימת פריטים של קטגוריה (עם כותרות-קבוצה אם קיימות) + כפתור שליחה לוואטסאפ */
-function CategoryList({ category, items, isMissing, onToggle, urgency }) {
-  const missingItems = category.items.filter((it) => isMissing(category.id, it))
+function MailIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2.5" y="4.5" width="19" height="15" rx="2.5" />
+      <path d="M3 6l9 7 9-7" />
+    </svg>
+  )
+}
+
+/* רשימת פריטים של קטגוריה (עם כותרות-קבוצה אם קיימות) */
+function CategoryList({ category, items, isMissing, onToggle }) {
   return (
     <div className="sh-list">
-      {category.note && <div className="cysto-note sh-note">{category.note}</div>}
       {items.length === 0 ? (
         <p className="empty-hint" style={{ marginTop: 8 }}>אין פריטים להצגה.</p>
       ) : (
@@ -69,19 +77,44 @@ function CategoryList({ category, items, isMissing, onToggle, urgency }) {
           )
         })
       )}
+    </div>
+  )
+}
 
-      <div className="ho-actions">
-        <button
-          className="wa-btn"
-          disabled={missingItems.length === 0}
-          onClick={() => sendWhatsApp(category, missingItems, urgency)}
-        >
-          <WhatsAppIcon /> לשלוח לקבוצת חסרים ({missingItems.length})
-        </button>
-        {missingItems.length > 0 && (
-          <p className="sh-hint">בלחיצה ייפתח וואטסאפ עם ההודעה מוכנה — בחר/י את קבוצת חסרים מרשימת הצ׳אטים ושלח/י.</p>
-        )}
+/* אלמנט מקור ל-PDF (מחוץ למסך) – נלכד ע"י html2pdf בשליחת המייל */
+function ShortagePrintable({ printRef, unit, category, items, urgency, dateHe }) {
+  return (
+    <div className="report-print pdf-source" ref={printRef}>
+      <div className="rp-head">
+        <img className="rp-logo" src={import.meta.env.BASE_URL + 'logo.png'} alt="הרצליה מדיקל סנטר" />
+        <div className="rp-brand">הרצליה מדיקל סנטר · כוחות עזר</div>
+        <h2 className="rp-title">{category.waTitle}</h2>
+        <div className="rp-meta">
+          <span><b>מחלקה:</b> {unit.name}</span>
+          <span><b>דחיפות:</b> {urgency}</span>
+          <span><b>תאריך:</b> {dateHe}</span>
+        </div>
       </div>
+      <div className="rp-section">
+        <h3>פריטים לבקשה ({items.length})</h3>
+        <table className="rp-table">
+          <thead>
+            <tr>
+              <th className="rp-th-name">פריט</th>
+              <th className="rp-th-exp">מק״ט</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((it, i) => (
+              <tr key={i}>
+                <td className="rp-td-name">{it.name}</td>
+                <td className="rp-td-exp">{it.sku || '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {category.note && <div className="rp-foot">{category.note}</div>}
     </div>
   )
 }
@@ -92,6 +125,9 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
   const [catId, setCatId] = useState(null) // קטגוריה נבחרת
   const [missing, setMissing] = useState({}) // { [key]: true }
   const [urgency, setUrgency] = useState(URGENCY_LEVELS[0]) // דחיפות משותפת לדוח
+  const [emailing, setEmailing] = useState(false)
+  const printRef = useRef(null)
+  const dateHe = new Date().toLocaleDateString('he-IL')
 
   // missing[key] = מספר סידורי עולה (seq) של הסימון; ככל שגבוה יותר – סומן מאוחר יותר.
   const isMissing = (cid, item) => !!missing[itemKey(cid, item)]
@@ -134,13 +170,6 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
         trail={trail}
       />
 
-      {/* בורר דחיפות ברמת העמוד */}
-      {!activeCat && (
-        <div className="glass plan-card controls-card">
-          <UrgencyPicker value={urgency} onChange={setUrgency} />
-        </div>
-      )}
-
       {/* סיכום קבוע: כל הפריטים שסומנו כחסר – נשאר גלוי בכל המסכים, גם בין קבוצות שונות */}
       {markedAll.length > 0 && (
         <div className="glass plan-card sh-marked">
@@ -160,6 +189,46 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
         /* תצוגת קטגוריה נבחרת */
         <div className="glass plan-card" style={{ marginTop: 14 }}>
           <UrgencyPicker value={urgency} onChange={setUrgency} />
+
+          {/* כפתורי שליחה – וואטסאפ ומייל אחד ליד השני, מתחת לדחיפות */}
+          {(() => {
+            const activeMissing = activeCat.items.filter((it) => isMissing(activeCat.id, it))
+            const none = activeMissing.length === 0
+            const emailLabel = activeCat.id === 'meds' ? 'שלח למייל הזמנת תרופות' : 'שלח למייל חסרים PDF'
+            const onEmail = async () => {
+              if (none || emailing) return
+              setEmailing(true)
+              try {
+                await emailPdf(printRef.current, pdfFilename(activeCat.waTitle + ' · ' + unit.name), activeCat.waTitle + ' · ' + unit.name)
+              } catch {
+                alert('שליחת ה-PDF נכשלה. נסה/י שוב.')
+              } finally {
+                setEmailing(false)
+              }
+            }
+            return (
+              <>
+                <div className="sh-send-row">
+                  <button className="wa-btn" disabled={none} onClick={() => sendWhatsApp(activeCat, activeMissing, urgency)}>
+                    <WhatsAppIcon /> שלח לוואטסאפ ({activeMissing.length})
+                  </button>
+                  <button className="email-btn" disabled={none || emailing} onClick={onEmail}>
+                    <MailIcon /> {emailing ? 'מכין PDF…' : emailLabel} ({activeMissing.length})
+                  </button>
+                </div>
+                {activeCat.note && <div className="sh-order-note">⏰ {activeCat.note}</div>}
+                <ShortagePrintable
+                  printRef={printRef}
+                  unit={unit}
+                  category={activeCat}
+                  items={activeMissing}
+                  urgency={urgency}
+                  dateHe={dateHe}
+                />
+              </>
+            )
+          })()}
+
           {/* חיפוש פנימי בתוך הקטגוריה (גם ציוד מתכלים וגם תרופות) */}
           <input
             className="input sh-search"
@@ -174,7 +243,6 @@ export default function ShortagesReport({ unit, onBack, onGoHome, onBackToCatego
             items={q ? activeCat.items.filter((it) => norm(it.name).includes(q)) : activeCat.items}
             isMissing={isMissing}
             onToggle={toggle}
-            urgency={urgency}
           />
         </div>
       ) : (

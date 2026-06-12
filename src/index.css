@@ -3880,6 +3880,79 @@ textarea.input {
   text-align: center;
 }
 
+/* שורת שליחה: וואטסאפ + מייל אחד ליד השני, מתחת לדחיפות */
+.sh-send-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: stretch;
+  margin-top: 16px;
+}
+
+/* כפתור "שלח למייל" – באותה צורה כמו כפתור הוואטסאפ, בגוון מותג */
+.email-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 200px;
+  padding: 15px 24px;
+  border-radius: var(--radius-pill);
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  background: linear-gradient(180deg, #4fb8e0 0%, #2d96c6 45%, #1f6f9e 100%);
+  box-shadow:
+    0 7px 0 #185a80,
+    0 12px 24px rgba(31, 111, 158, 0.45),
+    0 0 28px rgba(79, 184, 224, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.16s ease;
+}
+
+.email-btn:hover {
+  transform: translateY(-2px);
+}
+
+.email-btn:active {
+  transform: translateY(5px);
+  box-shadow:
+    0 2px 0 #185a80,
+    0 4px 10px rgba(31, 111, 158, 0.4),
+    inset 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.email-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 0 #b9c3bd, 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* תזכורת הזמנה (מתכלים בלבד) – ליד כפתורי השליחה */
+.sh-order-note {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 244, 200, 0.7);
+  border: 1px solid rgba(230, 180, 0, 0.55);
+  color: #9a7b00;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* אלמנט מקור ל-PDF – נמצא ב-DOM (לכידה ע"י html2pdf) אך מחוץ למסך */
+.pdf-source {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: 760px;
+  pointer-events: none;
+}
+
 /* מצב "חסר" – שורה באדום בהיר */
 .sh-row.missing {
   background: rgba(255, 220, 218, 0.6);
