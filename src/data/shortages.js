@@ -294,11 +294,12 @@ export function itemKey(catId, item) {
 // בניית טקסט הודעת הוואטסאפ: כותרת קבועה, שורת דחיפות, ורשימה נקייה
 // (שם + מק״ט בלבד, ללא המילה "חסר" וללא סוגריים). ללא כותרת תחתית.
 export function buildWhatsAppText(category, items, urgency) {
-  const lines = [category.waTitle]
-  if (urgency) lines.push('דחיפות: ' + urgency)
+  // כותרת ודחיפות מודגשות בוואטסאפ (תחביר *מודגש*)
+  const lines = ['*' + category.waTitle + '*']
+  if (urgency) lines.push('🔴 *דחיפות: ' + urgency + '*')
   lines.push('')
   items.forEach((it) => {
-    lines.push('* ' + it.name + (it.sku ? ' ' + it.sku : ''))
+    lines.push('• ' + it.name + (it.sku ? ' ' + it.sku : ''))
   })
   return lines.join('\n')
 }

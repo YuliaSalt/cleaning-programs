@@ -2314,6 +2314,34 @@ h1, h2, h3, h4 {
   color: var(--muted);
 }
 
+/* ===== באנר דחיפות מודגש בראש דוח החסרים (PDF) ===== */
+.rp-urgency {
+  margin: 4px 0 14px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+  border: 2px solid;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.rp-urgency.lvl1 {
+  color: #15795a;
+  background: #e3f6ee;
+  border-color: #1faf8f;
+}
+.rp-urgency.lvl2 {
+  color: #8a6d00;
+  background: #fff3cf;
+  border-color: #e6b400;
+}
+.rp-urgency.lvl3 {
+  color: #fff;
+  background: #c0392b;
+  border-color: #9c2c20;
+}
+
 /* ===== טבלת דוח (בקרת תרופות): תרופה · סטטוס · תוקף · להזמנה ===== */
 .rp-table {
   width: 100%;

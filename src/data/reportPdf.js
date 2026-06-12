@@ -55,27 +55,40 @@ function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 4000)
 }
 
+// פתיחת תוכנת דואר עם נושא/גוף מוכנים, מבלי לנווט את העמוד (לא מבטל הורדה פעילה).
+function openMail(subject, body) {
+  const a = document.createElement('a')
+  a.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body)
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+}
+
 // שליחת הדוח כ-PDF למייל. מחזיר: 'shared' | 'cancelled' | 'fallback'.
+// בנייד/טאבלט – שיתוף מקורי עם הקובץ מצורף (Gmail/דוא"ל). במחשב – הורדת ה-PDF
+// ופתיחת תוכנת הדואר לצירוף ידני (mailto אינו תומך בצירוף אוטומטי).
 export async function emailPdf(el, filename, subject) {
   const blob = await pdfBlob(el, filename)
-  const file = new File([blob], filename, { type: 'application/pdf' })
   const title = subject || filename
 
   // שיתוף מקורי עם קובץ מצורף (נתמך בעיקר בנייד/טאבלט)
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file], title, text: title })
-      return 'shared'
-    } catch (err) {
-      if (err && err.name === 'AbortError') return 'cancelled'
-      // נפילה לשיטה החלופית
+  if (typeof File !== 'undefined' && navigator.canShare) {
+    const file = new File([blob], filename, { type: 'application/pdf' })
+    if (navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title, text: title })
+        return 'shared'
+      } catch (err) {
+        if (err && err.name === 'AbortError') return 'cancelled'
+        // כל כשל אחר – ממשיכים לחלופה (הורדה + מייל)
+      }
     }
   }
 
-  // חלופה: הורדת ה-PDF + פתיחת תוכנת דואר לצירוף ידני של הקובץ שהורד.
+  // חלופה: קודם מורידים את ה-PDF (await קצר כדי שההורדה תיזום), ואז פותחים דואר.
   downloadBlob(blob, filename)
-  const body = 'מצורף הדוח: ' + title + '\n\n(צרף/י למייל את קובץ ה-PDF שהורד כעת למכשיר.)'
-  window.location.href =
-    'mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(body)
+  const body = 'מצורף דוח החסרים: ' + title + '\n\nקובץ ה-PDF ירד כעת למכשיר — יש לצרף אותו למייל לפני השליחה.'
+  await new Promise((r) => setTimeout(r, 600))
+  openMail(title, body)
   return 'fallback'
 }

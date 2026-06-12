@@ -17,6 +17,7 @@ const norm = (s) => (s || '').toString().toLowerCase()
 // רמות דחיפות לבחירה (משפיעות על שורת "דחיפות" בהודעת הוואטסאפ)
 export const URGENCY_LEVELS = ['רגילה', 'דחופה', 'דחופה מאוד']
 const urgClass = { 'רגילה': 'lvl1', 'דחופה': 'lvl2', 'דחופה מאוד': 'lvl3' }
+const urgKey = (u) => urgClass[u] || 'lvl1'
 
 /* בורר דחיפות – מופיע על העמוד וגם בתוך כל קטגוריה */
 function UrgencyPicker({ value, onChange }) {
@@ -91,10 +92,10 @@ function ShortagePrintable({ printRef, unit, category, items, urgency, dateHe })
         <h2 className="rp-title">{category.waTitle}</h2>
         <div className="rp-meta">
           <span><b>מחלקה:</b> {unit.name}</span>
-          <span><b>דחיפות:</b> {urgency}</span>
           <span><b>תאריך:</b> {dateHe}</span>
         </div>
       </div>
+      <div className={'rp-urgency ' + urgKey(urgency)}>דחיפות: {urgency}</div>
       <div className="rp-section">
         <h3>פריטים לבקשה ({items.length})</h3>
         <table className="rp-table">
