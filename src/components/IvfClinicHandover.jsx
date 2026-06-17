@@ -26,15 +26,6 @@ function WhatsAppIcon() {
 
 const todayStr = () => new Date().toLocaleDateString('en-CA')
 
-// סעיף הושלם לצורך חתימה: סעיפי חובה (בוצע/לא-בוצע, כן/לא) מחייבים בחירה;
-// טקסט חובה מחייב תוכן. סעיף שאינו חובה תמיד נחשב מושלם.
-function itemComplete(it, v) {
-  v = v || {}
-  if (!it.required) return true
-  if (it.type === 'text') return (v.text || '').trim() !== ''
-  return v.val !== null && v.val !== undefined
-}
-
 /* ===== טופס מילוי מרפאה IVF ===== */
 function IvfClinicForm({ unit, onSent, onReset }) {
   const shifts = unit.shifts || ['בוקר']
@@ -46,7 +37,6 @@ function IvfClinicForm({ unit, onSent, onReset }) {
   const [names, setNames] = useState({ nurseOut: { first: getDeviceNurse(), last: '' }, nurseIn: { first: '', last: '' } })
   const [items, setItems] = useState(blank.items)
   const [err, setErr] = useState(false) // שמות חסרים
-  const [itemsErr, setItemsErr] = useState(false) // סעיפי חובה שלא נבחרו
   const [signedRec, setSignedRec] = useState(null)
 
   const closed = isUnitClosed(unit.id)
@@ -57,10 +47,7 @@ function IvfClinicForm({ unit, onSent, onReset }) {
   }, [unit.id])
 
   const setName = (id, field, v) => setNames((n) => ({ ...n, [id]: { ...n[id], [field]: v } }))
-  const setVal = (id, val) => {
-    setItems((m) => ({ ...m, [id]: { ...m[id], val } }))
-    setItemsErr(false)
-  }
+  const setVal = (id, val) => setItems((m) => ({ ...m, [id]: { ...m[id], val } }))
   const setNote = (id, note) => setItems((m) => ({ ...m, [id]: { ...m[id], note } }))
   const setText = (id, text) => setItems((m) => ({ ...m, [id]: { ...m[id], text } }))
 
@@ -69,23 +56,17 @@ function IvfClinicForm({ unit, onSent, onReset }) {
     setNames({ nurseOut: { first: getDeviceNurse(), last: '' }, nurseIn: { first: '', last: '' } })
     setItems(e.items)
     setErr(false)
-    setItemsErr(false)
     setSignedRec(null)
     if (onReset) onReset()
   }
 
-  // כל סעיפי החובה הושלמו לפני חתימה ושמירה
-  const allComplete = IVF_CLINIC_ITEMS.every((it) => itemComplete(it, items[it.id]))
-
   function sign() {
     const namesOk = names.nurseOut.first.trim() && names.nurseIn.first.trim()
-    if (!namesOk || !allComplete) {
-      setErr(!namesOk)
-      setItemsErr(!allComplete)
+    if (!namesOk) {
+      setErr(true)
       return
     }
     setErr(false)
-    setItemsErr(false)
     rememberDeviceNurse(names.nurseOut.first)
     const record = {
       kind: 'ivf-clinic',
@@ -165,14 +146,13 @@ function IvfClinicForm({ unit, onSent, onReset }) {
             <div className="ho-block-title">משימות ומסירת מרפאה</div>
             {IVF_CLINIC_ITEMS.map((it) => {
               const v = items[it.id] || {}
-              const missing = itemsErr && !itemComplete(it, v)
 
               if (it.type === 'text') {
                 return (
                   <div className="field" key={it.id} style={{ marginTop: 14 }}>
-                    <label>{it.label} {it.required && <span className="req">*</span>}</label>
+                    <label>{it.label}</label>
                     <textarea
-                      className={'input' + (missing ? ' invalid' : '')}
+                      className="input"
                       rows={3}
                       placeholder={it.placeholder}
                       value={v.text || ''}
@@ -187,42 +167,31 @@ function IvfClinicForm({ unit, onSent, onReset }) {
               const offLabel = isYesNo ? 'לא' : 'לא בוצע'
               const onVal = isYesNo ? 'yes' : 'done'
               const offVal = isYesNo ? 'no' : 'notDone'
+              // שדה מלל עוטף-שורות נפתח כמו בדו״ח הכללי: "אירועים חריגים" כשנבחר "כן"; סעיף בוצע – כשנבחר "לא בוצע".
+              const detailOpen = isYesNo ? v.val === 'yes' : v.val === 'notDone'
               return (
-                <div className={'yn-row' + (missing ? ' invalid' : '')} key={it.id}>
+                <div className="yn-row" key={it.id}>
                   <div className="yn-head">
-                    <span className="yn-label">{it.label} {it.required && <span className="req">*</span>}</span>
+                    <span className="yn-label">{it.label}</span>
                     <div className="yn-btns">
                       <button className={'yn-btn yes' + (v.val === onVal ? ' active' : '')} onClick={() => setVal(it.id, onVal)}>{onLabel}</button>
                       <button className={'yn-btn no' + (v.val === offVal ? ' active' : '')} onClick={() => setVal(it.id, offVal)}>{offLabel}</button>
                     </div>
                   </div>
-                  {/* אירועים חריגים: פירוט נפתח כשנבחר "כן". סעיפי בוצע/לא-בוצע: הערות לא חובה. */}
-                  {isYesNo ? (
-                    <div className={'yn-detail' + (v.val === 'yes' ? ' open' : '')}>
+                  {it.notes && (
+                    <div className={'yn-detail' + (detailOpen ? ' open' : '')}>
                       <textarea
                         className="input"
                         rows={3}
-                        placeholder="פירוט האירוע החריג..."
+                        placeholder={isYesNo ? 'פירוט האירוע החריג...' : 'הערה / סיבה...'}
                         value={v.note || ''}
                         onChange={(e) => setNote(it.id, e.target.value)}
                       />
                     </div>
-                  ) : it.notes ? (
-                    <div className="field" style={{ marginTop: 8 }}>
-                      <label>הערות</label>
-                      <input
-                        className="input"
-                        type="text"
-                        placeholder="הערות (לא חובה)"
-                        value={v.note || ''}
-                        onChange={(e) => setNote(it.id, e.target.value)}
-                      />
-                    </div>
-                  ) : null}
+                  )}
                 </div>
               )
             })}
-            {itemsErr && <div className="err">יש להשלים את כל סעיפי החובה לפני חתימה ושמירה.</div>}
           </div>
 
           {/* בלוק 3 – אישור וחתימה */}
