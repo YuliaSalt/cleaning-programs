@@ -238,7 +238,9 @@ export function buildIvfClinicHandoverImage(record) {
   for (const it of IVF_CLINIC_ITEMS) {
     const v = (record.items && record.items[it.id]) || {}
     if (it.type === 'text') {
-      b.kv(it.label, v.text)
+      // מלל חופשי – כותרת ואז טקסט עוטף שורות בתוך גבולות הדף (לא חורג מהמסגרת)
+      b.para(it.label + ':', { s: 36, b: true, color: '#0a4d8c' })
+      b.para((v.text || '').trim() || '—', { s: 34, color: '#1f2d36', indent: 30, gap: 0.32 })
     } else if (it.type === 'yesno') {
       b.statusRow(it.label, v.val === 'yes' ? 'כן' : v.val === 'no' ? 'לא' : '—', v.val === 'yes' ? '#c0392b' : '#15a34a', true)
       if (v.note && v.note.trim()) b.para('פירוט: ' + v.note.trim(), { s: 32, color: '#5b7493', indent: 30, gap: 0.3 })

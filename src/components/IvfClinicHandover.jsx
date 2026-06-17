@@ -296,7 +296,16 @@ function IvfClinicView({ unit, record }) {
         <div className="ho-block-title">משימות ומסירת מרפאה</div>
         {IVF_CLINIC_ITEMS.map((it) => {
           const v = (record.items && record.items[it.id]) || {}
-          const showNote = it.type !== 'text' && v.note && v.note.trim()
+          // מלל חופשי מוצג כפסקה עוטפת שורות (vr-text) ולא בתוך שורת הסטטוס, כדי לא לחרוג מהמסגרת
+          if (it.type === 'text') {
+            return (
+              <div className="ho-view-row" key={it.id}>
+                <span className="vr-label">{it.label}</span>
+                <p className="vr-text">{(v.text || '').trim() || '—'}</p>
+              </div>
+            )
+          }
+          const showNote = v.note && v.note.trim()
           return (
             <div className="ho-view-row" key={it.id}>
               <span className="vr-label">{it.label}</span>

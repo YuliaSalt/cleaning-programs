@@ -130,6 +130,13 @@ export const IVF_CLINIC_ITEMS = [
   { id: 'events', label: 'אירועים חריגים', type: 'yesno', notes: true, required: false },
 ]
 
+// ברירת מחדל לכל סעיף: בוצע/לא-בוצע → 'done', כן/לא (אירועים חריגים) → 'no' (אין), טקסט → ריק.
+function ivfClinicDefaultVal(it) {
+  if (it.type === 'done') return 'done'
+  if (it.type === 'yesno') return 'no'
+  return null
+}
+
 export function emptyIvfClinicHandover(unitId, unitName, shift) {
   return {
     kind: 'ivf-clinic',
@@ -139,7 +146,7 @@ export function emptyIvfClinicHandover(unitId, unitName, shift) {
     shift,
     nurseOut: { first: '', last: '' },
     nurseIn: { first: '', last: '' },
-    items: Object.fromEntries(IVF_CLINIC_ITEMS.map((it) => [it.id, { val: null, note: '', text: '' }])),
+    items: Object.fromEntries(IVF_CLINIC_ITEMS.map((it) => [it.id, { val: ivfClinicDefaultVal(it), note: '', text: '' }])),
     nurse: '',
   }
 }
