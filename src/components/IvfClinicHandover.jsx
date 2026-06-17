@@ -167,8 +167,6 @@ function IvfClinicForm({ unit, onSent, onReset }) {
               const offLabel = isYesNo ? 'לא' : 'לא בוצע'
               const onVal = isYesNo ? 'yes' : 'done'
               const offVal = isYesNo ? 'no' : 'notDone'
-              // שדה מלל עוטף-שורות נפתח כמו בדו״ח הכללי: "אירועים חריגים" כשנבחר "כן"; סעיף בוצע – כשנבחר "לא בוצע".
-              const detailOpen = isYesNo ? v.val === 'yes' : v.val === 'notDone'
               return (
                 <div className="yn-row" key={it.id}>
                   <div className="yn-head">
@@ -178,12 +176,14 @@ function IvfClinicForm({ unit, onSent, onReset }) {
                       <button className={'yn-btn no' + (v.val === offVal ? ' active' : '')} onClick={() => setVal(it.id, offVal)}>{offLabel}</button>
                     </div>
                   </div>
+                  {/* הערות תמיד גלויות (לא מוסתרות) – textarea עוטף-שורות */}
                   {it.notes && (
-                    <div className={'yn-detail' + (detailOpen ? ' open' : '')}>
+                    <div className="field" style={{ marginTop: 8 }}>
+                      <label>{isYesNo ? 'פירוט' : 'הערות'}</label>
                       <textarea
                         className="input"
-                        rows={3}
-                        placeholder={isYesNo ? 'פירוט האירוע החריג...' : 'הערה / סיבה...'}
+                        rows={2}
+                        placeholder={isYesNo ? 'פירוט האירוע החריג...' : 'הערות (לא חובה)'}
                         value={v.note || ''}
                         onChange={(e) => setNote(it.id, e.target.value)}
                       />
