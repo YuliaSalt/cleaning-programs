@@ -113,6 +113,37 @@ export function emptyGeneralHandover(unitId, unitName, shift) {
   }
 }
 
+// ===== העברת משמרת – מרפאה IVF (טופס ייעודי) =====
+// אותו סגנון, אותן הגדרות ואותו איצוב כמו שאר דו״חות אחראית המשמרת,
+// אך עם רשימת סעיפים ייחודית למרפאה.
+// type: 'done'  – שני כפתורים: בוצע / לא בוצע (+ הערות אם notes)
+//       'yesno' – כן / לא (+ פירוט אם נבחר "כן")
+//       'text'  – כתיבה חופשית בלבד
+export const IVF_CLINIC_ITEMS = [
+  { id: 'fetCheck', label: 'בדיקת תיק של מטופלות העוברות FET מחר', type: 'done', notes: true, required: true },
+  { id: 'firstSecondCheck', label: 'בדיקת תיק ראשונה ושניה', type: 'done', notes: true, required: true },
+  { id: 'assignments', label: 'שיבוצים', type: 'done', notes: true, required: true },
+  { id: 'instructions', label: 'מסירת הנחיות עבור בטות מהחושלים', type: 'done', notes: true, required: true },
+  { id: 'fertSummary', label: 'שליחת סיכום הפריות', type: 'done', notes: true, required: true },
+  { id: 'crm', label: 'CRM - פניות בטיפול', type: 'text', placeholder: 'פירוט הפניות בטיפול (כתיבה חופשית)...', required: true },
+  { id: 'thaw', label: 'הפשרת ביציות ל-3 הימים הקרובים - נמסר לבני הזוג כי עליהם להגיע למתן זרע ביום ההפריה', type: 'done', notes: false, required: true },
+  { id: 'events', label: 'אירועים חריגים', type: 'yesno', notes: true, required: false },
+]
+
+export function emptyIvfClinicHandover(unitId, unitName, shift) {
+  return {
+    kind: 'ivf-clinic',
+    unitId,
+    unitName,
+    date: new Date().toLocaleDateString('en-CA'),
+    shift,
+    nurseOut: { first: '', last: '' },
+    nurseIn: { first: '', last: '' },
+    items: Object.fromEntries(IVF_CLINIC_ITEMS.map((it) => [it.id, { val: null, note: '', text: '' }])),
+    nurse: '',
+  }
+}
+
 export function fullName(n) {
   if (!n) return ''
   return ((n.first || '') + ' ' + (n.last || '')).trim()
@@ -210,9 +241,20 @@ export function emptyHandover(unitId, unitName, shift) {
 // תומך בשני הסוגים: כללית (kind === 'general') וגסטרו.
 export function buildHandoverReadable(rec) {
   const isGeneral = rec.kind === 'general'
+  const isIvfClinic = rec.kind === 'ivf-clinic'
   const fmtReport = (r) => (r && r.has ? 'יש' + (r.text ? ' · ' + r.text : '') : 'אין')
   const columns = []
-  if (isGeneral) {
+  if (isIvfClinic) {
+    columns.push(['אחות מקבלת', fullName(rec.nurseIn)])
+    IVF_CLINIC_ITEMS.forEach((it) => {
+      const v = (rec.items && rec.items[it.id]) || {}
+      let value
+      if (it.type === 'text') value = v.text || ''
+      else if (it.type === 'yesno') value = (v.val === 'yes' ? 'כן' : v.val === 'no' ? 'לא' : '—') + (v.note ? ' · ' + v.note : '')
+      else value = (v.val === 'done' ? 'בוצע' : v.val === 'notDone' ? 'לא בוצע' : '—') + (v.note ? ' · ' + v.note : '')
+      columns.push([it.label, value])
+    })
+  } else if (isGeneral) {
     columns.push(['אחות מקבלת', fullName(rec.nurseIn)])
     GEN_OCC_NUMBERS.forEach((it) => columns.push([it.label, rec.numbers ? rec.numbers[it.id] ?? '' : '']))
     if (rec.occNote) columns.push(['הערת תפוסה', rec.occNote])
@@ -234,8 +276,8 @@ export function buildHandoverReadable(rec) {
       unitName: rec.unitName,
       date: rec.date,
       shift: rec.shift,
-      by: isGeneral ? fullName(rec.nurseOut) : rec.nurse || '',
-      kind: isGeneral ? 'כללית' : 'גסטרו',
+      by: isGeneral || isIvfClinic ? fullName(rec.nurseOut) : rec.nurse || '',
+      kind: isIvfClinic ? 'מרפאה IVF' : isGeneral ? 'כללית' : 'גסטרו',
     },
     columns,
   }

@@ -14,6 +14,7 @@ import {
   rememberDeviceNurse,
 } from '../data/handover.js'
 import { buildGeneralHandoverImage, shareHandoverImage } from './handoverImage.js'
+import IvfClinicHandover from './IvfClinicHandover.jsx'
 import HandoverArchive from './HandoverArchive.jsx'
 import { shiftAlertLevel } from '../data/shiftAlert.js'
 import { isUnitClosed } from '../data/closures.js'
@@ -378,6 +379,19 @@ export default function GeneralHandover({ unit, onBack, onGoHome, onBackToCatego
           ))}
         </div>
       </div>
+    )
+  }
+
+  // מרפאה IVF – טופס ייעודי (סעיפי מרפאה), חזרה למסך בחירת תת-היחידה.
+  if (subUnit && subUnit.id === 'ivf-clinic') {
+    return (
+      <IvfClinicHandover
+        unit={effUnit}
+        onBack={() => setSubUnit(null)}
+        onGoHome={onGoHome}
+        onBackToCategory={onBackToCategory}
+        categoryName={categoryName}
+      />
     )
   }
 

@@ -9,6 +9,7 @@ import {
   GEN_REPORT_ITEMS,
   genCheckItemsFor,
   OR_SECTIONS,
+  IVF_CLINIC_ITEMS,
   fullName,
 } from '../data/handover.js'
 
@@ -221,6 +222,32 @@ export function buildGeneralHandoverImage(record) {
     b.gap(4)
   })
 
+  return b.finish()
+}
+
+// ===== טופס מרפאה IVF =====
+export function buildIvfClinicHandoverImage(record) {
+  const b = makeBuilder()
+  header(b, `דו״ח אחראית משמרת - ${record.unitName || ''}`, record)
+  if (record.nurseIn && fullName(record.nurseIn)) {
+    b.para('אחות מקבלת: ' + fullName(record.nurseIn), { s: 32, b: true, color: '#0a4d8c' })
+    b.line()
+  }
+
+  b.band('משימות ומסירת מרפאה')
+  for (const it of IVF_CLINIC_ITEMS) {
+    const v = (record.items && record.items[it.id]) || {}
+    if (it.type === 'text') {
+      b.kv(it.label, v.text)
+    } else if (it.type === 'yesno') {
+      b.statusRow(it.label, v.val === 'yes' ? 'כן' : v.val === 'no' ? 'לא' : '—', v.val === 'yes' ? '#c0392b' : '#15a34a', true)
+      if (v.note && v.note.trim()) b.para('פירוט: ' + v.note.trim(), { s: 32, color: '#5b7493', indent: 30, gap: 0.3 })
+    } else {
+      b.statusRow(it.label, v.val === 'done' ? '✓ בוצע' : v.val === 'notDone' ? '✗ לא בוצע' : '—', v.val === 'done' ? '#15a34a' : v.val === 'notDone' ? '#c0392b' : '#a0adb8', true)
+      if (v.note && v.note.trim()) b.para('הערה: ' + v.note.trim(), { s: 30, color: '#5b7493', indent: 30, gap: 0.3 })
+    }
+    b.gap(6)
+  }
   return b.finish()
 }
 

@@ -268,6 +268,10 @@ const GENERAL_CONSUMABLES = [
 
 // הגדרת הקטגוריות עבור מחלקה נתונה.
 // waTitle = כותרת קבועה להודעת הוואטסאפ של אותה קטגוריה.
+//
+// רשימת "ציוד מתכלים כללי" המלאה שייכת כרגע לגסטרו ופעולות בלבד.
+// בשאר המחלקות הכפתור והקטגוריה נשארים, אך התוכן ריק עד שתתווסף
+// רשימה ייעודית לכל מחלקה.
 export function getShortageCategories(unitId) {
   return [
     {
@@ -275,7 +279,7 @@ export function getShortageCategories(unitId) {
       label: 'ציוד מתכלים כללי',
       waTitle: 'בקשה לרכש ציוד מתכלים כללי',
       note: ORDER_NOTE,
-      items: GENERAL_CONSUMABLES,
+      items: unitId === 'gastro' ? GENERAL_CONSUMABLES : [],
     },
     {
       id: 'meds',
