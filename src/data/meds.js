@@ -1273,6 +1273,21 @@ export function getMedList(unitId) {
   return MED_LISTS[unitId] || []
 }
 
+// סעיפי בקרה נוספים – נבדקים בסוף הרשימה, לאחר "ניקיון וסדר כללי ארון תרופות".
+// כל סעיף הוא משימת בקרה (בוצע/לא בוצע) שנרשמת בדוח.
+export const MED_AUDIT_ITEMS = [
+  { id: 'storage', label: 'תרופות מאוחסנות לפי הסטנדרט הנדרש (מקום ייעודי נעול, סדר לוגי לפי שמות גנריים, אחסון באריזה מקורית ובאמצעי אחסון בר-ניקוי נפרד לכל תרופה ומינון)' },
+  { id: 'validity', label: 'כל התרופות המאוחסנות במחלקה בתוקף; תוקף קצר – 3 חודשים – עם סימון ייעודי' },
+  { id: 'opened', label: 'תרופה שנפתחה מסומנת בתווית ייעודית ובה שם הפותח, תאריך ושעת פתיחה' },
+  { id: 'highRisk', label: 'קיימת רשימת תרופות בנות סיכון ותרופות הדורשות השוואה כפולה, הניתנות על ידי אחות מוסמכת בהתאם למדיניות הארגון' },
+  { id: 'narcotics', label: 'ניהול סמים מסוכנים מתבצע כנדרש: התאמה בין ספירת התרופות לרישום; בטופס רישום סם מצוינים מינונים שניתנו כולל שם המטופל ושעת המתן, וכן מינונים שלא ניתנו והושמדו' },
+]
+
+// מצב התחלתי לסעיפי הבקרה – כולם לא מסומנים.
+export function emptyMedAudit() {
+  return MED_AUDIT_ITEMS.reduce((acc, it) => { acc[it.id] = false; return acc }, {})
+}
+
 // האם למחלקה יש בקרת תרופות מוגדרת
 export function hasMedList(unitId) {
   return Array.isArray(MED_LISTS[unitId]) && MED_LISTS[unitId].length > 0
@@ -1300,6 +1315,8 @@ export function buildMedReadable(rec) {
     return [def.name, parts.join(' · ')]
   })
   columns.push(['ניקיון וסדר כללי ארון תרופות', rec.cabinetClean ? 'בוצע' : 'לא בוצע'])
+  const audit = rec.audit || {}
+  MED_AUDIT_ITEMS.forEach((it) => columns.push([it.label, audit[it.id] ? 'בוצע' : 'לא בוצע']))
   return {
     meta: {
       savedAt: rec.savedAt,
@@ -1313,12 +1330,49 @@ export function buildMedReadable(rec) {
   }
 }
 
-export function saveMedReport(unitId, month, items, by, cabinetClean = false) {
-  const rec = { unitId, month, items, by: by || '', cabinetClean: !!cabinetClean, savedAt: new Date().toISOString() }
+export function saveMedReport(unitId, month, items, by, cabinetClean = false, audit = {}) {
+  const rec = { unitId, month, items, by: by || '', cabinetClean: !!cabinetClean, audit: { ...audit }, savedAt: new Date().toISOString() }
   const key = `${PREFIX}${unitId}:${month}:${Date.now()}`
   storage.setJSON(key, rec)
   pushReport(key, rec, 'save', buildMedReadable(rec)) // גיבוי/סנכרון ענן + שורה קריאה בגיליון (best-effort)
+  clearMedDraft(unitId) // לאחר חתימה – הטיוטה כבר אינה נחוצה
   return key
+}
+
+// ===== טיוטה (שמירה אוטומטית לצורך השלמה לפני חתימה) =====
+// נשמרת מקומית וגם מסונכרנת לענן (מפתח קבוע אחד לכל מחלקה) – כדי שניתן יהיה
+// להתחיל הזנה במכשיר אחד ולהמשיך באחר. אינה נספרת כדוח (אין שורה קריאה, readable=null),
+// ונמחקת עם החתימה. טיוטה רלוונטית רק אם היא חדשה יותר מהדוח החתום האחרון.
+const DRAFT_PREFIX = 'hmc:meds:draft:'
+
+// כתיבה מקומית בלבד (מיידית) – מחזירה את הרשומה לדחיפה נדחית לענן.
+export function saveMedDraftLocal(unitId, draft) {
+  const rec = { ...draft, unitId, savedAt: new Date().toISOString() }
+  storage.setJSON(DRAFT_PREFIX + unitId, rec)
+  return rec
+}
+
+// דחיפת הטיוטה הנוכחית לענן (נקראת ממותחל/debounce כדי לא להציף ברשת).
+export function pushMedDraft(unitId) {
+  const rec = storage.getJSON(DRAFT_PREFIX + unitId)
+  if (rec) pushReport(DRAFT_PREFIX + unitId, rec, 'save', null)
+}
+
+export function getMedDraft(unitId) {
+  const draft = storage.getJSON(DRAFT_PREFIX + unitId)
+  if (!draft || !draft.savedAt) return null
+  // אם קיים דוח חתום שווה/חדש יותר מהטיוטה – הטיוטה כבר אינה רלוונטית (גם בין מכשירים).
+  const reports = listMedReports(unitId)
+  if (reports.length) {
+    const signedTs = Date.parse(reports[0].savedAt) || 0
+    if (signedTs >= (Date.parse(draft.savedAt) || 0)) return null
+  }
+  return draft
+}
+
+export function clearMedDraft(unitId) {
+  storage.removeItem(DRAFT_PREFIX + unitId)
+  pushReport(DRAFT_PREFIX + unitId, null, 'delete', null) // מחיקה גם בענן
 }
 
 // מצב התחלתי לטופס: ממשיכים מהדוח האחרון שנחתם (תוקף/סטטוס נשמרים בין פתיחות).

@@ -1,7 +1,8 @@
-import { useState, useMemo, useRef, Fragment } from 'react'
+import { useState, useMemo, useRef, useEffect, Fragment } from 'react'
 import ScreenHeader from './ScreenHeader.jsx'
 import ReportActions from './ReportActions.jsx'
-import { getMedList, saveMedReport, listMedReports, getLatestMedItems } from '../data/meds.js'
+import { getMedList, saveMedReport, listMedReports, getLatestMedItems, MED_AUDIT_ITEMS, emptyMedAudit, getMedDraft, saveMedDraftLocal, pushMedDraft } from '../data/meds.js'
+import { syncReports } from '../data/cloudSync.js'
 import { getDeviceNurse, rememberDeviceNurse, HE_MONTHS } from '../data/handover.js'
 import DatePicker from './DatePicker.jsx'
 
@@ -51,10 +52,46 @@ function WhatsAppIcon() {
 /* ===== טופס בקרת תרופות ===== */
 function MedForm({ unit, onSaved }) {
   const list = useMemo(() => getMedList(unit.id), [unit.id])
-  const [items, setItems] = useState(() => getLatestMedItems(unit.id, list))
-  const [nurse, setNurse] = useState(() => getDeviceNurse())
-  const [cabinetClean, setCabinetClean] = useState(false) // ניקיון וסדר כללי ארון תרופות – חובה לפני חתימה
-  const [err, setErr] = useState('') // '' | 'nurse' | 'expiry' | 'cabinet'
+  // טיוטה שמורה (השלמה לפני חתימה). אם קיימת – ממשיכים ממנה; אחרת מהדוח האחרון שנחתם.
+  const draft = useMemo(() => getMedDraft(unit.id), [unit.id])
+  const [items, setItems] = useState(() =>
+    Array.isArray(draft?.items) && draft.items.length === list.length ? draft.items : getLatestMedItems(unit.id, list)
+  )
+  const [nurse, setNurse] = useState(() => draft?.nurse || getDeviceNurse())
+  const [cabinetClean, setCabinetClean] = useState(() => !!draft?.cabinetClean) // ניקיון וסדר כללי ארון תרופות – חובה לפני חתימה
+  const [audit, setAudit] = useState(() => ({ ...emptyMedAudit(), ...(draft?.audit || {}) })) // סעיפי בקרה נוספים (בוצע/לא בוצע)
+  const [err, setErr] = useState('') // '' | 'nurse' | 'expiry' | 'cabinet' | 'audit'
+
+  // שמירה אוטומטית של טיוטה בכל שינוי – מקומית מיידית, ודחיפה לענן בהשהיה קצרה
+  // (כדי שלא ייאבד מידע אם יוצאים לפני חתימה, וכדי שניתן יהיה להמשיך ממכשיר אחר).
+  // מדלגים על הריצה הראשונה (טעינה) כדי לא לדרוס טיוטה במצב התחלתי זהה.
+  const mounted = useRef(false)
+  const touched = useRef(false) // האם המשתמש שינה משהו (כדי לא לדרוס בעת משיכת ענן)
+  useEffect(() => {
+    if (!list.length) return
+    if (!mounted.current) { mounted.current = true; return }
+    touched.current = true
+    saveMedDraftLocal(unit.id, { items, cabinetClean, audit, nurse })
+    const t = setTimeout(() => pushMedDraft(unit.id), 1200) // debounce לדחיפת הענן
+    return () => clearTimeout(t)
+  }, [unit.id, list.length, items, cabinetClean, audit, nurse])
+
+  // בעת פתיחת הטופס – משיכה מהענן כדי לקלוט טיוטה שהוזנה במכשיר אחר.
+  // נטען רק אם המשתמש עדיין לא נגע בטופס (כדי לא לדרוס הזנה מקומית).
+  useEffect(() => {
+    let alive = true
+    syncReports().then(() => {
+      if (!alive || touched.current) return
+      const d = getMedDraft(unit.id)
+      if (!d) return
+      if (Array.isArray(d.items) && d.items.length === list.length) setItems(d.items)
+      setCabinetClean(!!d.cabinetClean)
+      setAudit({ ...emptyMedAudit(), ...(d.audit || {}) })
+      if (d.nurse) setNurse(d.nurse)
+    }).catch(() => {})
+    return () => { alive = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unit.id])
   const [replaceFor, setReplaceFor] = useState(null) // אינדקס התרופה שעבורה נפתח חלון "הוחלף → תקין + תוקף"
   const [replaceDate, setReplaceDate] = useState('')
 
@@ -102,8 +139,12 @@ function MedForm({ unit, onSaved }) {
       setErr('cabinet')
       return
     }
+    if (!MED_AUDIT_ITEMS.every((it) => audit[it.id])) {
+      setErr('audit')
+      return
+    }
     rememberDeviceNurse(nurse)
-    saveMedReport(unit.id, monthKey(), items, nurse.trim(), cabinetClean)
+    saveMedReport(unit.id, monthKey(), items, nurse.trim(), cabinetClean, audit)
     onSaved()
   }
 
@@ -183,6 +224,22 @@ function MedForm({ unit, onSaved }) {
         </button>
       </div>
       {err === 'cabinet' && <div className="err">יש לסמן שבוצעו ניקיון וסדר כללי בארון התרופות לפני חתימה.</div>}
+
+      {/* סעיפי בקרה נוספים – מסומנים בסוף הרשימה, לאחר ניקיון וסדר כללי */}
+      <div className="med-cabinet med-audit">
+        {MED_AUDIT_ITEMS.map((it) => (
+          <button
+            key={it.id}
+            type="button"
+            className={'ho-check' + (audit[it.id] ? ' on' : '') + (err === 'audit' && !audit[it.id] ? ' missing' : '')}
+            onClick={() => { setAudit((a) => ({ ...a, [it.id]: !a[it.id] })); if (err === 'audit') setErr('') }}
+          >
+            <span className="ho-circle">{audit[it.id] ? '✓' : ''}</span>
+            <span className="ho-check-label">{it.label}</span>
+          </button>
+        ))}
+      </div>
+      {err === 'audit' && <div className="err">יש לסמן את כל סעיפי הבקרה לפני חתימה (הסעיפים החסרים מסומנים).</div>}
 
       {/* חתימת אחות – בלחיצה נחתם ונשמר */}
       <div className="med-sign">
@@ -305,6 +362,15 @@ function MedView({ unit, record }) {
               <span className={'rp-mark' + (record.cabinetClean ? ' on' : '')}>{record.cabinetClean ? '✓' : '—'}</span>
               <span className="rp-task-label">בוצעה ניקיון וסדר כללי ארון תרופות</span>
             </li>
+            {MED_AUDIT_ITEMS.map((it) => {
+              const done = !!(record.audit && record.audit[it.id])
+              return (
+                <li key={it.id}>
+                  <span className={'rp-mark' + (done ? ' on' : '')}>{done ? '✓' : '—'}</span>
+                  <span className="rp-task-label">{it.label}</span>
+                </li>
+              )
+            })}
           </ul>
         </div>
 
