@@ -19,10 +19,20 @@ export function monthStr(d = new Date()) {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
 }
 
-// מפתח התקופה לפי סוג הטאב (ביומי כולל משמרת)
-export function periodKey(tabId, shift) {
+// תחילת השבוע: התאריך (YYYY-MM-DD) של היום-בשבוע resetDow האחרון שחל היום או לפניו.
+// resetDow: 0=ראשון ... 6=שבת. משמש כמפתח תקופה שבועי שמתאפס (משחרר את הכפתור) באותו יום.
+// דוגמה: גסטרו (מבוצע שני) מתאפס ביום ראשון (0); שאר המחלקות (מבוצע ראשון) מתאפסות בשבת (6).
+export function weekPeriod(resetDow = 1, d = new Date()) {
+  const t = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  const diff = (t.getDay() - resetDow + 7) % 7
+  t.setDate(t.getDate() - diff)
+  return dateStr(t)
+}
+
+// מפתח התקופה לפי סוג הטאב (ביומי כולל משמרת; בשבועי לפי יום השחרור של התוכנית)
+export function periodKey(tabId, shift, weekResetDow = 1) {
   if (tabId === 'daily') return dateStr() + (shift ? ':' + shift : '')
-  if (tabId === 'weekly') return isoWeek()
+  if (tabId === 'weekly') return weekPeriod(weekResetDow)
   if (tabId === 'monthly') return monthStr()
   return dateStr() // isolation – אירוע ליום
 }
@@ -59,7 +69,7 @@ export function computeUnitProgress(unitId) {
       if (tab.id === 'daily') {
         periods = s.shift ? [periodKey('daily', s.shift)] : (plan.shifts || []).map((sh) => periodKey('daily', sh))
       } else {
-        periods = [periodKey(tab.id, s.shift)]
+        periods = [periodKey(tab.id, s.shift, plan.weeklyResetDow)]
       }
       const rooms = s.roomScoped && plan.rooms ? plan.rooms : ['-']
       const done = rooms.filter((r) =>

@@ -2070,6 +2070,11 @@ for (const plan of Object.values(PLANS)) {
   }
 }
 
+// יום שחרור הדוח השבועי (איפוס מפתח התקופה – הכפתור נפתח לחתימה חדשה):
+// גסטרו מבוצע ביום שני → משוחרר ביום ראשון (0). שאר המחלקות מבוצעות ביום ראשון → משוחררות בשבת (6).
+for (const plan of Object.values(PLANS)) plan.weeklyResetDow = 6
+PLANS.gastro.weeklyResetDow = 0
+
 // מיפוי יחידה -> תוכנית. כל 6 מחלקות האשפוז חולקות את אותה תוכנית.
 const UNIT_TO_PLAN = {
   'inpatient-a': 'hospitalizations',

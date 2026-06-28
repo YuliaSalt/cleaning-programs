@@ -3,6 +3,7 @@
 // פריט מתחיל ב-✕ אדום (חסר) והופך ל-✓ ירוק בלחיצה. נשלחים לוואטסאפ רק הפריטים שנותרו אדומים.
 
 import { storage } from './storage.js'
+import { pushReport } from './cloudSync.js'
 
 // המלצה זהה בראש הסעיף הראשון בכל הפעולות.
 const RECOMMENDATION =
@@ -461,6 +462,7 @@ export function saveProcedureReport(rec) {
   const r = { ...rec, savedAt: rec.savedAt || new Date().toISOString() }
   const key = `${REPORT_PREFIX}${r.procId}:${Date.now()}`
   storage.setJSON(key, r)
+  pushReport(key, r, 'save', null) // גיבוי/שחזור בין מכשירים (best-effort, לא חוסם)
   return key
 }
 

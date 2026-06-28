@@ -9,6 +9,11 @@
  */
 
 /* ===================== קבועים נוחים לעריכה ===================== */
+// טוקן אפליקציה (הקשחה אופציונלית). השאר '' לכיבוי הבדיקה (תאימות לאחור).
+// אם תגדיר/י ערך – חובה שהלקוח ישלח אותו (VITE_SHEETS_TOKEN) או שכל בקשה תידחה.
+// הערה: בלקוח סטטי הטוקן גלוי ב-bundle – הוא חוסם סריקה מזדמנת, לא תוקף נחוש.
+var APP_TOKEN = '';
+
 // שם הגיליון (הטאב) שממנו נקראים הנתונים. השאר '' לשימוש בגיליון הפעיל.
 var SHEET_NAME = 'Sheet1';
 
@@ -36,18 +41,33 @@ var REPORTS_FIXED = ['key', 'תאריך', 'שעה', 'מחלקה', 'תדירות'
 var HANDOVERS_SHEET = 'Handovers';
 var HANDOVERS_FIXED = ['key', 'תאריך', 'שעה', 'מחלקה', 'משמרת', 'מוסר/ת', 'סוג'];
 
+// בדיקת טוקן (אם הוגדר APP_TOKEN). מחזיר true אם מותר להמשיך.
+function tokenOk(provided) {
+  if (!APP_TOKEN) return true; // כבוי – תאימות לאחור
+  return String(provided || '') === APP_TOKEN;
+}
+
+// מפתח חוקי בלבד: תבנית hmc:<type>:... – חוסם כתיבת מפתחות זרים.
+function validKey(key) {
+  return /^hmc:[a-z]+:/.test(key);
+}
+
 function doGet(e) {
   e = e || {};
   var params = e.parameter || {};
   try {
+    if (!tokenOk(params.token)) {
+      return respond({ ok: false, error: 'unauthorized', count: 0, updatedAt: null, data: [] }, params.callback);
+    }
     // action=reports – קריאת כל דוחות הביצוע שגובו (לשחזור/מיזוג באפליקציה)
     if (params.action === 'reports') {
       return respond(readReports(), params.callback);
     }
     return respond(buildPayload(params), params.callback);
   } catch (err) {
+    Logger.log('doGet error: ' + (err && err.stack ? err.stack : err)); // פירוט ללוג בלבד
     return respond(
-      { ok: false, error: String(err && err.message ? err.message : err), count: 0, updatedAt: null, data: [] },
+      { ok: false, error: 'server error', count: 0, updatedAt: null, data: [] }, // הודעה גנרית ללקוח
       params.callback
     );
   }
@@ -61,8 +81,11 @@ function doPost(e) {
     if (e.postData && e.postData.contents) {
       body = JSON.parse(e.postData.contents);
     }
+    if (!tokenOk(body.token)) return respond({ ok: false, error: 'unauthorized' });
+
     var key = String(body.key || '').trim();
     if (!key) return respond({ ok: false, error: 'missing key' });
+    if (!validKey(key)) return respond({ ok: false, error: 'invalid key' }); // חוסם מפתחות זרים
 
     if (body.action === 'delete') {
       deleteReport(key);
@@ -71,7 +94,8 @@ function doPost(e) {
     saveReport(key, body.rec || {}, body.readable || null);
     return respond({ ok: true, action: 'save', key: key });
   } catch (err) {
-    return respond({ ok: false, error: String(err && err.message ? err.message : err) });
+    Logger.log('doPost error: ' + (err && err.stack ? err.stack : err)); // פירוט ללוג בלבד
+    return respond({ ok: false, error: 'server error' }); // הודעה גנרית ללקוח
   }
 }
 

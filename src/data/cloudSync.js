@@ -12,7 +12,14 @@
 // המבנה בגיליון (טאב טכני "ReportsRaw"): key | savedAt | payload(JSON) – משותף לכל הסוגים.
 
 import { storage } from './storage.js'
-import { SHEETS_API_URL, cloudEnabled } from './cloudConfig.js'
+import { SHEETS_API_URL, SHEETS_TOKEN, cloudEnabled } from './cloudConfig.js'
+
+// הוספת טוקן (אם הוגדר) ל-query string של בקשות GET.
+function withToken(url) {
+  if (!SHEETS_TOKEN) return url
+  const sep = url.indexOf('?') === -1 ? '?' : '&'
+  return url + sep + 'token=' + encodeURIComponent(SHEETS_TOKEN)
+}
 
 const QUEUE_KEY = 'hmc:syncqueue'
 const REPORT_PREFIX = 'hmc:plan:'
@@ -20,15 +27,17 @@ const HANDOVER_PREFIX = 'hmc:handover:'
 const CLOSURE_PREFIX = 'hmc:closure:'
 const MEDS_PREFIX = 'hmc:meds:'
 const MONTHCTL_PREFIX = 'hmc:monthctl:'
+const PROC_PREFIX = 'hmc:proc:'
 
-// מפתח שמסונכרן לענן (דוח ביצוע / העברת משמרת / סגירת יחידה / בקרת תרופות / בקרות חודשיות).
+// מפתח שמסונכרן לענן (דוח ביצוע / העברת משמרת / סגירת יחידה / בקרת תרופות / בקרות חודשיות / פעולות).
 function isSyncableKey(key) {
   return (
     key.indexOf(REPORT_PREFIX) === 0 ||
     key.indexOf(HANDOVER_PREFIX) === 0 ||
     key.indexOf(CLOSURE_PREFIX) === 0 ||
     key.indexOf(MEDS_PREFIX) === 0 ||
-    key.indexOf(MONTHCTL_PREFIX) === 0
+    key.indexOf(MONTHCTL_PREFIX) === 0 ||
+    key.indexOf(PROC_PREFIX) === 0
   )
 }
 
@@ -69,7 +78,7 @@ export async function pushReport(key, rec, action = 'save', readable = null) {
     readable: action === 'save' ? readable : null,
   }
   try {
-    await postToCloud({ ...item, ts: Date.now() })
+    await postToCloud({ ...item, token: SHEETS_TOKEN, ts: Date.now() })
   } catch {
     enqueue(item)
   }
@@ -89,7 +98,7 @@ export async function flushQueue() {
   const remaining = []
   for (const item of q) {
     try {
-      await postToCloud({ ...item, ts: Date.now() })
+      await postToCloud({ ...item, token: SHEETS_TOKEN, ts: Date.now() })
     } catch {
       remaining.push(item)
     }
@@ -104,7 +113,7 @@ let jsonpSeq = 0
 // קריאה ראשית: fetch GET רגיל (Apps Script מחזיר JSON עם CORS). ללא callback גלובלי.
 async function fetchReportsViaFetch() {
   const sep = SHEETS_API_URL.indexOf('?') === -1 ? '?' : '&'
-  const res = await fetch(SHEETS_API_URL + sep + 'action=reports', { method: 'GET' })
+  const res = await fetch(withToken(SHEETS_API_URL + sep + 'action=reports'), { method: 'GET' })
   if (!res.ok) throw new Error('HTTP ' + res.status)
   return res.json()
 }
@@ -130,7 +139,7 @@ function fetchReportsViaJsonp() {
     }
     window[cb] = (data) => finish(data, null)
     s.onerror = () => finish(null, new Error('JSONP error'))
-    s.src = SHEETS_API_URL + sep + 'action=reports&callback=' + cb
+    s.src = withToken(SHEETS_API_URL + sep + 'action=reports&callback=' + cb)
     document.body.appendChild(s)
   })
 }

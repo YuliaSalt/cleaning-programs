@@ -10,6 +10,11 @@ export const SHEETS_API_URL =
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SHEETS_API_URL) ||
   'https://script.google.com/macros/s/AKfycbz31AXe4_sG6gw-BVPBCacWMKFCgWuqj3BMFT3s5KRPdidGgl1dHFYXuPiFqqMIb9MW/exec'
 
+// טוקן אפליקציה אופציונלי (הקשחה). חייב להיות זהה ל-APP_TOKEN שב-Apps Script.
+// ריק כברירת מחדל – ללא שינוי בהתנהגות. מוגדר דרך VITE_SHEETS_TOKEN בזמן build.
+export const SHEETS_TOKEN =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SHEETS_TOKEN) || ''
+
 // האם הסנכרון מוגדר בפועל
 export function cloudEnabled() {
   return typeof SHEETS_API_URL === 'string' && SHEETS_API_URL.indexOf('http') === 0

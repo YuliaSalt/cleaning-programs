@@ -2,6 +2,12 @@
 <html lang="he" dir="rtl">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- אבטחת תעבורה: כפיית שדרוג כל בקשת-משנה ל-HTTPS (מונע אזהרות "חיבור לא מאובטח" / תוכן מעורב)
+         + מדיניות Referrer מצמצמת. הערות אבטחה נוספות (CSP מלא) מתועדות ב-README. -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
     <link rel="icon" type="image/png" href="/logo.png" />
 
     <!-- תצוגת אפליקציה במסך מלא (PWA / הוספה למסך הבית) -->

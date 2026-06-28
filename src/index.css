@@ -4297,18 +4297,17 @@ button:disabled:active,
 /* בלוק השיבוץ הנוכחי על כפתור הכרטיס */
 .mc-assign {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 6px 16px;
+  gap: 5px;
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid rgba(21, 127, 108, 0.18);
 }
-.mc-assign-month {
-  font-size: 13px;
-  font-weight: 800;
+/* החודש הנוכחי בתוך כותרת הכפתור – בולט */
+.mc-title-month {
   color: #157f6c;
+  font-weight: 800;
 }
 .mc-assign-row {
   display: inline-flex;
@@ -4316,8 +4315,11 @@ button:disabled:active,
   gap: 6px;
 }
 .mc-assign-role {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
+  color: var(--brand-soft);
+}
+.mc-assign-sep {
   color: var(--muted);
 }
 .mc-assign-name {

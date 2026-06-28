@@ -31,7 +31,8 @@ export function shiftAlertLevel(shift, done, now = new Date()) {
 }
 
 // התראת צבע לתדירות (חודשי/שבועי) לפי תאריך, כל עוד לא נחתם הדוח לתקופה.
-export function freqAlertLevel(tabId, done, now = new Date()) {
+// dueDow: יום הביצוע של השבועי (0=ראשון ... 6=שבת). ברירת מחדל ראשון (0).
+export function freqAlertLevel(tabId, done, now = new Date(), dueDow = 0) {
   if (done) return null
   if (tabId === 'monthly') {
     const d = now.getDate()
@@ -40,8 +41,8 @@ export function freqAlertLevel(tabId, done, now = new Date()) {
     return null
   }
   if (tabId === 'weekly') {
-    // רק ביום ראשון: צהוב מ-15:00, אדום מ-18:00
-    if (now.getDay() !== 0) return null
+    // רק ביום הביצוע: צהוב מ-15:00, אדום מ-18:00
+    if (now.getDay() !== dueDow) return null
     const t = now.getHours() * 60 + now.getMinutes()
     if (t >= M(18)) return 'red'
     if (t >= M(15)) return 'yellow'

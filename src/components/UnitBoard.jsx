@@ -108,17 +108,17 @@ export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, 
           }}
         >
           <div className="wc-top">
-            <h3>שיבוץ בקרה חודשית</h3>
+            <h3>שיבוץ בקרה חודשית · <span className="mc-title-month">{monthName(currentMonth1())}</span></h3>
           </div>
-          <p>עגלת החייאה ותרופות · שיבוץ אחיות</p>
           <div className="mc-assign">
-            <span className="mc-assign-month">{monthName(currentMonth1())}</span>
             <span className="mc-assign-row">
-              <span className="mc-assign-role">תרופות</span>
+              <span className="mc-assign-role">בקרת תרופות</span>
+              <span className="mc-assign-sep">-</span>
               <span className={'mc-assign-name' + (ctlMeds ? '' : ' empty')}>{ctlMeds || 'טרם שובץ'}</span>
             </span>
             <span className="mc-assign-row">
-              <span className="mc-assign-role">עגלת החייאה</span>
+              <span className="mc-assign-role">בקרת עגלת החייאה</span>
+              <span className="mc-assign-sep">-</span>
               <span className={'mc-assign-name' + (ctlCrash ? '' : ' empty')}>{ctlCrash || 'טרם שובץ'}</span>
             </span>
           </div>

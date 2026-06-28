@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { getCurrentShift, findUnit } from '../data/departments.js'
 import { getCleaningPlan, signoffKind, DISINFECTANT_GUIDE, getMergedDailySection, normTask, specialTaskText, taskResolved } from '../data/cleaningTemplates.js'
-import { dateStr, periodKey, planKey } from '../data/progress.js'
+import { periodKey, planKey } from '../data/progress.js'
 import { shiftAlertLevel, freqAlertLevel } from '../data/shiftAlert.js'
 import { isUnitClosed } from '../data/closures.js'
 import { storage } from '../data/storage.js'
@@ -410,7 +410,7 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
   const flatDaily = !!plan.stationDaily && tab && tab.id === 'daily'
   const dailyMerged = flatDaily && view === 'leaf' ? getMergedDailySection(plan, shift) : null
 
-  const period = tab ? periodKey(tab.id, shift) : ''
+  const period = tab ? periodKey(tab.id, shift, plan.weeklyResetDow) : ''
   const baseKey = (s) => planKey(unit.id, s.roomScoped && room ? room : '-', tab.id, s.id, period)
 
   // האם כל הדוחות החתומים של התדירות נחתמו לתקופה הנוכחית? (חודשי/שבועי – לצביעת הכפתור)
@@ -419,7 +419,7 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
     if (!t) return true
     const signed = t.sections.filter((s) => s.kind === 'signed')
     if (signed.length === 0) return true // אין מה לחתום → ללא התראה
-    const per = periodKey(tabId)
+    const per = periodKey(tabId, undefined, plan.weeklyResetDow)
     return signed.every((s) => storage.has(planKey(unit.id, '-', tabId, s.id, per)))
   }
 
@@ -526,7 +526,9 @@ export default function CleaningPlan({ unit, onBack, onGoHome, onBackToCategory,
           <DrillGrid
             items={[
               ...plan.tabs.map((t) => {
-                const lvl = closed ? null : freqAlertLevel(t.id, freqSigned(t.id))
+                // יום הביצוע של השבועי = יום השחרור + 1 (גסטרו: שני · שאר: ראשון)
+                const dueDow = ((plan.weeklyResetDow ?? 6) + 1) % 7
+                const lvl = closed ? null : freqAlertLevel(t.id, freqSigned(t.id), new Date(), dueDow)
                 return {
                   key: t.id,
                   label: t.label,
