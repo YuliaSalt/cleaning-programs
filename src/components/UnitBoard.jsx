@@ -1,13 +1,17 @@
+import { useState } from 'react'
 import { getUnitWindows } from '../data/departments.js'
 import { listMedReports, hasMedList } from '../data/meds.js'
 import { medsAlertLevel } from '../data/shiftAlert.js'
 import { isUnitClosed } from '../data/closures.js'
+import { getMonthEntry, currentYM, monthName, currentMonth1 } from '../data/monthlyControls.js'
 import ScreenHeader from './ScreenHeader.jsx'
 import ClosurePanel from './ClosurePanel.jsx'
+import MonthlyControls from './MonthlyControls.jsx'
 
 const monthKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
 
 export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, onBack, categoryName }) {
+  const [showControls, setShowControls] = useState(false)
   // כשהיחידה סגורה היום – להשתיק התראות "טרם נחתם / באיחור"
   const closed = isUnitClosed(unit.id)
   // בקרת תרופות נחתמה החודש? (לצביעת כפתור "בקרת תרופות חודשית") – רק למחלקה עם רשימה
@@ -38,6 +42,23 @@ export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, 
   }
 
   const windows = getUnitWindows(unit.id)
+
+  // שיבוץ החודש הנוכחי – להצגה על כפתור "שיבוץ בקרה חודשית"
+  const ctl = getMonthEntry(unit.id, currentYM())
+  const ctlMeds = ctl.meds.name.trim()
+  const ctlCrash = ctl.crash.name.trim()
+
+  // מסך "בקרות חודשיות" (ניהול תור אחראי תרופות / עגלת החייאה)
+  if (showControls) {
+    return (
+      <MonthlyControls
+        unit={unit}
+        onBack={() => setShowControls(false)}
+        onGoHome={onGoHome}
+        categoryName={categoryName}
+      />
+    )
+  }
 
   return (
     <div>
@@ -70,6 +91,38 @@ export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, 
             {!w.enabled && <span className="wc-soon">{w.soonLabel || 'בקרוב'}</span>}
           </div>
         ))}
+      </div>
+
+      {/* כפתור בשורה נפרדת בתחתית – שיבוץ בקרה חודשית (ניהול תור אחיות) */}
+      <div className="card-grid single-col" style={{ marginTop: 16 }}>
+        <div
+          className="window-card win-controls clickable"
+          role="button"
+          tabIndex={0}
+          onClick={() => setShowControls(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              setShowControls(true)
+            }
+          }}
+        >
+          <div className="wc-top">
+            <h3>שיבוץ בקרה חודשית</h3>
+          </div>
+          <p>עגלת החייאה ותרופות · שיבוץ אחיות</p>
+          <div className="mc-assign">
+            <span className="mc-assign-month">{monthName(currentMonth1())}</span>
+            <span className="mc-assign-row">
+              <span className="mc-assign-role">תרופות</span>
+              <span className={'mc-assign-name' + (ctlMeds ? '' : ' empty')}>{ctlMeds || 'טרם שובץ'}</span>
+            </span>
+            <span className="mc-assign-row">
+              <span className="mc-assign-role">עגלת החייאה</span>
+              <span className={'mc-assign-name' + (ctlCrash ? '' : ' empty')}>{ctlCrash || 'טרם שובץ'}</span>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   )

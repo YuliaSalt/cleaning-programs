@@ -7,6 +7,7 @@
 //   hmc:handover:...  – העברות משמרת
 //   hmc:closure:...   – סגירות יחידה
 //   hmc:meds:...      – בקרת תרופות חודשית
+//   hmc:monthctl:...  – בקרות חודשיות (ניהול תור: אחראי תרופות / עגלת החייאה)
 //
 // המבנה בגיליון (טאב טכני "ReportsRaw"): key | savedAt | payload(JSON) – משותף לכל הסוגים.
 
@@ -18,14 +19,16 @@ const REPORT_PREFIX = 'hmc:plan:'
 const HANDOVER_PREFIX = 'hmc:handover:'
 const CLOSURE_PREFIX = 'hmc:closure:'
 const MEDS_PREFIX = 'hmc:meds:'
+const MONTHCTL_PREFIX = 'hmc:monthctl:'
 
-// מפתח שמסונכרן לענן (דוח ביצוע / העברת משמרת / סגירת יחידה / בקרת תרופות).
+// מפתח שמסונכרן לענן (דוח ביצוע / העברת משמרת / סגירת יחידה / בקרת תרופות / בקרות חודשיות).
 function isSyncableKey(key) {
   return (
     key.indexOf(REPORT_PREFIX) === 0 ||
     key.indexOf(HANDOVER_PREFIX) === 0 ||
     key.indexOf(CLOSURE_PREFIX) === 0 ||
-    key.indexOf(MEDS_PREFIX) === 0
+    key.indexOf(MEDS_PREFIX) === 0 ||
+    key.indexOf(MONTHCTL_PREFIX) === 0
   )
 }
 

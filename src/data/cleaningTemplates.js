@@ -238,6 +238,7 @@ PLANS.hospitalizations = {
     {
       id: 'weekly',
       label: 'שבועי',
+      meta: 'לביצוע בימי ראשון',
       sections: [
         signed(
           'w1',
@@ -438,6 +439,7 @@ PLANS.recovery = {
     {
       id: 'weekly',
       label: 'שבועי',
+      meta: 'לביצוע בימי ראשון',
       sections: [
         signed(
           'w1',
@@ -647,6 +649,7 @@ PLANS.or = {
     {
       id: 'weekly',
       label: 'שבועי',
+      meta: 'לביצוע בימי ראשון',
       sections: [
         signed('w1', 'תחנה 1 - ניקיון משק (כלור 1000)', [
           'הזזת ארונות (כלור 1000)',
@@ -790,7 +793,7 @@ PLANS.ivf = {
     {
       id: 'weekly',
       label: 'שבועי',
-      meta: 'רשימת משימות',
+      meta: 'לביצוע בימי ראשון',
       sections: [
         signed(
           'week',
@@ -912,6 +915,7 @@ PLANS.cath = {
     {
       id: 'weekly',
       label: 'שבועי',
+      meta: 'לביצוע בימי ראשון',
       sections: [
         signed(
           'weekly',
@@ -1187,8 +1191,8 @@ PLANS.gastro = {
     {
       id: 'weekly',
       label: 'שבועי',
-      meta: 'לביצוע ימי ראשון · משמרת ערב',
-      note: 'לביצוע בימי ראשון · משמרת ערב',
+      meta: 'לביצוע בימי שני · משמרת ערב',
+      note: 'לביצוע בימי שני · משמרת ערב',
       sections: [
         signed(
           'w1',
@@ -1404,6 +1408,7 @@ PLANS.ct = {
     {
       id: 'weekly',
       label: 'שבועי',
+      meta: 'לביצוע בימי ראשון',
       note: 'תחנות עצמאיות עם חתימות נפרדות',
       sections: [
         signed(
@@ -1643,6 +1648,7 @@ PLANS.mri = {
     {
       id: 'weekly',
       label: 'שבועי',
+      meta: 'לביצוע בימי ראשון',
       note: 'תחנות עצמאיות עם חתימות נפרדות',
       sections: [
         signed(
@@ -1866,6 +1872,7 @@ PLANS.xray = {
     {
       id: 'weekly',
       label: 'שבועי',
+      meta: 'לביצוע בימי ראשון',
       note: 'תחנות עצמאיות עם חתימות נפרדות',
       sections: [
         signed(
@@ -2020,6 +2027,39 @@ PLANS.xray = {
   ],
 }
 
+// ===== מחלקה ד – תוכנית ייעודית: זהה לאשפוז, אך החודשי מאוחד לרשימה אחת =====
+// (ללא פיצול ל-5 תחנות, ללא ניקיון חדרי המתנה, וכפתור החודשי מציין "שבוע ראשון של החודש").
+const INPATIENT_D_MONTHLY = {
+  id: 'monthly',
+  label: 'חודשי',
+  meta: 'לביצוע בשבוע ראשון של החודש',
+  note: 'לביצוע בשבוע ראשון של החודש',
+  sections: [
+    signed(
+      'm1',
+      'ניקיון חודשי יסודי',
+      [
+        'ניקוי יסודי ועומק של חדר צוות במחלקה',
+        'ניקוי וסידור ארונות אחסון מחסן וארונות ציוד רפואי',
+        'סידור וניקוי יסודי מקיף של מחסן הציוד המחלקתי',
+        'ניקוי יסודי של חדר סירים ובדיקת תקינות סקשן כולל רישום תאריך',
+        'ניקוי יסודי ועומק של כלל עגלות הטיפולים ועגלות קמיליון',
+        'ניקוי יסודי ועומק של כל האלונקות והמיטות במחלקה כולל פירוק גלגלים ידיות ומזרנים',
+        'ניקוי יסודי של מכשור רפואי כגון אולטרסאונד אקג מוניטורים מכשירי לחץ דם ומנגטות',
+        'ניקוי יסודי ותחזוקה של ארון תרופות מקרר תרופות ומקרר אוכל',
+        'בדיקת תוקף חומרי ניקוי וחיטוי בכל עמדות המחלקה',
+        'בדיקת תוקף של כל הציוד הרפואי והמתכלה במחלקה',
+      ],
+      ['שדה חובה להקלדת שם העובד המבצע']
+    ),
+  ],
+}
+
+PLANS.inpatientD = {
+  ...PLANS.hospitalizations,
+  tabs: PLANS.hospitalizations.tabs.map((t) => (t.id === 'monthly' ? INPATIENT_D_MONTHLY : t)),
+}
+
 // נורמליזציה גורפת: בכל התחנות בכל המחלקות מסירים "חתימת ביצוע" ו"נבדק עיי חתימה",
 // ומשאירים רק שדה חובה אחד להקלדת שם העובד המבצע.
 for (const plan of Object.values(PLANS)) {
@@ -2035,7 +2075,7 @@ const UNIT_TO_PLAN = {
   'inpatient-a': 'hospitalizations',
   'inpatient-b': 'hospitalizations',
   'inpatient-c': 'hospitalizations',
-  'inpatient-d': 'hospitalizations',
+  'inpatient-d': 'inpatientD', // מחלקה ד – תוכנית ייעודית (חודשי מאוחד)
   'inpatient-e': 'hospitalizations',
   icu: 'hospitalizations',
   recovery: 'recovery',
