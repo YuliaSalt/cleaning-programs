@@ -7,14 +7,6 @@ import { storage } from './storage.js'
 export function dateStr(d = new Date()) {
   return d.toLocaleDateString('en-CA') // YYYY-MM-DD
 }
-export function isoWeek(d = new Date()) {
-  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
-  const day = t.getUTCDay() || 7
-  t.setUTCDate(t.getUTCDate() + 4 - day)
-  const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1))
-  const week = Math.ceil(((t - yearStart) / 86400000 + 1) / 7)
-  return t.getUTCFullYear() + '-W' + String(week).padStart(2, '0')
-}
 export function monthStr(d = new Date()) {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
 }
@@ -22,7 +14,7 @@ export function monthStr(d = new Date()) {
 // תחילת השבוע: התאריך (YYYY-MM-DD) של היום-בשבוע resetDow האחרון שחל היום או לפניו.
 // resetDow: 0=ראשון ... 6=שבת. משמש כמפתח תקופה שבועי שמתאפס (משחרר את הכפתור) באותו יום.
 // דוגמה: גסטרו (מבוצע שני) מתאפס ביום ראשון (0); שאר המחלקות (מבוצע ראשון) מתאפסות בשבת (6).
-export function weekPeriod(resetDow = 1, d = new Date()) {
+function weekPeriod(resetDow = 1, d = new Date()) {
   const t = new Date(d.getFullYear(), d.getMonth(), d.getDate())
   const diff = (t.getDay() - resetDow + 7) % 7
   t.setDate(t.getDate() - diff)

@@ -44,8 +44,8 @@ function normEntry(e) {
   }
 }
 
-// כל החודשים השמורים למחלקה: מפה לפי "YYYY-MM".
-export function getUnitControls(unitId) {
+// כל החודשים השמורים למחלקה: מפה לפי "YYYY-MM" (עזר פנימי).
+function getUnitControls(unitId) {
   const rec = storage.getJSON(recKey(unitId))
   return (rec && rec.data) || {}
 }
