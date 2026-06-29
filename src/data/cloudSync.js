@@ -14,6 +14,11 @@
 import { storage } from './storage.js'
 import { SHEETS_API_URL, SHEETS_TOKEN, cloudEnabled } from './cloudConfig.js'
 
+// דגל סשן: בזמן ניקוי "שיבוץ בקרה חודשית" – לא לשחזר מפתחות monthctl מהענן
+// (אחרת המחיקה תבוטל ע"י משיכה מחדש באותו סשן). מתאפס בטעינה הבאה.
+let skipMonthctlPull = false
+export function setSkipMonthctlPull(v) { skipMonthctlPull = !!v }
+
 // הוספת טוקן (אם הוגדר) ל-query string של בקשות GET.
 function withToken(url) {
   if (!SHEETS_TOKEN) return url
@@ -164,6 +169,7 @@ export async function pullReports() {
   for (const row of payload.data) {
     const key = row.key
     if (!key || !isSyncableKey(key)) continue
+    if (skipMonthctlPull && key.indexOf(MONTHCTL_PREFIX) === 0) continue // בזמן ניקוי – לא לשחזר שיבוץ
     let cloudRec = row.payload
     if (typeof cloudRec === 'string') {
       try { cloudRec = JSON.parse(cloudRec) } catch { continue }

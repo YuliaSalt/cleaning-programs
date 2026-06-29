@@ -14,6 +14,7 @@ import MedsControl from './components/MedsControl.jsx'
 import ShortagesReport from './components/ShortagesReport.jsx'
 import { findUnit, getCategory, findCategoryOfUnit } from './data/departments.js'
 import { syncReports } from './data/cloudSync.js'
+import { purgeMonthctlOnce } from './data/maintenance.js'
 import { recordVisit, getAutoRedirectUnit } from './data/routing.js'
 
 // זיהוי מובייל לפי רוחב המסך – מאפשר פריסת מובייל ייעודית (ללא סרגל צד).
@@ -40,7 +41,11 @@ export default function App() {
   // גיבוי ענן: בעליית האפליקציה מושכים דוחות מהגיליון וממזגים, ודוחפים תור ממתין.
   // משוחזר אוטומטית אם ה-localStorage התאפס. ללא הגדרת ענן – no-op שקט.
   useEffect(() => {
-    syncReports().catch(() => {})
+    // ניקוי חד-פעמי של "שיבוץ בקרה חודשית" (מקומי + ענן) לפני הסנכרון הרגיל, ואז סנכרון.
+    ;(async () => {
+      try { await purgeMonthctlOnce() } catch { /* best-effort */ }
+      syncReports().catch(() => {})
+    })()
   }, [])
 
   // ניתוב חכם: בעליית האפליקציה, אם נכנסו לאותה מחלקה ברצף – מדלגים על מסך

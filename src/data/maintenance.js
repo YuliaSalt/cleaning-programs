@@ -5,6 +5,7 @@
 // הניקוי של הענן (Google Sheets) נעשה בנפרד דרך clearAllReports ב-Apps Script.
 
 import { storage } from './storage.js'
+import { pushReport, pullReports, setSkipMonthctlPull } from './cloudSync.js'
 
 const PURGE_KEY = 'hmc:purge-version'
 // העלאת המספר תפעיל ניקוי חד-פעמי נוסף בכל המכשירים.
@@ -22,4 +23,28 @@ export function purgeAllReportsOnce() {
   // ניקוי תור הסנכרון כדי שלא יידחפו שמירות ישנות חזרה לענן
   storage.removeItem('hmc:syncqueue')
   storage.setItem(PURGE_KEY, String(PURGE_VERSION))
+}
+
+// ===== ניקוי חד-פעמי של "שיבוץ בקרה חודשית" (מקומי + ענן) =====
+// בהעלאת MONTHCTL_PURGE_VERSION כל מכשיר מנקה פעם אחת את כל נתוני monthctl,
+// כדי להתחיל הזנה נקייה לאחר שתוקן באג ההפרדה בין מחלקות.
+const MONTHCTL_PURGE_KEY = 'hmc:monthctl-purge'
+const MONTHCTL_PURGE_VERSION = 1
+const MONTHCTL_PREFIX = 'hmc:monthctl:'
+
+export async function purgeMonthctlOnce() {
+  const done = Number(storage.getItem(MONTHCTL_PURGE_KEY)) || 0
+  if (done >= MONTHCTL_PURGE_VERSION) return
+  // 1) למשוך תחילה את כל מפתחות ה-monthctl מהענן (כולל ממכשירים אחרים), כדי שנוכל למחוק את כולם.
+  try { await pullReports() } catch { /* best-effort */ }
+  // 2) למחוק כל רשומת שיבוץ – מקומית וגם בענן.
+  for (const k of storage.keys()) {
+    if (k.startsWith(MONTHCTL_PREFIX)) {
+      storage.removeItem(k)
+      pushReport(k, null, 'delete') // מחיקה בענן (best-effort, נכנס לתור אם נכשל)
+    }
+  }
+  // 3) למנוע שחזור monthctl מהענן בסשן הזה (עד שהמחיקות יעובדו) – הזנה מחדש תישמר כרגיל.
+  setSkipMonthctlPull(true)
+  storage.setItem(MONTHCTL_PURGE_KEY, String(MONTHCTL_PURGE_VERSION))
 }
