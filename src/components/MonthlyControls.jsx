@@ -77,7 +77,7 @@ export default function MonthlyControls({ unit, onBack, onGoHome, categoryName }
       <div className="mc-list">
         {MONTH_NAMES_HE.map((_, i) => (
           <MonthRow
-            key={i + 1}
+            key={unit.id + '-' + (i + 1)}
             unitId={unit.id}
             year={year}
             month1={i + 1}

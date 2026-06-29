@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getUnitWindows } from '../data/departments.js'
 import { listMedReports, hasMedList } from '../data/meds.js'
 import { medsAlertLevel } from '../data/shiftAlert.js'
@@ -12,6 +12,8 @@ const monthKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth()
 
 export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, onBack, categoryName }) {
   const [showControls, setShowControls] = useState(false)
+  // החלפת מחלקה (למשל דרך הסרגל) – לסגור את מסך השיבוץ כדי שלא יישאר פתוח עם נתוני המחלקה הקודמת
+  useEffect(() => { setShowControls(false) }, [unit.id])
   // כשהיחידה סגורה היום – להשתיק התראות "טרם נחתם / באיחור"
   const closed = isUnitClosed(unit.id)
   // בקרת תרופות נחתמה החודש? (לצביעת כפתור "בקרת תרופות חודשית") – רק למחלקה עם רשימה
@@ -52,6 +54,7 @@ export default function UnitBoard({ unit, onOpenWindow, onSelectUnit, onGoHome, 
   if (showControls) {
     return (
       <MonthlyControls
+        key={unit.id}
         unit={unit}
         onBack={() => setShowControls(false)}
         onGoHome={onGoHome}
